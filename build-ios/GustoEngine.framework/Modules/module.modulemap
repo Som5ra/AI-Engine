@@ -1,0 +1,6 @@
+framework module GustoEngine {
+  umbrella header "GustoEngine.h"
+  export *
+
+  module * { export * }
+}
