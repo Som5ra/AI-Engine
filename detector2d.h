@@ -13,47 +13,89 @@ using namespace dnn;
 
 extern "C"
 {
-    struct Net_config
-    {
-        float confThreshold; // Confidence threshold
-        float nmsThreshold;  // Non-maximum suppression threshold
-        std::string modelpath;
-        std::string cls_names_path;
-        int inpHeight;
-        int inpWidth;
-    };
-
-    class YOLOV7
+    class Net_config
     {
         public:
-            YOLOV7(Net_config config);
-            void detect(cv::Mat& frame, float* ret_bboxes, float* ret_confidences, int* ret_classIds, int ret_len);
-        private:
-            int inpWidth;
+            Net_config();
+            Net_config(int inpHeight, int inpWidth,
+                        float confThreshold, float nmsThreshold, 
+                        char* modelpath, char* cls_names_path, int len_string = 1024);
+            Net_config(const Net_config& config);
+
+            float confThreshold; // Confidence threshold
+            float nmsThreshold;  // Non-maximum suppression threshold
+
             int inpHeight;
+            int inpWidth;
+            
+            std::string cls_names_path;
+            std::string modelpath;
             std::vector<std::string> class_names;
             int num_class;
 
-            float confThreshold;
-            float nmsThreshold;
-            cv::dnn::Net net;
+    };
+    Net_config::Net_config(int inpHeight, int inpWidth,
+                        float confThreshold, float nmsThreshold, 
+                        char* modelpath, char* cls_names_path, int len_string
+    ){
+        this->confThreshold = confThreshold;
+        this->nmsThreshold = nmsThreshold;
+
+        this->modelpath.assign(modelpath, len_string);
+        this->cls_names_path.assign(cls_names_path, len_string);
+        ifstream ifs(this->cls_names_path.c_str());
+        string line;
+        while (getline(ifs, line)) this->class_names.push_back(line);
+        this->num_class = class_names.size();
+        this->inpHeight = inpHeight;
+        this->inpWidth = inpWidth;
+    }
+
+    class YOLO
+    {
+        public:
+            YOLO();
+            void detect(cv::Mat& frame, float* ret_bboxes, float* ret_confidences, int* ret_classIds, int* ret_len);
+            int compile(int inpHeight, int inpWidth,
+                        float confThreshold, float nmsThreshold, 
+                        char* modelpath, char* cls_names_path, int len_string);
+            Net_config* config;
+
+        private:
+
+            cv::dnn::Net* net;
             // disabled for android testing
             // void drawPred(float conf, int left, int top, int right, int bottom, cv::Mat& frame, int classid);
     };
     
-    YOLOV7::YOLOV7(Net_config config)
+    YOLO::YOLO()
     {
-        this->confThreshold = config.confThreshold;
-        this->nmsThreshold = config.nmsThreshold;
-
-        this->net = readNetFromONNX(config.modelpath);
-        ifstream ifs(config.cls_names_path.c_str());
-        string line;
-        while (getline(ifs, line)) this->class_names.push_back(line);
-        this->num_class = class_names.size();
-        this->inpHeight = config.inpHeight;
-        this->inpWidth = config.inpWidth;
+        // this->net = new cv::dnn::Net();
+        // this->config = new Net_config();
     }
+
+    int YOLO::compile(int inpHeight, int inpWidth,
+                        float confThreshold, float nmsThreshold, 
+                        char* modelpath, char* cls_names_path, int len_string = 1024
+    ){
+        // if succeed return 0 else 1
+        try {
+            this->config = new Net_config(inpHeight, inpWidth, confThreshold, nmsThreshold, modelpath, cls_names_path, 1024);
+            // cv::dnn::Net net = cv::dnn::readNetFromONNX(this->config->modelpath);
+            // this->net = &net;
+            this->net = new cv::dnn::Net(cv::dnn::readNetFromONNX(this->config->modelpath));
+            // this->net = &;
+            ifstream ifs(this->config->cls_names_path.c_str());
+            string line;
+
+        } catch (const std::exception& e) {
+            std::cerr << e.what() << '\n';
+            return 1;
+        }
+        return 0;
+    }
+
+
     // disabled for android testing
     // void YOLOV7::drawPred(float conf, int left, int top, int right, int bottom, Mat& frame, int classid)   // Draw the predicted bounding box
     // {
@@ -71,12 +113,12 @@ extern "C"
     //     putText(frame, label, Point(left, top), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0, 255, 0), 1);
     // }
 
-    void YOLOV7::detect(Mat& frame, float* ret_bboxes, float* ret_confidences, int* ret_classIds, int ret_len)
+    void YOLO::detect(Mat& frame, float* ret_bboxes, float* ret_confidences, int* ret_classIds, int* ret_len)
     {
-        Mat blob = blobFromImage(frame, 1 / 255.0, Size(this->inpWidth, this->inpHeight), Scalar(0, 0, 0), true, false);
-        this->net.setInput(blob);	
+        Mat blob = blobFromImage(frame, 1 / 255.0, Size(this->config->inpWidth, this->config->inpHeight), Scalar(0, 0, 0), true, false);
+        this->net->setInput(blob);	
         vector<Mat> outs;
-        this->net.forward(outs, this->net.getUnconnectedOutLayersNames());
+        this->net->forward(outs, this->net->getUnconnectedOutLayersNames());
         int num_proposal = outs[0].size[0];
         int nout = outs[0].size[1];
         if (outs[0].dims > 2)
@@ -89,13 +131,13 @@ extern "C"
         vector<float> confidences;
         vector<Rect> boxes;
         vector<int> classIds;
-        float ratioh = (float)frame.rows / this->inpHeight, ratiow = (float)frame.cols / this->inpWidth;
+        float ratioh = (float)frame.rows / this->config->inpHeight, ratiow = (float)frame.cols / this->config->inpWidth;
         int n = 0, row_ind = 0; ///cx,cy,w,h,box_score,class_score
         float* pdata = (float*)outs[0].data;
         for (n = 0; n < num_proposal; n++)   
         {
             float box_score = pdata[4];
-            if (box_score > this->confThreshold)
+            if (box_score > this->config->confThreshold)
             {
                 Mat scores = outs[0].row(row_ind).colRange(5, nout);
                 Point classIdPoint;
@@ -103,7 +145,7 @@ extern "C"
                 // Get the value and location of the maximum score
                 minMaxLoc(scores, 0, &max_class_socre, 0, &classIdPoint);
                 max_class_socre *= box_score;
-                if (max_class_socre > this->confThreshold)
+                if (max_class_socre > this->config->confThreshold)
                 {
                     const int class_idx = classIdPoint.x;
                     float cx = pdata[0] * ratiow;  ///cx
@@ -126,10 +168,11 @@ extern "C"
         // Perform non maximum suppression to eliminate redundant overlapping boxes with
         // lower confidences
         vector<int> indices;
-        dnn::NMSBoxes(boxes, confidences, this->confThreshold, this->nmsThreshold, indices);
+        dnn::NMSBoxes(boxes, confidences, this->config->confThreshold, this->config->nmsThreshold, indices);
 
-        ret_len = indices.size();
-        for (size_t i = 0; i < ret_len; ++i)
+        *ret_len = indices.size();
+
+        for (size_t i = 0; i < *ret_len; ++i)
         {
             int idx = indices[i];
             Rect box = boxes[idx];
