@@ -1,5 +1,7 @@
 #include "detector2d.h"
 
+// #include <ctime>
+#include <chrono>
 
 // #include <filesystem>
 // namespace fs = std::filesystem;
@@ -38,10 +40,12 @@ extern "C"
     }
 
 
-    void infer(YOLO* detector, 
+    float infer(YOLO* detector, 
             unsigned char* bitmap, int height, int width,
             float* ret_bboxes, float* ret_confidences, int* ret_classIds, int* ret_len
     ){
+        auto t_start = std::chrono::high_resolution_clock::now();
+
         // load and preprocess the frame
         cv::Mat frame = cv::Mat(height, width, CV_8UC4, bitmap);
         cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
@@ -49,5 +53,11 @@ extern "C"
         cv::resize(frame, frame, cv::Size(detector->config->inpWidth, detector->config->inpHeight));
 
         detector->detect(frame, ret_bboxes, ret_confidences, ret_classIds, ret_len);
+
+        // the work...
+        auto t_end = std::chrono::high_resolution_clock::now();
+
+        float elapsed_time_ms = std::chrono::duration<double, std::milli>(t_end-t_start).count();
+        return elapsed_time_ms;
     }
 }
