@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/build",
+  "command": "/usr/bin/c++  -I/media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/../../3rdparty/onnxruntime-static/include -O3 -DNDEBUG -o CMakeFiles/GustoEngineExamples.dir/ort_test.cpp.o -c /media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/ort_test.cpp",
+  "file": "/media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/ort_test.cpp",
+  "output": "CMakeFiles/GustoEngineExamples.dir/ort_test.cpp.o"
+}
+]
