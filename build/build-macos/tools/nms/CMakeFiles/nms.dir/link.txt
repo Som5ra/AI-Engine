@@ -1,0 +1,1 @@
+/opt/homebrew/Cellar/llvm/19.1.2/bin/clang++ -O3 -DNDEBUG -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -dynamiclib -Wl,-headerpad_max_install_names -L/opt/homebrew/opt/llvm/lib -o libnms.dylib -install_name @rpath/libnms.dylib CMakeFiles/nms.dir/nms.cpp.o  -lomp
