@@ -39,4 +39,10 @@ elseif(BUILD_PLATFORM STREQUAL "linux")
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nms> ${CMAKE_BINARY_DIR}/lib/Linux/
     )
     install(FILES $<TARGET_FILE:nms> DESTINATION /media/sombrali/HDD1/3d_object_detection/opencv-unity/gusto-engine-unity-wrapper1/Assets/Plugins/Linux)
+elseif(BUILD_PLATFORM STREQUAL "macos")
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/MacOS/)
+    add_custom_command(TARGET nms POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nms> ${CMAKE_BINARY_DIR}/lib/MacOS/
+    )
+    install(FILES $<TARGET_FILE:nms> DESTINATION /media/sombrali/HDD1/3d_object_detection/opencv-unity/gusto-engine-unity-wrapper1/Assets/Plugins/MacOS)
 endif()

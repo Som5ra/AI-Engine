@@ -19,6 +19,25 @@ def execute(cmd, shell=False):
     except OSError as e:
         raise Exception("Execution failed: %d / %s" % (e.errno, e.strerror))
     
+def build_macos():
+    binary_dir = 'build/build-macos'
+
+    compile_cmd = ['cmake']
+    compile_cmd.append('-DBUILD_PLATFORM=macos')
+    compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')
+    compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
+
+    compile_cmd.append('-S .')
+    compile_cmd.append(f'-B {binary_dir}')
+    execute(compile_cmd)
+    
+    build_cmd = [f'cmake --build {binary_dir}']
+    build_cmd.append('-j8')
+    execute(build_cmd, shell=True)
+
+    
+    install_cmd = [f'cmake --install {binary_dir}']
+    execute(install_cmd, shell=True)
 
 def build_linux():
     binary_dir = 'build/build-linux'
@@ -72,11 +91,12 @@ def build_android(
 
     install_cmd = [f'cmake --install {binary_dir}']
     execute(install_cmd, shell=True)
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Build the project')
     parser.add_argument('--android', action='store_true')
-    parser.add_argument('--ios', action='store_true')
+    parser.add_argument('--macos', action='store_true')
     parser.add_argument('--linux', action='store_true')
 
     args = parser.parse_args()
@@ -86,3 +106,6 @@ if __name__ == '__main__':
 
     if args.android:
         build_android()
+    
+    if args.macos:
+        build_macos()
