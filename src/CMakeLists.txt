@@ -24,6 +24,26 @@ elseif(BUILD_PLATFORM STREQUAL "linux")
     message(STATUS "onnxruntime_INCLUDE_DIRS: ${onnxruntime_INCLUDE_DIRS}")
     message(STATUS "onnxruntime_LIBS: ${onnxruntime_LIBS}")
     find_package(OpenMP REQUIRED)
+elseif(BUILD_PLATFORM STREQUAL "macos")
+    set(CMAKE_C_COMPILER "/opt/homebrew/Cellar/llvm/19.1.2/bin/clang")
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/llvm/19.1.2/bin/clang++")
+    set(OPENMP_LIBRARIES "/opt/homebrew/Cellar/llvm/19.1.2/lib")
+    set(OPENMP_INCLUDES "/opt/homebrew/Cellar/llvm/19.1.2/include")
+    
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang\$")
+        set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_C_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY omp)
+    endif()
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang\$")
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY omp)
+    endif()
+    find_package(OpenMP REQUIRED)
+    include_directories(${OPENMP_INCLUDES})
+    message(STATUS ${OPENMP_INCLUDES})
 endif()
 
 find_package(OpenCV REQUIRED CONFIG PATHS ${OpenCV_DIR})
@@ -32,10 +52,7 @@ find_package(OpenCV REQUIRED CONFIG PATHS ${OpenCV_DIR})
 set(nlohmann_json_DIR "/usr/local/share/cmake/nlohmann_json")
 find_package(nlohmann_json REQUIRED CONFIG)
 
-
-
 include_directories(${CMAKE_SOURCE_DIR}/include)
-
 
 
 add_library( ${PROJECT_NAME} SHARED detector2d.cpp ${SOURCES})
@@ -49,8 +66,9 @@ if(BUILD_PLATFORM STREQUAL "linux")
     target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} nlohmann_json::nlohmann_json OpenMP::OpenMP_CXX )
 elseif(BUILD_PLATFORM STREQUAL "android")
     target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} nlohmann_json::nlohmann_json ${OpenMP_omp_LIBRARY})
-else()
-    target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} nlohmann_json::nlohmann_json)
+elseif(BUILD_PLATFORM STREQUAL "macos")
+    target_include_directories(${PROJECT_NAME} PRIVATE ${OPENMP_INCLUDES})
+    target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} nlohmann_json::nlohmann_json OpenMP::OpenMP_CXX)
 endif()
 # file(COPY $<TARGET_FILE:GustoEngine>
 #      DESTINATION ${CMAKE_BINARY_DIR}/build/Android/${ANDROID_ABI})
@@ -95,6 +113,10 @@ message(STATUS "    Version:" "${OpenCV_VERSION}" )
 message(STATUS "    OpenCV_DIR:" "${OpenCV_DIR}"  )
 # message(STATUS "    OpenCV_LIBS:" "${OpenCV_LIBS}" )
 # message(STATUS "    OpenCV_INCLUDE_DIRS:" "${OpenCV_INCLUDE_DIRS}" )
+
+message("")
+message(STATUS "  OpenMP: ")
+message(STATUS "    OpenMP_FOUND:" "${OpenMP_FOUND}"  )
 
 message("")
 message(STATUS "  SOURCE: ")

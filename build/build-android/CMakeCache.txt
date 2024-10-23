@@ -257,6 +257,15 @@ Project_IS_TOP_LEVEL:STATIC=ON
 Project_SOURCE_DIR:STATIC=/media/sombrali/HDD1/opencv-unity/gusto_dnn
 
 //Value Computed by CMake
+nms_BINARY_DIR:STATIC=/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/nms
+
+//Value Computed by CMake
+nms_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+nms_SOURCE_DIR:STATIC=/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/nms
+
+//Value Computed by CMake
 ocv_dnn_rtm_BINARY_DIR:STATIC=/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/examples/ocv_dnn_rtm
 
 //Value Computed by CMake
@@ -377,7 +386,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=6
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

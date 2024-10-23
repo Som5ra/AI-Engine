@@ -19,7 +19,7 @@ def execute(cmd, shell=False):
     except OSError as e:
         raise Exception("Execution failed: %d / %s" % (e.errno, e.strerror))
     
-def build_macos():
+def build_macos(install = True):
     binary_dir = 'build/build-macos'
 
     compile_cmd = ['cmake']
@@ -35,11 +35,11 @@ def build_macos():
     build_cmd.append('-j8')
     execute(build_cmd, shell=True)
 
-    
-    install_cmd = [f'cmake --install {binary_dir}']
-    execute(install_cmd, shell=True)
+    if install:
+        install_cmd = [f'cmake --install {binary_dir}']
+        execute(install_cmd, shell=True)
 
-def build_linux():
+def build_linux(install = True):
     binary_dir = 'build/build-linux'
 
     compile_cmd = ['cmake']
@@ -55,14 +55,16 @@ def build_linux():
     build_cmd.append('-j8')
     execute(build_cmd, shell=True)
 
-    
-    install_cmd = [f'cmake --install {binary_dir}']
-    execute(install_cmd, shell=True)
+    if install:
+        install_cmd = [f'cmake --install {binary_dir}']
+        execute(install_cmd, shell=True)
+
 
 def build_android(
         toolchain = "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/build/cmake/android.toolchain.cmake",
         ANDROID_ABI = 'arm64-v8a', 
-        ANDROID_PLATFORM = 'android-22'):
+        ANDROID_PLATFORM = 'android-22',
+        install = True):
     
     android_abi_enum = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
     binary_dir = 'build/build-android'
@@ -89,8 +91,9 @@ def build_android(
     build_cmd.append('-j8')
     execute(build_cmd, shell=True)
 
-    install_cmd = [f'cmake --install {binary_dir}']
-    execute(install_cmd, shell=True)
+    if install:
+        install_cmd = [f'cmake --install {binary_dir}']
+        execute(install_cmd, shell=True)
 
 if __name__ == '__main__':
 
@@ -98,14 +101,15 @@ if __name__ == '__main__':
     parser.add_argument('--android', action='store_true')
     parser.add_argument('--macos', action='store_true')
     parser.add_argument('--linux', action='store_true')
+    parser.add_argument('--install', action='store_true')
 
     args = parser.parse_args()
 
     if args.linux: 
-        build_linux()
+        build_linux(install = args.install)
 
     if args.android:
-        build_android()
+        build_android(install = args.install)
     
     if args.macos:
-        build_macos()
+        build_macos(install = args.install)

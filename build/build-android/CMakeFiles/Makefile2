@@ -65,21 +65,25 @@ CMAKE_BINARY_DIR = /media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-andro
 # The main recursive "all" target.
 all: src/all
 all: examples/all
+all: tools/all
 .PHONY : all
 
 # The main recursive "codegen" target.
 codegen: src/codegen
 codegen: examples/codegen
+codegen: tools/codegen
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
 preinstall: src/preinstall
 preinstall: examples/preinstall
+preinstall: tools/preinstall
 .PHONY : preinstall
 
 # The main recursive "clean" target.
 clean: src/clean
 clean: examples/clean
+clean: tools/clean
 .PHONY : clean
 
 #=============================================================================
@@ -186,6 +190,44 @@ src/clean: src/CMakeFiles/GustoEngine.dir/clean
 .PHONY : src/clean
 
 #=============================================================================
+# Directory level rules for directory tools
+
+# Recursive "all" directory target.
+tools/all: tools/nms/all
+.PHONY : tools/all
+
+# Recursive "codegen" directory target.
+tools/codegen: tools/nms/codegen
+.PHONY : tools/codegen
+
+# Recursive "preinstall" directory target.
+tools/preinstall: tools/nms/preinstall
+.PHONY : tools/preinstall
+
+# Recursive "clean" directory target.
+tools/clean: tools/nms/clean
+.PHONY : tools/clean
+
+#=============================================================================
+# Directory level rules for directory tools/nms
+
+# Recursive "all" directory target.
+tools/nms/all: tools/nms/CMakeFiles/nms.dir/all
+.PHONY : tools/nms/all
+
+# Recursive "codegen" directory target.
+tools/nms/codegen: tools/nms/CMakeFiles/nms.dir/codegen
+.PHONY : tools/nms/codegen
+
+# Recursive "preinstall" directory target.
+tools/nms/preinstall:
+.PHONY : tools/nms/preinstall
+
+# Recursive "clean" directory target.
+tools/nms/clean: tools/nms/CMakeFiles/nms.dir/clean
+.PHONY : tools/nms/clean
+
+#=============================================================================
 # Target rules for target src/CMakeFiles/GustoEngine.dir
 
 # All Build rule for target.
@@ -215,6 +257,37 @@ src/CMakeFiles/GustoEngine.dir/codegen:
 src/CMakeFiles/GustoEngine.dir/clean:
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/GustoEngine.dir/build.make src/CMakeFiles/GustoEngine.dir/clean
 .PHONY : src/CMakeFiles/GustoEngine.dir/clean
+
+#=============================================================================
+# Target rules for target tools/nms/CMakeFiles/nms.dir
+
+# All Build rule for target.
+tools/nms/CMakeFiles/nms.dir/all:
+	$(MAKE) $(MAKESILENT) -f tools/nms/CMakeFiles/nms.dir/build.make tools/nms/CMakeFiles/nms.dir/depend
+	$(MAKE) $(MAKESILENT) -f tools/nms/CMakeFiles/nms.dir/build.make tools/nms/CMakeFiles/nms.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/CMakeFiles --progress-num=4,5 "Built target nms"
+.PHONY : tools/nms/CMakeFiles/nms.dir/all
+
+# Build rule for subdir invocation for target.
+tools/nms/CMakeFiles/nms.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tools/nms/CMakeFiles/nms.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/CMakeFiles 0
+.PHONY : tools/nms/CMakeFiles/nms.dir/rule
+
+# Convenience name for target.
+nms: tools/nms/CMakeFiles/nms.dir/rule
+.PHONY : nms
+
+# codegen rule for target.
+tools/nms/CMakeFiles/nms.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f tools/nms/CMakeFiles/nms.dir/build.make tools/nms/CMakeFiles/nms.dir/codegen
+.PHONY : tools/nms/CMakeFiles/nms.dir/codegen
+
+# clean rule for target.
+tools/nms/CMakeFiles/nms.dir/clean:
+	$(MAKE) $(MAKESILENT) -f tools/nms/CMakeFiles/nms.dir/build.make tools/nms/CMakeFiles/nms.dir/clean
+.PHONY : tools/nms/CMakeFiles/nms.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

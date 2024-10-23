@@ -35,3 +35,16 @@
 /media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/examples/ort/CMakeFiles/install.dir
 /media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/examples/ort/CMakeFiles/install/local.dir
 /media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/examples/ort/CMakeFiles/install/strip.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/CMakeFiles/edit_cache.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/CMakeFiles/rebuild_cache.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/CMakeFiles/list_install_components.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/CMakeFiles/install.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/CMakeFiles/install/local.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/CMakeFiles/install/strip.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/nms/CMakeFiles/nms.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/nms/CMakeFiles/edit_cache.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/nms/CMakeFiles/rebuild_cache.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/nms/CMakeFiles/list_install_components.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/nms/CMakeFiles/install.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/nms/CMakeFiles/install/local.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/tools/nms/CMakeFiles/install/strip.dir

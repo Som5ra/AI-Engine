@@ -14,11 +14,35 @@ if(BUILD_PLATFORM STREQUAL "linux")
 endif()
 
 if(BUILD_PLATFORM STREQUAL "macos")
+    set(CMAKE_C_COMPILER "/opt/homebrew/Cellar/llvm/19.1.2/bin/clang")
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/llvm/19.1.2/bin/clang++")
+    set(OPENMP_LIBRARIES "/opt/homebrew/Cellar/llvm/19.1.2/lib")
+    set(OPENMP_INCLUDES "/opt/homebrew/Cellar/llvm/19.1.2/include")
+    
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang\$")
+        set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_C_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY omp)
+    endif()
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang\$")
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY omp)
+    endif()
 endif()
 
 find_package(OpenMP REQUIRED)
+# enable omp.h
+if(BUILD_PLATFORM STREQUAL "macos")
+    # set(OpenMP_OMPH "/opt/homebrew/opt/libomp/include")
+    include_directories(${OPENMP_INCLUDES})
+    message(STATUS ${OPENMP_INCLUDES})
+endif()
+
 # add_executable( ${PROJECT_NAME} nms.cpp)
 add_library( ${PROJECT_NAME} SHARED nms.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE ${OPENMP_INCLUDES})
 target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX)
 
 

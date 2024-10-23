@@ -174,6 +174,19 @@ GustoEngine/fast:
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/GustoEngine.dir/build.make src/CMakeFiles/GustoEngine.dir/build
 .PHONY : GustoEngine/fast
 
+#=============================================================================
+# Target rules for targets named nms
+
+# Build rule for target.
+nms: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 nms
+.PHONY : nms
+
+# fast build rule for target.
+nms/fast:
+	$(MAKE) $(MAKESILENT) -f tools/nms/CMakeFiles/nms.dir/build.make tools/nms/CMakeFiles/nms.dir/build
+.PHONY : nms/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -187,6 +200,7 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... GustoEngine"
+	@echo "... nms"
 .PHONY : help
 
 

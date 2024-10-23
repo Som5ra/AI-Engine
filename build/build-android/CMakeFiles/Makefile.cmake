@@ -34,6 +34,8 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/ocv_dnn_yolov7/CMakeLists.txt"
   "/media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/ort/CMakeLists.txt"
   "/media/sombrali/HDD1/opencv-unity/gusto_dnn/src/CMakeLists.txt"
+  "/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/CMakeLists.txt"
+  "/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/nms/CMakeLists.txt"
   "/usr/local/share/cmake-3.30/Modules/CMakeCCompiler.cmake.in"
   "/usr/local/share/cmake-3.30/Modules/CMakeCCompilerABI.c"
   "/usr/local/share/cmake-3.30/Modules/CMakeCInformation.cmake"
@@ -172,9 +174,12 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "examples/ocv_dnn_rtm/CMakeFiles/CMakeDirectoryInformation.cmake"
   "examples/ocv_dnn_yolov7/CMakeFiles/CMakeDirectoryInformation.cmake"
   "examples/ort/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "tools/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "tools/nms/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "src/CMakeFiles/GustoEngine.dir/DependInfo.cmake"
+  "tools/nms/CMakeFiles/nms.dir/DependInfo.cmake"
   )
