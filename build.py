@@ -21,7 +21,7 @@ def execute(cmd, shell=False):
     
 
 def build_linux():
-    binary_dir = 'build-linux'
+    binary_dir = 'build/build-linux'
 
     compile_cmd = ['cmake']
     compile_cmd.append('-DBUILD_PLATFORM=linux')
@@ -46,7 +46,7 @@ def build_android(
         ANDROID_PLATFORM = 'android-22'):
     
     android_abi_enum = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
-    binary_dir = 'build-android'
+    binary_dir = 'build/build-android'
 
     if ANDROID_ABI not in android_abi_enum:
         raise Exception('Invalid ANDROID_ABI')
