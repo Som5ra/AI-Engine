@@ -190,6 +190,7 @@ src/libGustoEngine.dylib: /usr/local/lib/libopencv_core.a
 src/libGustoEngine.dylib: /usr/local/lib/opencv4/3rdparty/libzlib.a
 src/libGustoEngine.dylib: /usr/local/lib/opencv4/3rdparty/libittnotify.a
 src/libGustoEngine.dylib: /usr/local/lib/opencv4/3rdparty/libtegra_hal.a
+src/libGustoEngine.dylib: /opt/homebrew/opt/libomp/lib/libomp.a
 src/libGustoEngine.dylib: src/CMakeFiles/GustoEngine.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX shared library libGustoEngine.dylib"
 	cd /Users/build/sombra_build_tool/AI-Engine/build/build-macos/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/GustoEngine.dir/link.txt --verbose=$(VERBOSE)

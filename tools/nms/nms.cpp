@@ -2,14 +2,14 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
-
+#include <cmath>
 using namespace std;
 
 extern "C"{
     struct Rect {
-        float x, y, width, height;
-        Rect(float x, float y, float width, float height) : x(x), y(y), width(width), height(height) {}
-        float area() const { return width * height; }
+        float x1, y1, x2, y2;
+        Rect(float x1, float y1, float x2, float y2) :  x1(x1), y1(y1), x2(x2), y2(y2) {}
+        float area() const { return (y2 - y1 + 1) * (x2 - x1 + 1); } 
     };
 
     vector<int> nms_cpu(const vector<Rect>& _boxes, const vector<float>& _scores, float _score_thr, float _nms_thr) {
@@ -23,45 +23,47 @@ extern "C"{
         output:
             NDArray of indices to keep
         */
-        vector<int> raw_indices(_scores.size());
+        vector<int> _raw_indices(_scores.size()), raw_indices;
         vector<Rect> boxes;
         vector<float> scores;
-        vector<float> areas;
+        vector<float> areas; 
 
-        iota(raw_indices.begin(), raw_indices.end(), 0);
-        cout << "debug: " << _scores.size() << endl;
+        iota(_raw_indices.begin(), _raw_indices.end(), 0);
         // #pragma omp parallel for
-        #pragma omp critical
         for (size_t i = 0; i < _scores.size(); ++i) {
             if (_scores[i] >= _score_thr) {
                     boxes.push_back(_boxes[i]);
                     scores.push_back(_scores[i]);
-                    areas.push_back(_boxes[i].area());
+                    raw_indices.push_back(_raw_indices[i]);
+                    areas.push_back(_boxes[i].area()); 
             }
         }
         vector<int> order(scores.size());
         iota(order.begin(), order.end(), 0);
         stable_sort(order.begin(), order.end(), [&scores](size_t i1, size_t i2) {return scores[i1] > scores[i2];});
-
+        for (size_t i = 0; i < order.size(); i++)
+        {
+            cerr << order[i] << " " << scores[order[i]] << " " << raw_indices[order[i]] << " ";
+        }
+        cerr << endl;
         
         vector<int> keep;
         while (!order.empty()) {
             int i = order[0];
             keep.push_back(raw_indices[i]);
             vector<int> new_order;
-            #pragma omp parallel for
             for (size_t j = 1; j < order.size(); ++j) {
                 int idx = order[j];
-                float xx1 = max(boxes[i].x, boxes[idx].x);
-                float yy1 = max(boxes[i].y, boxes[idx].y);
-                float xx2 = min(boxes[i].x + boxes[i].width, boxes[idx].x + boxes[idx].width);
-                float yy2 = min(boxes[i].y + boxes[i].height, boxes[idx].y + boxes[idx].height);
+                float xx1 = max(boxes[i].x1, boxes[idx].x1);
+                float yy1 = max(boxes[i].y1, boxes[idx].y1);
+                float xx2 = min(boxes[i].x2, boxes[idx].x2);
+                float yy2 = min(boxes[i].y2, boxes[idx].y2);
 
                 float w = max(0.0f, xx2 - xx1 + 1);
                 float h = max(0.0f, yy2 - yy1 + 1);
                 float inter = w * h;
-                float ovr = inter / (boxes[i].area() + boxes[idx].area() - inter);
-
+                // float ovr = inter / (boxes[i].area() + boxes[idx].area() - inter);
+                float ovr = inter / (areas[i] + areas[idx] - inter);
                 if (ovr <= _nms_thr) {
                     new_order.push_back(idx);
                 }
@@ -89,12 +91,15 @@ extern "C"{
         vector<int> cls_inds(scores.size());
         vector<float> cls_scores(scores.size());
         for (size_t i = 0; i < scores.size(); ++i) {
+            
             auto max_it = max_element(scores[i].begin(), scores[i].end());
             cls_inds[i] = distance(scores[i].begin(), max_it);
             cls_scores[i] = *max_it;
         }
-
         vector<int> valid_idx = nms_cpu(boxes, cls_scores, score_thr, nms_thr);
+        for (size_t i = 0; i < valid_idx.size(); ++i) {
+            cerr << valid_idx[i] << " ";
+        }
         if (valid_idx.empty()) {
             return {vector<int>(), vector<int>()};
         }
@@ -107,6 +112,59 @@ extern "C"{
         return {valid_idx, valid_idx_class_id};
     }
 
+    void sigmoid(float* arr, int size) {
+        #pragma omp parallel for
+        for (int i = 0; i < size; i++) {
+            arr[i] = 1 / (1 + exp(-arr[i]));
+        }
+    }
+
+    void nms_with_sigmoid(float* boxes, int* boxes_shape, float* scores, int* scores_shape, float score_thr, float nms_thr, int* ret_indices, int* ret_indices_cls, int* ret_len)
+    {
+        /*
+            For example,
+            boxes_shape: (batch_size, 2100, 4)
+            scores_shape: (batch_size, 3, 2100)
+
+            ret_indices: (batch_size, n,) 
+            ret_indices_cls: (batch_size, n,) 
+            ret_len: (batch_size, 1), where n is the number of valid boxes so we can decode the boxes in c# side
+        */
+        int boxarr_size_per_batch = boxes_shape[1] * boxes_shape[2];
+        int scorearr_size_per_batch = scores_shape[1] * scores_shape[2];
+        int current_ret_len = 0;   
+        sigmoid(scores, scores_shape[0] * scores_shape[1] * scores_shape[2]);
+        #pragma omp parallel
+        for (size_t batch = 0; batch < boxes_shape[0]; batch++){
+            int box_batch_offset = batch * boxarr_size_per_batch;
+            int score_batch_offset = batch * scorearr_size_per_batch;
+            vector<Rect> boxes_vec;
+            vector<vector<float>> scores_vec;
+            for (int i = 0; i < boxes_shape[1]; i++)
+            {
+                boxes_vec.push_back(Rect(boxes[box_batch_offset + i * 4], boxes[box_batch_offset + i * 4 + 1], boxes[box_batch_offset + i * 4 + 2], boxes[box_batch_offset + i * 4 + 3]));
+            }
+            for (int i = 0; i < scores_shape[2]; i++)
+            {
+                vector<float> scores_vec_tmp;
+                for (int j = 0; j < scores_shape[1]; j++)
+                {
+                    scores_vec_tmp.push_back(scores[score_batch_offset + j * scores_shape[2] + i]);
+                    // scores_vec_tmp.push_back(scores[score_batch_offset + j * scores_shape[2]]);
+                }
+                scores_vec.push_back(scores_vec_tmp);
+            }
+            pair<vector<int>, vector<int>> res = multiclass_nms_class_unaware_cpu(boxes_vec, scores_vec, score_thr, nms_thr);
+            ret_len[batch] = res.first.size();
+            for (size_t i = 0; i < res.first.size(); i++)
+            {
+                ret_indices[current_ret_len + i] = res.first[i];
+                ret_indices_cls[current_ret_len + i] = res.second[i];
+            }
+            current_ret_len += res.first.size();
+        }
+        return ;
+    }
     void nms(float* boxes, int* boxes_shape, float* scores, int* scores_shape, float score_thr, float nms_thr, int* ret_indices, int* ret_indices_cls, int* ret_len)
     {
         /*
@@ -121,12 +179,12 @@ extern "C"{
         int boxarr_size_per_batch = boxes_shape[1] * boxes_shape[2];
         int scorearr_size_per_batch = scores_shape[1] * scores_shape[2];
         int current_ret_len = 0;   
+        #pragma omp parallel
         for (size_t batch = 0; batch < boxes_shape[0]; batch++){
             int box_batch_offset = batch * boxarr_size_per_batch;
             int score_batch_offset = batch * scorearr_size_per_batch;
             vector<Rect> boxes_vec;
             vector<vector<float>> scores_vec;
-            #pragma omp critical
             for (int i = 0; i < boxes_shape[1]; i++)
             {
                 boxes_vec.push_back(Rect(boxes[box_batch_offset + i * 4], boxes[box_batch_offset + i * 4 + 1], boxes[box_batch_offset + i * 4 + 2], boxes[box_batch_offset + i * 4 + 3]));
@@ -137,6 +195,7 @@ extern "C"{
                 for (int j = 0; j < scores_shape[1]; j++)
                 {
                     scores_vec_tmp.push_back(scores[score_batch_offset + j * scores_shape[2] + i]);
+                    // scores_vec_tmp.push_back(scores[score_batch_offset + j * scores_shape[2]]);
                 }
                 scores_vec.push_back(scores_vec_tmp);
             }

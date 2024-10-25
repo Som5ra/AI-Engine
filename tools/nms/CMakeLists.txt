@@ -3,9 +3,18 @@ cmake_minimum_required(VERSION 3.20.0)
 project(nms)
 
 if(BUILD_PLATFORM STREQUAL "android")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0")
     set(OpenMP_CXX_FLAGS "-fopenmp")
     set(OpenMP_CXX_LIB_NAMES "omp")
-    set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/aarch64/libomp.a")
+    if (ANDROID_ABI STREQUAL "arm64-v8a")
+        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/aarch64/libomp.a")
+    elseif (ANDROID_ABI STREQUAL "armeabi-v7a")
+        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/arm/libomp.a")
+    elseif(ANDROID_ABI STREQUAL "x86")
+        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/i386/libomp.a")
+    elseif(ANDROID_ABI STREQUAL "x86_64")
+        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/x86_64/libomp.a")
+    endif()
 endif()
 
 if(BUILD_PLATFORM STREQUAL "linux")
@@ -31,6 +40,12 @@ if(BUILD_PLATFORM STREQUAL "macos")
     set(OpenMP_omp_LIBRARY "/opt/homebrew/opt/libomp/lib/libomp.a")
 endif()
 
+if(BUILD_PLATFORM STREQUAL "windows")
+    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp")
+
+endif()
+
+
 find_package(OpenMP REQUIRED)
 # enable omp.h
 if(BUILD_PLATFORM STREQUAL "macos")
@@ -55,17 +70,17 @@ if(BUILD_PLATFORM STREQUAL "android")
     add_custom_command(TARGET nms POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nms> ${CMAKE_BINARY_DIR}/lib/Android/${ANDROID_ABI}/
     )
-    install(FILES $<TARGET_FILE:nms> DESTINATION /media/sombrali/HDD1/3d_object_detection/opencv-unity/gusto-engine-unity-wrapper1/Assets/Plugins/Android)
+    install(FILES $<TARGET_FILE:nms> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Android/${ANDROID_ABI})
 elseif(BUILD_PLATFORM STREQUAL "linux")
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/Linux/)
     add_custom_command(TARGET nms POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nms> ${CMAKE_BINARY_DIR}/lib/Linux/
     )
-    install(FILES $<TARGET_FILE:nms> DESTINATION /media/sombrali/HDD1/3d_object_detection/opencv-unity/gusto-engine-unity-wrapper1/Assets/Plugins/Linux)
+    install(FILES $<TARGET_FILE:nms> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
 elseif(BUILD_PLATFORM STREQUAL "macos")
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/MacOS/)
     add_custom_command(TARGET nms POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nms> ${CMAKE_BINARY_DIR}/lib/MacOS/
     )
-    install(FILES $<TARGET_FILE:nms> DESTINATION /media/sombrali/HDD1/3d_object_detection/opencv-unity/gusto-engine-unity-wrapper1/Assets/Plugins/MacOS)
+    install(FILES $<TARGET_FILE:nms> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/MacOS)
 endif()

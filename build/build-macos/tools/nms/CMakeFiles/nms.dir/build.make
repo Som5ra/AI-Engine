@@ -92,6 +92,7 @@ nms_EXTERNAL_OBJECTS =
 
 tools/nms/libnms.dylib: tools/nms/CMakeFiles/nms.dir/nms.cpp.o
 tools/nms/libnms.dylib: tools/nms/CMakeFiles/nms.dir/build.make
+tools/nms/libnms.dylib: /opt/homebrew/opt/libomp/lib/libomp.a
 tools/nms/libnms.dylib: tools/nms/CMakeFiles/nms.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library libnms.dylib"
 	cd /Users/build/sombra_build_tool/AI-Engine/build/build-macos/tools/nms && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/nms.dir/link.txt --verbose=$(VERBOSE)

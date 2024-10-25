@@ -593,3 +593,291 @@ events:
         
       exitCode: 2
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:440 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:580 (_OPENMP_GET_SPEC_DATE)"
+      - "src/CMakeLists.txt:44 (find_package)"
+    description: "Detecting C OpenMP version"
+    directories:
+      source: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-5IsiV2"
+      binary: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-5IsiV2"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/opt/homebrew/opt/llvm/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    buildResult:
+      variable: "OpenMP_SPECTEST_C_"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-5IsiV2'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.30.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_2a1e5/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_2a1e5.dir/build.make CMakeFiles/cmTC_2a1e5.dir/build
+        Building C object CMakeFiles/cmTC_2a1e5.dir/OpenMPCheckVersion.c.o
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -Xpreprocessor -fopenmp -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -MD -MT CMakeFiles/cmTC_2a1e5.dir/OpenMPCheckVersion.c.o -MF CMakeFiles/cmTC_2a1e5.dir/OpenMPCheckVersion.c.o.d -o CMakeFiles/cmTC_2a1e5.dir/OpenMPCheckVersion.c.o -c /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-5IsiV2/OpenMPCheckVersion.c
+        /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-5IsiV2/OpenMPCheckVersion.c:3:10: fatal error: 'omp.h' file not found
+            3 | #include <omp.h>
+              |          ^~~~~~~
+        1 error generated.
+        make[1]: *** [CMakeFiles/cmTC_2a1e5.dir/OpenMPCheckVersion.c.o] Error 1
+        make: *** [cmTC_2a1e5/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:440 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:580 (_OPENMP_GET_SPEC_DATE)"
+      - "src/CMakeLists.txt:44 (find_package)"
+    description: "Detecting CXX OpenMP version"
+    directories:
+      source: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-pphl9I"
+      binary: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-pphl9I"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/opt/homebrew/opt/llvm/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    buildResult:
+      variable: "OpenMP_SPECTEST_CXX_"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-pphl9I'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.30.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_6e2af/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_6e2af.dir/build.make CMakeFiles/cmTC_6e2af.dir/build
+        Building CXX object CMakeFiles/cmTC_6e2af.dir/OpenMPCheckVersion.cpp.o
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -Xpreprocessor -fopenmp -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -MD -MT CMakeFiles/cmTC_6e2af.dir/OpenMPCheckVersion.cpp.o -MF CMakeFiles/cmTC_6e2af.dir/OpenMPCheckVersion.cpp.o.d -o CMakeFiles/cmTC_6e2af.dir/OpenMPCheckVersion.cpp.o -c /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-pphl9I/OpenMPCheckVersion.cpp
+        /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-pphl9I/OpenMPCheckVersion.cpp:3:10: fatal error: 'omp.h' file not found
+            3 | #include <omp.h>
+              |          ^~~~~~~
+        1 error generated.
+        make[1]: *** [CMakeFiles/cmTC_6e2af.dir/OpenMPCheckVersion.cpp.o] Error 1
+        make: *** [cmTC_6e2af/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:440 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:580 (_OPENMP_GET_SPEC_DATE)"
+      - "tools/nms/CMakeLists.txt:35 (find_package)"
+    description: "Detecting C OpenMP version"
+    directories:
+      source: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-s4U0TF"
+      binary: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-s4U0TF"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/opt/homebrew/opt/llvm/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    buildResult:
+      variable: "OpenMP_SPECTEST_C_"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-s4U0TF'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.30.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_94c5c/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_94c5c.dir/build.make CMakeFiles/cmTC_94c5c.dir/build
+        Building C object CMakeFiles/cmTC_94c5c.dir/OpenMPCheckVersion.c.o
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -Xpreprocessor -fopenmp -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -MD -MT CMakeFiles/cmTC_94c5c.dir/OpenMPCheckVersion.c.o -MF CMakeFiles/cmTC_94c5c.dir/OpenMPCheckVersion.c.o.d -o CMakeFiles/cmTC_94c5c.dir/OpenMPCheckVersion.c.o -c /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-s4U0TF/OpenMPCheckVersion.c
+        /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-s4U0TF/OpenMPCheckVersion.c:3:10: fatal error: 'omp.h' file not found
+            3 | #include <omp.h>
+              |          ^~~~~~~
+        1 error generated.
+        make[1]: *** [CMakeFiles/cmTC_94c5c.dir/OpenMPCheckVersion.c.o] Error 1
+        make: *** [cmTC_94c5c/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:440 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:580 (_OPENMP_GET_SPEC_DATE)"
+      - "tools/nms/CMakeLists.txt:35 (find_package)"
+    description: "Detecting CXX OpenMP version"
+    directories:
+      source: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-sd8Ese"
+      binary: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-sd8Ese"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/opt/homebrew/opt/llvm/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    buildResult:
+      variable: "OpenMP_SPECTEST_CXX_"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-sd8Ese'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.30.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_6d5bd/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_6d5bd.dir/build.make CMakeFiles/cmTC_6d5bd.dir/build
+        Building CXX object CMakeFiles/cmTC_6d5bd.dir/OpenMPCheckVersion.cpp.o
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -Xpreprocessor -fopenmp -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -MD -MT CMakeFiles/cmTC_6d5bd.dir/OpenMPCheckVersion.cpp.o -MF CMakeFiles/cmTC_6d5bd.dir/OpenMPCheckVersion.cpp.o.d -o CMakeFiles/cmTC_6d5bd.dir/OpenMPCheckVersion.cpp.o -c /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-sd8Ese/OpenMPCheckVersion.cpp
+        /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-sd8Ese/OpenMPCheckVersion.cpp:3:10: fatal error: 'omp.h' file not found
+            3 | #include <omp.h>
+              |          ^~~~~~~
+        1 error generated.
+        make[1]: *** [CMakeFiles/cmTC_6d5bd.dir/OpenMPCheckVersion.cpp.o] Error 1
+        make: *** [cmTC_6d5bd/fast] Error 2
+        
+      exitCode: 2
+...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:440 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:580 (_OPENMP_GET_SPEC_DATE)"
+      - "src/CMakeLists.txt:43 (find_package)"
+    description: "Detecting C OpenMP version"
+    directories:
+      source: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-S5uVC9"
+      binary: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-S5uVC9"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/opt/homebrew/opt/llvm/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    buildResult:
+      variable: "OpenMP_SPECTEST_C_"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-S5uVC9'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.30.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_5491c/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_5491c.dir/build.make CMakeFiles/cmTC_5491c.dir/build
+        Building C object CMakeFiles/cmTC_5491c.dir/OpenMPCheckVersion.c.o
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -Xpreprocessor -fopenmp -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -MD -MT CMakeFiles/cmTC_5491c.dir/OpenMPCheckVersion.c.o -MF CMakeFiles/cmTC_5491c.dir/OpenMPCheckVersion.c.o.d -o CMakeFiles/cmTC_5491c.dir/OpenMPCheckVersion.c.o -c /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-S5uVC9/OpenMPCheckVersion.c
+        /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-S5uVC9/OpenMPCheckVersion.c:3:10: fatal error: 'omp.h' file not found
+            3 | #include <omp.h>
+              |          ^~~~~~~
+        1 error generated.
+        make[1]: *** [CMakeFiles/cmTC_5491c.dir/OpenMPCheckVersion.c.o] Error 1
+        make: *** [cmTC_5491c/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:440 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:580 (_OPENMP_GET_SPEC_DATE)"
+      - "src/CMakeLists.txt:43 (find_package)"
+    description: "Detecting CXX OpenMP version"
+    directories:
+      source: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-RUP8bQ"
+      binary: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-RUP8bQ"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/opt/homebrew/opt/llvm/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    buildResult:
+      variable: "OpenMP_SPECTEST_CXX_"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-RUP8bQ'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.30.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_7b508/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_7b508.dir/build.make CMakeFiles/cmTC_7b508.dir/build
+        Building CXX object CMakeFiles/cmTC_7b508.dir/OpenMPCheckVersion.cpp.o
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -Xpreprocessor -fopenmp -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -MD -MT CMakeFiles/cmTC_7b508.dir/OpenMPCheckVersion.cpp.o -MF CMakeFiles/cmTC_7b508.dir/OpenMPCheckVersion.cpp.o.d -o CMakeFiles/cmTC_7b508.dir/OpenMPCheckVersion.cpp.o -c /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-RUP8bQ/OpenMPCheckVersion.cpp
+        /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-RUP8bQ/OpenMPCheckVersion.cpp:3:10: fatal error: 'omp.h' file not found
+            3 | #include <omp.h>
+              |          ^~~~~~~
+        1 error generated.
+        make[1]: *** [CMakeFiles/cmTC_7b508.dir/OpenMPCheckVersion.cpp.o] Error 1
+        make: *** [cmTC_7b508/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:440 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:580 (_OPENMP_GET_SPEC_DATE)"
+      - "tools/nms/CMakeLists.txt:34 (find_package)"
+    description: "Detecting C OpenMP version"
+    directories:
+      source: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-JsymSy"
+      binary: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-JsymSy"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/opt/homebrew/opt/llvm/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    buildResult:
+      variable: "OpenMP_SPECTEST_C_"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-JsymSy'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.30.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_37155/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_37155.dir/build.make CMakeFiles/cmTC_37155.dir/build
+        Building C object CMakeFiles/cmTC_37155.dir/OpenMPCheckVersion.c.o
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -Xpreprocessor -fopenmp -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -MD -MT CMakeFiles/cmTC_37155.dir/OpenMPCheckVersion.c.o -MF CMakeFiles/cmTC_37155.dir/OpenMPCheckVersion.c.o.d -o CMakeFiles/cmTC_37155.dir/OpenMPCheckVersion.c.o -c /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-JsymSy/OpenMPCheckVersion.c
+        /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-JsymSy/OpenMPCheckVersion.c:3:10: fatal error: 'omp.h' file not found
+            3 | #include <omp.h>
+              |          ^~~~~~~
+        1 error generated.
+        make[1]: *** [CMakeFiles/cmTC_37155.dir/OpenMPCheckVersion.c.o] Error 1
+        make: *** [cmTC_37155/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:440 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.30.3/share/cmake/Modules/FindOpenMP.cmake:580 (_OPENMP_GET_SPEC_DATE)"
+      - "tools/nms/CMakeLists.txt:34 (find_package)"
+    description: "Detecting CXX OpenMP version"
+    directories:
+      source: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-bCWStJ"
+      binary: "/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-bCWStJ"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/opt/homebrew/opt/llvm/lib"
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    buildResult:
+      variable: "OpenMP_SPECTEST_CXX_"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-bCWStJ'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.30.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_ed082/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_ed082.dir/build.make CMakeFiles/cmTC_ed082.dir/build
+        Building CXX object CMakeFiles/cmTC_ed082.dir/OpenMPCheckVersion.cpp.o
+        /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -Xpreprocessor -fopenmp -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -MD -MT CMakeFiles/cmTC_ed082.dir/OpenMPCheckVersion.cpp.o -MF CMakeFiles/cmTC_ed082.dir/OpenMPCheckVersion.cpp.o.d -o CMakeFiles/cmTC_ed082.dir/OpenMPCheckVersion.cpp.o -c /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-bCWStJ/OpenMPCheckVersion.cpp
+        /Users/build/sombra_build_tool/AI-Engine/build/build-macos/CMakeFiles/CMakeScratch/TryCompile-bCWStJ/OpenMPCheckVersion.cpp:3:10: fatal error: 'omp.h' file not found
+            3 | #include <omp.h>
+              |          ^~~~~~~
+        1 error generated.
+        make[1]: *** [CMakeFiles/cmTC_ed082.dir/OpenMPCheckVersion.cpp.o] Error 1
+        make: *** [cmTC_ed082/fast] Error 2
+        
+      exitCode: 2
+...

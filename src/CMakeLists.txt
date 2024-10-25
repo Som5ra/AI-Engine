@@ -4,13 +4,28 @@ project(GustoEngine)
 
 if(BUILD_PLATFORM STREQUAL "android")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0")
-    
     set(ANDROID_SYSROOT ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot)
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-4.10.0-android-sdk/OpenCV-android-sdk/sdk/native/jni/abi-arm64-v8a)
+    message(STATUS "abi: ${ANDROID_ABI}")
 
     set(OpenMP_CXX_FLAGS "-fopenmp")
     set(OpenMP_CXX_LIB_NAMES "omp")
-    set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/aarch64/libomp.a")
+
+    if (ANDROID_ABI STREQUAL "arm64-v8a")
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-4.10.0-android-sdk/OpenCV-android-sdk/sdk/native/jni/abi-arm64-v8a)
+        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/aarch64/libomp.a")
+
+    elseif (ANDROID_ABI STREQUAL "armeabi-v7a")
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-4.10.0-android-sdk/OpenCV-android-sdk/sdk/native/jni/abi-armeabi-v7a)
+        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/arm/libomp.a")
+
+    elseif(ANDROID_ABI STREQUAL "x86")
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-4.10.0-android-sdk/OpenCV-android-sdk/sdk/native/jni/abi-x86)
+        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/i386/libomp.a")
+    elseif(ANDROID_ABI STREQUAL "x86_64")
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-4.10.0-android-sdk/OpenCV-android-sdk/sdk/native/jni/abi-x86_64)
+        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/x86_64/libomp.a")
+    endif()
+
     find_package(OpenMP REQUIRED)
     include_directories("/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/include")
 elseif(BUILD_PLATFORM STREQUAL "linux")
@@ -85,14 +100,14 @@ if(BUILD_PLATFORM STREQUAL "android")
     #   Install target, for "make install"
     # ----------------------------------------------------------------------------
     # install(FILES $<TARGET_FILE:GustoEngine> DESTINATION ${PROJECT_SOURCE_DIR}/../gusto-engine-unity-wrapper/Assets/Plugins/Android/)
-    install(FILES $<TARGET_FILE:GustoEngine> DESTINATION /media/sombrali/HDD1/3d_object_detection/opencv-unity/gusto-engine-unity-wrapper1/Assets/Plugins/Android)
+    install(FILES $<TARGET_FILE:GustoEngine> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Android/${ANDROID_ABI})
 elseif(BUILD_PLATFORM STREQUAL "linux")
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/Linux/)
     add_custom_command(TARGET GustoEngine POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:GustoEngine> ${CMAKE_BINARY_DIR}/lib/Linux/
     )
     # install(FILES $<TARGET_FILE:GustoEngine> DESTINATION ${PROJECT_SOURCE_DIR}/../gusto-engine-unity-wrapper/Assets/Plugins/Linux/)
-    install(FILES $<TARGET_FILE:GustoEngine> DESTINATION /media/sombrali/HDD1/3d_object_detection/opencv-unity/gusto-engine-unity-wrapper1/Assets/Plugins/Linux)
+    install(FILES $<TARGET_FILE:GustoEngine> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
 endif()
 
 
@@ -104,7 +119,7 @@ message("")
 
 message(STATUS "  Build options: ")
 message(STATUS "    BUILD_PLATFORM:"           ${BUILD_PLATFORM}      )
-
+message(STATUS "    ANDROID_ABI:"              ${ANDROID_ABI}         )
 # ============================ OpenCV ===========================
 message("")
 message(STATUS "  OpenCV: ")
