@@ -1,4 +1,6 @@
 .vscode/*
 3rdparty/*
 weights/*
-build/*
+build/build-android/*
+build/build-linux/*
+build/build-macos/*
