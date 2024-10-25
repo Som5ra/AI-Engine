@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/GustoEngineExamples.dir/ort_test.cpp.o -o GustoEngineExamples  /media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/../../3rdparty/onnxruntime-static/lib/libonnxruntime.a

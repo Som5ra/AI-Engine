@@ -66,9 +66,9 @@ target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX)
 #   Install target, for "make install"
 # ----------------------------------------------------------------------------
 if(BUILD_PLATFORM STREQUAL "android")
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/Android/${ANDROID_ABI}/)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/../lib/Android/${ANDROID_ABI}/)
     add_custom_command(TARGET nms POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nms> ${CMAKE_BINARY_DIR}/lib/Android/${ANDROID_ABI}/
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nms> ${CMAKE_BINARY_DIR}/../lib/Android/${ANDROID_ABI}/
     )
     install(FILES $<TARGET_FILE:nms> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Android/${ANDROID_ABI})
 elseif(BUILD_PLATFORM STREQUAL "linux")

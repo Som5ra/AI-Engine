@@ -1,3 +1,0 @@
-/media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/build/CMakeFiles/GustoEngineExamples.dir
-/media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/build/CMakeFiles/edit_cache.dir
-/media/sombrali/HDD1/opencv-unity/gusto_dnn/examples/build/CMakeFiles/rebuild_cache.dir

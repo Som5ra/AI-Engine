@@ -247,9 +247,6 @@ OpenMP_C_FLAGS:STRING=-fopenmp=libomp
 //C compiler libraries for OpenMP parallelization
 OpenMP_C_LIB_NAMES:STRING=omp
 
-//Path to the omp library for OpenMP
-OpenMP_omp_LIBRARY:FILEPATH=/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/i386/libomp.so
-
 //Value Computed by CMake
 Project_BINARY_DIR:STATIC=/media/sombrali/HDD1/opencv-unity/gusto_dnn/build/build-android/x86
 
@@ -458,6 +455,4 @@ OpenMP_C_SPEC_DATE:INTERNAL=201811
 OpenMP_SPECTEST_CXX_:INTERNAL=TRUE
 //Result of TRY_COMPILE
 OpenMP_SPECTEST_C_:INTERNAL=TRUE
-//ADVANCED property for variable: OpenMP_omp_LIBRARY
-OpenMP_omp_LIBRARY-ADVANCED:INTERNAL=1
 

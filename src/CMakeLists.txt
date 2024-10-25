@@ -91,9 +91,9 @@ endif()
 # message(${CMAKE_BINARY_DIR}/Android/${ANDROID_ABI}/${targetfile})
 
 if(BUILD_PLATFORM STREQUAL "android")
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/Android/${ANDROID_ABI}/)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/../lib/Android/${ANDROID_ABI}/)
     add_custom_command(TARGET GustoEngine POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:GustoEngine> ${CMAKE_BINARY_DIR}/lib/Android/${ANDROID_ABI}/
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:GustoEngine> ${CMAKE_BINARY_DIR}/../lib/Android/${ANDROID_ABI}/
     )
 
     # ----------------------------------------------------------------------------
