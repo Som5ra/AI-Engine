@@ -1,2 +1,0 @@
-/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Android/arm64-v8a/libGustoEngine.so
-/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Android/arm64-v8a/libnms.so

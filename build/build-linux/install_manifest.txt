@@ -1,2 +1,0 @@
-/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux/libGustoEngine.so
-/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux/libnms.so
