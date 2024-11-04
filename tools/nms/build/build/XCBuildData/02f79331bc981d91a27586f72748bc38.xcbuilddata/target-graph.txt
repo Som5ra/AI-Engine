@@ -1,7 +1,0 @@
-Target dependency graph (3 targets)
-Target 'ALL_BUILD' in project 'nms'
-➜ Explicit dependency on target 'nms' in project 'nms'
-➜ Explicit dependency on target 'ZERO_CHECK' in project 'nms'
-Target 'nms' in project 'nms'
-➜ Explicit dependency on target 'ZERO_CHECK' in project 'nms'
-Target 'ZERO_CHECK' in project 'nms' (no dependencies)
