@@ -158,6 +158,7 @@ if __name__ == '__main__':
     parser.add_argument('--macos', action='store_true')
     parser.add_argument('--linux', action='store_true')
     parser.add_argument('--windows', action='store_true')
+    parser.add_argument('--ios', action='store_true')
     parser.add_argument('--install', type=bool, default=True)
 
     args = parser.parse_args()
