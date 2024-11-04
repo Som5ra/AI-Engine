@@ -5,7 +5,6 @@
 #include <string>
 #include <chrono>
 #include <omp.h>
-#include <opencv2/opencv.hpp> 
 
 extern "C"
 {
@@ -21,8 +20,6 @@ extern "C"
 
     
     using namespace std;
-    using namespace cv;
-    using namespace dnn;
 
 
     class Net_config
