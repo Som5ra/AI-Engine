@@ -1,7 +1,7 @@
 import os
 import subprocess
 import argparse
-
+import shutil
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -62,19 +62,27 @@ def build_linux(install = True):
 
 def build_windows(install = True):
     binary_dir = 'build/build-windows'
+    # Ensure the build directory exists
+    if not os.path.exists(binary_dir):
+        os.makedirs(binary_dir)
 
-    compile_cmd = ['cmmake']
+    compile_cmd = ['cmake']
     compile_cmd.append('-DBUILD_PLATFORM=windows')
     compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')
     compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
 
+    # compile_cmd.append('-DCMAKE_TOOLCHAIN_FILE=~/mingw-w64-x86_64.cmake')
+    # compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
+    # compile_cmd.append('-DCMAKE_MAKE_PROGRAM=mingw32-make')
+    # compile_cmd.append('-G MinGW Makefiles')
+    
     compile_cmd.append('-S .')
     compile_cmd.append(f'-B {binary_dir}')
     execute(compile_cmd)
     
-    build_cmd = [f'cmake --build {binary_dir}']
-    build_cmd.append('-j8')
-    execute(build_cmd, shell=True)
+    # windows_make_path = binary_dir.replace("/", "\\")
+    build_cmd = ['cmake', '--build', binary_dir, '-j8']
+    execute(build_cmd)
 
     if install:
         install_cmd = [f'cmake --install {binary_dir}']
@@ -115,6 +123,34 @@ def build_android(
         install_cmd = [f'cmake --install {binary_dir}']
         execute(install_cmd, shell=True)
 
+def build_ios(toolchain = 'ios.toolchain.cmake', install = True):
+    # cmake -B build -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios-cmake/ios.toolchain.cmake -DPLATFORM=OS64 -DBUILD_PLATFORM=ios -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    # cmake --build build --config Release
+
+    binary_dir = f'build/build-ios/'
+
+    compile_cmd = ['cmake']
+    compile_cmd.append('-DBUILD_PLATFORM=ios')
+    compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')        
+    compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
+
+    compile_cmd.append(f'-G Xcode')
+    compile_cmd.append(f'-DCMAKE_TOOLCHAIN_FILE={toolchain}')
+    compile_cmd.append(f'-DPLATFORM=OS64')
+
+
+    compile_cmd.append('-S .')
+    compile_cmd.append(f'-B {binary_dir}')
+    execute(compile_cmd)
+    
+    build_cmd = [f'cmake --build {binary_dir} --config Release']
+    build_cmd.append('-j8')
+    execute(build_cmd, shell=True)
+
+    if install:
+        install_cmd = [f'cmake --install {binary_dir}']
+        execute(install_cmd, shell=True)
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Build the project')
@@ -142,3 +178,6 @@ if __name__ == '__main__':
 
     if args.windows:
         build_windows(install = args.install)
+
+    if args.ios:
+        build_ios(install = args.install)
