@@ -1,4 +1,4 @@
-## Android Build
+<!-- ## Android Build -->
 
 <!-- ### Prepare
 1. Android NDK
@@ -9,7 +9,15 @@
 ### Build
 
 ```
-python3 build.py --android --linux
-python3 build.py --macos
-python3 build.py --windows
+Linux Host:
+python3 build.py --android --linux --windows
+
+MACOS Host:
+python3 build.py --macos --ios
+<!-- python3 build.py --macos -->
+<!-- python3 build.py --windows -->
 ```
+
+
+### NOTES
+OPENMP does not support for Windows and IOS 
