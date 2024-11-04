@@ -14,8 +14,6 @@ python3 build.py --android --linux --windows
 
 MACOS Host:
 python3 build.py --macos --ios
-<!-- python3 build.py --macos -->
-<!-- python3 build.py --windows -->
 ```
 
 
