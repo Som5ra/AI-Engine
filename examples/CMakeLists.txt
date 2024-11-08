@@ -1,3 +1,5 @@
 add_subdirectory(ocv_dnn_rtm)
 add_subdirectory(ocv_dnn_yolov7)
 add_subdirectory(ort)
+add_subdirectory(json_test)
+add_subdirectory(face_geometry_example)
