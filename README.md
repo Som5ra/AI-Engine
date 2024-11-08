@@ -18,4 +18,4 @@ python3 build.py --macos --ios
 
 
 ### NOTES
-OPENMP does not support for Windows and IOS 
+OPENMP does not support Windows and IOS for now
