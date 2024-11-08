@@ -1,2 +1,2 @@
 add_subdirectory(nms)
-# add_subdirectory(face_geometry)
+add_subdirectory(face_geometry)

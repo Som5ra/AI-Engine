@@ -5,455 +5,136 @@
 #include <vector>
 
 #include "Eigen/Core"
+
+#include "utils.h"
+#include "tools/face_geometry/geometry_pipeline.h"
+#include "tools/face_geometry/face_geometry.h"
 #include "tools/face_geometry/procrustes_solver.h"
 
-namespace face_geometry {
-namespace {
-
-enum InputSource {
-  DEFAULT,
-  FACE_LANDMARK_PIPELINE,
-  FACE_DETECTION_PIPELINE,
-};
-
-enum OriginPointLocation {
-  TOP_LEFT_CORNER,
-  BOTTOM_LEFT_CORNER,
-};
-
-struct PerspectiveCamera {
-  float vertical_fov_degrees() const { return vertical_fov_degrees_; }
-  float near() const { return near_; }
-  float far() const { return far_; }
-
-  float vertical_fov_degrees_;
-  float near_;
-  float far_;
-};
-
-
-struct PerspectiveCameraFrustum {
-  // NOTE: all arguments must be validated prior to calling this constructor.
-  PerspectiveCameraFrustum(const PerspectiveCamera& perspective_camera,
-                           int frame_width, int frame_height) {
-    static constexpr float kDegreesToRadians = 3.14159265358979323846f / 180.f;
-
-    const float height_at_near =
-        2.f * perspective_camera.near() *
-        std::tan(0.5f * kDegreesToRadians *
-                 perspective_camera.vertical_fov_degrees());
-
-    const float width_at_near = frame_width * height_at_near / frame_height;
-
-    left = -0.5f * width_at_near;
-    right = 0.5f * width_at_near;
-    bottom = -0.5f * height_at_near;
-    top = 0.5f * height_at_near;
-    near = perspective_camera.near();
-    far = perspective_camera.far();
-  }
-
-  float left;
-  float right;
-  float bottom;
-  float top;
-  float near;
-  float far;
-};
-
-class ScreenToMetricSpaceConverter {
- public:
-  ScreenToMetricSpaceConverter(
-      OriginPointLocation origin_point_location,      //
-      InputSource input_source,                       //
-      Eigen::Matrix3Xf&& canonical_metric_landmarks,  //
-      Eigen::VectorXf&& landmark_weights,             //
-      std::unique_ptr<ProcrustesSolver> procrustes_solver)
-      : origin_point_location_(origin_point_location),
-        input_source_(input_source),
-        canonical_metric_landmarks_(std::move(canonical_metric_landmarks)),
-        landmark_weights_(std::move(landmark_weights)),
-        procrustes_solver_(std::move(procrustes_solver)) {}
-
-  // Converts `screen_landmark_list` into `metric_landmark_list` and estimates
-  // the `pose_transform_mat`.
-  //
-  // Here's the algorithm summary:
-  //
-  // (1) Project X- and Y- screen landmark coordinates at the Z near plane.
-  //
-  // (2) Estimate a canonical-to-runtime landmark set scale by running the
-  //     Procrustes solver using the screen runtime landmarks.
-  //
-  //     On this iteration, screen landmarks are used instead of unprojected
-  //     metric landmarks as it is not safe to unproject due to the relative
-  //     nature of the input screen landmark Z coordinate.
-  //
-  // (3) Use the canonical-to-runtime scale from (2) to unproject the screen
-  //     landmarks. The result is referenced as "intermediate landmarks" because
-  //     they are the first estimation of the resuling metric landmarks, but are
-  //     not quite there yet.
-  //
-  // (4) Estimate a canonical-to-runtime landmark set scale by running the
-  //     Procrustes solver using the intermediate runtime landmarks.
-  //
-  // (5) Use the product of the scale factors from (2) and (4) to unproject
-  //     the screen landmarks the second time. This is the second and the final
-  //     estimation of the metric landmarks.
-  //
-  // (6) Multiply each of the metric landmarks by the inverse pose
-  //     transformation matrix to align the runtime metric face landmarks with
-  //     the canonical metric face landmarks.
-  //
-  // Note: the input screen landmarks are in the left-handed coordinate system,
-  //       however any metric landmarks - including the canonical metric
-  //       landmarks, the final runtime metric landmarks and any intermediate
-  //       runtime metric landmarks - are in the right-handed coordinate system.
-  //
-  //       To keep the logic correct, the landmark set handedness is changed any
-  //       time the screen-to-metric semantic barrier is passed.
-  int Convert(const NormalizedLandmarkList& screen_landmark_list,  //
-                       const PerspectiveCameraFrustum& pcf,                 //
-                       LandmarkList& metric_landmark_list,                  //
-                       Eigen::Matrix4f& pose_transform_mat) const {
-    // RET_CHECK_EQ(screen_landmark_list.landmark_size(),
-    //              canonical_metric_landmarks_.cols())
-    //     << "The number of landmarks doesn't match the number passed upon "
-    //        "initialization!";
-
-    Eigen::Matrix3Xf screen_landmarks;
-    ConvertLandmarkListToEigenMatrix(screen_landmark_list, screen_landmarks);
-
-    ProjectXY(pcf, screen_landmarks);
-    const float depth_offset = screen_landmarks.row(2).mean();
-
-    // 1st iteration: don't unproject XY because it's unsafe to do so due to
-    //                the relative nature of the Z coordinate. Instead, run the
-    //                first estimation on the projected XY and use that scale to
-    //                unproject for the 2nd iteration.
-    Eigen::Matrix3Xf intermediate_landmarks(screen_landmarks);
-    ChangeHandedness(intermediate_landmarks);
-
-    // MP_ASSIGN_OR_RETURN(const float first_iteration_scale,
-    //                     EstimateScale(intermediate_landmarks),
-    //                     _ << "Failed to estimate first iteration scale!");
-
-    // 2nd iteration: unproject XY using the scale from the 1st iteration.
-    intermediate_landmarks = screen_landmarks;
-    MoveAndRescaleZ(pcf, depth_offset, first_iteration_scale,
-                    intermediate_landmarks);
-    UnprojectXY(pcf, intermediate_landmarks);
-    ChangeHandedness(intermediate_landmarks);
-
-    // For face detection input landmarks, re-write Z-coord from the canonical
-    // landmarks.
-    if (input_source_ == InputSource::FACE_DETECTION_PIPELINE) {
-      Eigen::Matrix4f intermediate_pose_transform_mat;
-    //   MP_RETURN_IF_ERROR(procrustes_solver_->SolveWeightedOrthogonalProblem(
-    //       canonical_metric_landmarks_, intermediate_landmarks,
-    //       landmark_weights_, intermediate_pose_transform_mat))
-    //       << "Failed to estimate pose transform matrix!";
-
-      intermediate_landmarks.row(2) =
-          (intermediate_pose_transform_mat *
-           canonical_metric_landmarks_.colwise().homogeneous())
-              .row(2);
-    }
-    // MP_ASSIGN_OR_RETURN(const float second_iteration_scale,
-                        // EstimateScale(intermediate_landmarks),
-                        // _ << "Failed to estimate second iteration scale!");
-
-    // Use the total scale to unproject the screen landmarks.
-    const float total_scale = first_iteration_scale * second_iteration_scale;
-    MoveAndRescaleZ(pcf, depth_offset, total_scale, screen_landmarks);
-    UnprojectXY(pcf, screen_landmarks);
-    ChangeHandedness(screen_landmarks);
-
-    // At this point, screen landmarks are converted into metric landmarks.
-    Eigen::Matrix3Xf& metric_landmarks = screen_landmarks;
-
-    // MP_RETURN_IF_ERROR(procrustes_solver_->SolveWeightedOrthogonalProblem(
-    //     canonical_metric_landmarks_, metric_landmarks, landmark_weights_,
-    //     pose_transform_mat))
-    //     << "Failed to estimate pose transform matrix!";
-
-    // For face detection input landmarks, re-write Z-coord from the canonical
-    // landmarks and run the pose transform estimation again.
-    if (input_source_ == InputSource::FACE_DETECTION_PIPELINE) {
-      metric_landmarks.row(2) =
-          (pose_transform_mat *
-           canonical_metric_landmarks_.colwise().homogeneous())
-              .row(2);
-
-    //   MP_RETURN_IF_ERROR(procrustes_solver_->SolveWeightedOrthogonalProblem(
-    //       canonical_metric_landmarks_, metric_landmarks, landmark_weights_,
-    //       pose_transform_mat))
-    //       << "Failed to estimate pose transform matrix!";
+namespace gusto_face_geometry {
+    GUSTO_RET ValidatePerspectiveCamera(
+        const PerspectiveCamera& perspective_camera) {
+    static constexpr float kAbsoluteErrorEps = 1e-9f;
+    
+    if (perspective_camera.near() <= kAbsoluteErrorEps){
+        std::cerr << "Near Z must be greater than 0 with a margin of 10^{-9}!" << std::endl;
+        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
-    // Multiply each of the metric landmarks by the inverse pose
-    // transformation matrix to align the runtime metric face landmarks with
-    // the canonical metric face landmarks.
-    metric_landmarks = (pose_transform_mat.inverse() *
-                        metric_landmarks.colwise().homogeneous())
-                           .topRows(3);
-
-    ConvertEigenMatrixToLandmarkList(metric_landmarks, metric_landmark_list);
-
-    return absl::OkStatus();
-  }
-
- private:
-  void ProjectXY(const PerspectiveCameraFrustum& pcf,
-                 Eigen::Matrix3Xf& landmarks) const {
-    float x_scale = pcf.right - pcf.left;
-    float y_scale = pcf.top - pcf.bottom;
-    float x_translation = pcf.left;
-    float y_translation = pcf.bottom;
-
-    if (origin_point_location_ == OriginPointLocation::TOP_LEFT_CORNER) {
-      landmarks.row(1) = 1.f - landmarks.row(1).array();
+    if (perspective_camera.far() <= perspective_camera.near() + kAbsoluteErrorEps){
+        std::cerr << "Far Z must be greater than Near Z with a margin of 10^{-9}!" << std::endl;
+        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+    }
+    if (perspective_camera.vertical_fov_degrees() <= kAbsoluteErrorEps){
+        std::cerr << "Vertical FOV must be positive with a margin of 10^{-9}!" << std::endl;
+        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+    }
+    if (perspective_camera.vertical_fov_degrees() + kAbsoluteErrorEps >= 180.f){
+        std::cerr << "Vertical FOV must be less than 180 degrees with a margin of 10^{-9}" << std::endl;
+        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+    }
+    return GustoStatus::ERR_OK;
     }
 
-    landmarks =
-        landmarks.array().colwise() * Eigen::Array3f(x_scale, y_scale, x_scale);
-    landmarks.colwise() += Eigen::Vector3f(x_translation, y_translation, 0.f);
-  }
-
-  intOr<float> EstimateScale(Eigen::Matrix3Xf& landmarks) const {
-    Eigen::Matrix4f transform_mat;
-    // MP_RETURN_IF_ERROR(procrustes_solver_->SolveWeightedOrthogonalProblem(
-    //     canonical_metric_landmarks_, landmarks, landmark_weights_,
-    //     transform_mat))
-    //     << "Failed to estimate canonical-to-runtime landmark set transform!";
-
-    return transform_mat.col(0).norm();
-  }
-
-  static void MoveAndRescaleZ(const PerspectiveCameraFrustum& pcf,
-                              float depth_offset, float scale,
-                              Eigen::Matrix3Xf& landmarks) {
-    landmarks.row(2) =
-        (landmarks.array().row(2) - depth_offset + pcf.near) / scale;
-  }
-
-  static void UnprojectXY(const PerspectiveCameraFrustum& pcf,
-                          Eigen::Matrix3Xf& landmarks) {
-    landmarks.row(0) =
-        landmarks.row(0).cwiseProduct(landmarks.row(2)) / pcf.near;
-    landmarks.row(1) =
-        landmarks.row(1).cwiseProduct(landmarks.row(2)) / pcf.near;
-  }
-
-  static void ChangeHandedness(Eigen::Matrix3Xf& landmarks) {
-    landmarks.row(2) *= -1.f;
-  }
-
-  static void ConvertLandmarkListToEigenMatrix(
-      const NormalizedLandmarkList& landmark_list,
-      Eigen::Matrix3Xf& eigen_matrix) {
-    eigen_matrix = Eigen::Matrix3Xf(3, landmark_list.landmark_size());
-    for (int i = 0; i < landmark_list.landmark_size(); ++i) {
-      const auto& landmark = landmark_list.landmark(i);
-      eigen_matrix(0, i) = landmark.x();
-      eigen_matrix(1, i) = landmark.y();
-      eigen_matrix(2, i) = landmark.z();
-    }
-  }
-
-  static void ConvertEigenMatrixToLandmarkList(
-      const Eigen::Matrix3Xf& eigen_matrix, LandmarkList& landmark_list) {
-    landmark_list.Clear();
-
-    for (int i = 0; i < eigen_matrix.cols(); ++i) {
-      auto& landmark = *landmark_list.add_landmark();
-      landmark.set_x(eigen_matrix(0, i));
-      landmark.set_y(eigen_matrix(1, i));
-      landmark.set_z(eigen_matrix(2, i));
-    }
-  }
-
-  const OriginPointLocation origin_point_location_;
-  const InputSource input_source_;
-  Eigen::Matrix3Xf canonical_metric_landmarks_;
-  Eigen::VectorXf landmark_weights_;
-
-  std::unique_ptr<ProcrustesSolver> procrustes_solver_;
-};
-
-class GeometryPipelineImpl : public GeometryPipeline {
- public:
-  GeometryPipelineImpl(
-      const PerspectiveCamera& perspective_camera,  //
-      const Mesh3d& canonical_mesh,                 //
-      uint32_t canonical_mesh_vertex_size,          //
-      uint32_t canonical_mesh_num_vertices,
-      uint32_t canonical_mesh_vertex_position_offset,
-      std::unique_ptr<ScreenToMetricSpaceConverter> space_converter)
-      : perspective_camera_(perspective_camera),
-        canonical_mesh_(canonical_mesh),
-        canonical_mesh_vertex_size_(canonical_mesh_vertex_size),
-        canonical_mesh_num_vertices_(canonical_mesh_num_vertices),
-        canonical_mesh_vertex_position_offset_(
-            canonical_mesh_vertex_position_offset),
-        space_converter_(std::move(space_converter)) {}
-
-  intOr<std::vector<FaceGeometry>> EstimateFaceGeometry(
-      const std::vector<NormalizedLandmarkList>& multi_face_landmarks,
-      int frame_width, int frame_height) const override {
-    // MP_RETURN_IF_ERROR(ValidateFrameDimensions(frame_width, frame_height))
-    //     << "Invalid frame dimensions!";
-
-    // Create a perspective camera frustum to be shared for geometry estimation
-    // per each face.
-    PerspectiveCameraFrustum pcf(perspective_camera_, frame_width,
-                                 frame_height);
-
-    std::vector<FaceGeometry> multi_face_geometry;
-
-    // From this point, the meaning of "face landmarks" is clarified further as
-    // "screen face landmarks". This is done do distinguish from "metric face
-    // landmarks" that are derived during the face geometry estimation process.
-    for (const NormalizedLandmarkList& screen_face_landmarks :
-         multi_face_landmarks) {
-      // Having a too compact screen landmark list will result in numerical
-      // instabilities, therefore such faces are filtered.
-      if (IsScreenLandmarkListTooCompact(screen_face_landmarks)) {
-        continue;
-      }
-
-      // Convert the screen landmarks into the metric landmarks and get the pose
-      // transformation matrix.
-      LandmarkList metric_face_landmarks;
-      Eigen::Matrix4f pose_transform_mat;
-    //   MP_RETURN_IF_ERROR(space_converter_->Convert(screen_face_landmarks, pcf,
-    //                                                metric_face_landmarks,
-    //                                                pose_transform_mat))
-    //       << "Failed to convert landmarks from the screen to the metric space!";
-
-      // Pack geometry data for this face.
-      FaceGeometry face_geometry;
-      Mesh3d* mutable_mesh = face_geometry.mutable_mesh();
-      // Copy the canonical face mesh as the face geometry mesh.
-      mutable_mesh->CopyFrom(canonical_mesh_);
-      // Replace XYZ vertex mesh coodinates with the metric landmark positions.
-      for (int i = 0; i < canonical_mesh_num_vertices_; ++i) {
-        uint32_t vertex_buffer_offset = canonical_mesh_vertex_size_ * i +
-                                        canonical_mesh_vertex_position_offset_;
-
-        mutable_mesh->set_vertex_buffer(vertex_buffer_offset,
-                                        metric_face_landmarks.landmark(i).x());
-        mutable_mesh->set_vertex_buffer(vertex_buffer_offset + 1,
-                                        metric_face_landmarks.landmark(i).y());
-        mutable_mesh->set_vertex_buffer(vertex_buffer_offset + 2,
-                                        metric_face_landmarks.landmark(i).z());
-      }
-      // Populate the face pose transformation matrix.
-      mediapipe::MatrixDataProtoFromMatrix(
-          pose_transform_mat, face_geometry.mutable_pose_transform_matrix());
-
-      multi_face_geometry.push_back(face_geometry);
+    GUSTO_RET ValidateEnvironment(const Environment& environment) {
+        return ValidatePerspectiveCamera(environment.perspective_camera);
     }
 
-    return multi_face_geometry;
-  }
+    GUSTO_RET ValidateMesh3d(const Mesh3d& mesh_3d) {
+        const std::size_t vertex_size = mesh_3d.canonical_mesh_vertex_size;
+        const std::size_t primitive_type = mesh_3d.primitive_type;
 
- private:
-  static bool IsScreenLandmarkListTooCompact(
-      const NormalizedLandmarkList& screen_landmarks) {
-    float mean_x = 0.f;
-    float mean_y = 0.f;
-    for (int i = 0; i < screen_landmarks.landmark_size(); ++i) {
-      const auto& landmark = screen_landmarks.landmark(i);
-      mean_x += (landmark.x() - mean_x) / static_cast<float>(i + 1);
-      mean_y += (landmark.y() - mean_y) / static_cast<float>(i + 1);
+        if (mesh_3d.vertex_buffer_size() % vertex_size != 0 || mesh_3d.index_buffer_size() % primitive_type != 0) {
+            std::cerr << "Invalid vertex or primitive size!" << std::endl;
+            return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        }
+
+        const int num_vertices = mesh_3d.vertex_buffer_size() / vertex_size;
+        for (uint32_t idx : mesh_3d.index_buffer) {
+            if (idx >= num_vertices){
+                std::cerr << "All mesh indices must refer to an existing vertex!" << std::endl;
+                return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+            }
+        }
+
+        return GustoStatus::ERR_OK;
     }
 
-    float max_sq_dist = 0.f;
-    for (const auto& landmark : screen_landmarks.landmark()) {
-      const float d_x = landmark.x() - mean_x;
-      const float d_y = landmark.y() - mean_y;
-      max_sq_dist = std::max(max_sq_dist, d_x * d_x + d_y * d_y);
+    GUSTO_RET ValidateFaceGeometry(const FaceGeometry& face_geometry) {
+        if (ValidateMesh3d(face_geometry.mesh) != GustoStatus::ERR_OK){
+            std::cerr << "Invalid mesh!" << std::endl;
+            return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        }
+
+        const MatrixData& pose_transform_matrix = face_geometry.pose_transform_matrix;
+        if (pose_transform_matrix.rows != 4 || pose_transform_matrix.cols != 4 || pose_transform_matrix.packed_data_size() != 16){
+            std::cerr << "Pose transformation matrix must be a 4x4 matrix!" << std::endl;
+            return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        }
+        return GustoStatus::ERR_OK;
     }
 
-    static constexpr float kIsScreenLandmarkListTooCompactThreshold = 1e-3f;
-    return std::sqrt(max_sq_dist) <= kIsScreenLandmarkListTooCompactThreshold;
-  }
+    GUSTO_RET ValidateGeometryPipelineMetadata(const GeometryPipelineMetadata& metadata) {
+        if (ValidateMesh3d(metadata.canonical_mesh) != GustoStatus::ERR_OK){
+            std::cerr << "Invalid canonical mesh!" << std::endl;
+            return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        }
+        if (metadata.procrustes_landmark_basis_size() <= 0){
+            std::cerr << "Procrustes landmark basis must be non-empty!" << std::endl;
+            return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        }
 
-  const PerspectiveCamera perspective_camera_;
-  const Mesh3d canonical_mesh_;
-  const uint32_t canonical_mesh_vertex_size_;
-  const uint32_t canonical_mesh_num_vertices_;
-  const uint32_t canonical_mesh_vertex_position_offset_;
+        const int num_vertices = metadata.canonical_mesh.vertex_buffer_size() / metadata.canonical_mesh.canonical_mesh_vertex_size;
+        for (const WeightedLandmarkRef& wlr : metadata.procrustes_landmark_basis) {
+            if (wlr.landmark_id >= num_vertices){
+                std::cerr << "All Procrustes basis indices must refer to an existing canonical mesh vertex!" << std::endl;
+                return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+            }
+            if (wlr.weight < 0.f){
+                std::cerr << "All Procrustes basis landmarks must have a non-negative weight!" << std::endl;
+                return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+            }
+        }
 
-  std::unique_ptr<ScreenToMetricSpaceConverter> space_converter_;
-};
+        return GustoStatus::ERR_OK;
+    }
 
-}  // namespace
+    GUSTO_RET ValidateFrameDimensions(int frame_width, int frame_height) {
+        if (frame_width <= 0 || frame_height <= 0){
+            std::cerr << "Frame width and height must be positive!" << std::endl;
+            return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        }
+        return GustoStatus::ERR_OK;
+    }
 
-intOr<std::unique_ptr<GeometryPipeline>> CreateGeometryPipeline(
-    const Environment& environment, const GeometryPipelineMetadata& metadata) {
-//   MP_RETURN_IF_ERROR(ValidateEnvironment(environment))
-//       << "Invalid environment!";
-//   MP_RETURN_IF_ERROR(ValidateGeometryPipelineMetadata(metadata))
-//       << "Invalid geometry pipeline metadata!";
+    GUSTO_RET GeometryPipelineMetadata::GUSTO_CHECK_CANONICAL_MESH(){
+        // actually canonical_mesh.vertex_buffer.size() / 5 == 478
+        // this->canonical_mesh_num_vertices = this->canonical_mesh.vertex_buffer.size() / 5;
+        try{
+            assert(this->canonical_mesh.vertex_buffer.size() / 5 == canonical_mesh_num_vertices);
+            assert(this->canonical_mesh.canonical_mesh_vertex_size == 5);
+            assert(this->canonical_mesh.canonical_mesh_vertex_position_offset == 0);
+        }catch (const std::exception& e) {
+            std::cerr << "Canonical mesh is not valid" << std::endl;
+            return GustoStatus::ERR_GENERAL_ERROR;
+        }
+        return GustoStatus::ERR_OK;
+    }
 
-//   const auto& canonical_mesh = metadata.canonical_mesh();
-//   RET_CHECK(HasVertexComponent(canonical_mesh.vertex_type(),
-//                                VertexComponent::POSITION))
-//       << "Canonical face mesh must have the `POSITION` vertex component!";
-//   RET_CHECK(HasVertexComponent(canonical_mesh.vertex_type(),
-//                                VertexComponent::TEX_COORD))
-//       << "Canonical face mesh must have the `TEX_COORD` vertex component!";
+    GUSTO_RET GeometryPipelineMetadata::serialize_json(const std::string& filename)
+    {
+        GustoSerializer serializer;
+        json data = serializer.load_json(filename);
+        this->input_source = data.template get<InputSource>();
+        for(auto& it : data["procrustes_landmark_basis"]) {
+            this->procrustes_landmark_basis.push_back(WeightedLandmarkRef{it["landmark_id"].get<int>(), it["weight"].get<float>()});
+        }
+        for(auto& it : data["canonical_mesh"]["vertex_buffer"]) { this->canonical_mesh.vertex_buffer.push_back(it.get<float>());}
+        for(auto& it : data["canonical_mesh"]["index_buffer"]) { this->canonical_mesh.index_buffer.push_back(it.get<int>());}
+        
+        return GeometryPipelineMetadata::GUSTO_CHECK_CANONICAL_MESH();
+    }
 
-  uint32_t canonical_mesh_vertex_size =
-      GetVertexSize(canonical_mesh.vertex_type());
-  uint32_t canonical_mesh_num_vertices =
-      canonical_mesh.vertex_buffer_size() / canonical_mesh_vertex_size;
-  uint32_t canonical_mesh_vertex_position_offset =
-      GetVertexComponentOffset(canonical_mesh.vertex_type(),
-                               VertexComponent::POSITION)
-          .value();
 
-  // Put the Procrustes landmark basis into Eigen matrices for an easier access.
-  Eigen::Matrix3Xf canonical_metric_landmarks =
-      Eigen::Matrix3Xf::Zero(3, canonical_mesh_num_vertices);
-  Eigen::VectorXf landmark_weights =
-      Eigen::VectorXf::Zero(canonical_mesh_num_vertices);
 
-  for (int i = 0; i < canonical_mesh_num_vertices; ++i) {
-    uint32_t vertex_buffer_offset =
-        canonical_mesh_vertex_size * i + canonical_mesh_vertex_position_offset;
-
-    canonical_metric_landmarks(0, i) =
-        canonical_mesh.vertex_buffer(vertex_buffer_offset);
-    canonical_metric_landmarks(1, i) =
-        canonical_mesh.vertex_buffer(vertex_buffer_offset + 1);
-    canonical_metric_landmarks(2, i) =
-        canonical_mesh.vertex_buffer(vertex_buffer_offset + 2);
-  }
-
-  for (const WeightedLandmarkRef& wlr : metadata.procrustes_landmark_basis()) {
-    uint32_t landmark_id = wlr.landmark_id();
-    landmark_weights(landmark_id) = wlr.weight();
-  }
-
-  std::unique_ptr<GeometryPipeline> result =
-      absl::make_unique<GeometryPipelineImpl>(
-          environment.perspective_camera(), canonical_mesh,
-          canonical_mesh_vertex_size, canonical_mesh_num_vertices,
-          canonical_mesh_vertex_position_offset,
-          absl::make_unique<ScreenToMetricSpaceConverter>(
-              environment.origin_point_location(),
-              metadata.input_source() == InputSource::DEFAULT
-                  ? InputSource::FACE_LANDMARK_PIPELINE
-                  : metadata.input_source(),
-              std::move(canonical_metric_landmarks),
-              std::move(landmark_weights),
-              CreateFloatPrecisionProcrustesSolver()));
-
-  return result;
-}
-
-}  // namespace mediapipe::face_geometry
-
+} // namespace face_geometry

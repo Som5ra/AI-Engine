@@ -8,15 +8,12 @@
 #include <omp.h>
 #endif
 
+#include "tools/nms/nms.h"
+
+
+
+namespace gusto_nms{
 using namespace std;
-
-
-
-struct Rect {
-    float x1, y1, x2, y2;
-    Rect(float x1, float y1, float x2, float y2) :  x1(x1), y1(y1), x2(x2), y2(y2) {}
-    float area() const { return (y2 - y1 + 1) * (x2 - x1 + 1); } 
-};
 
 vector<int> nms_cpu(const vector<Rect>& _boxes, const vector<float>& _scores, float _score_thr, float _nms_thr) {
     /*
@@ -46,14 +43,11 @@ vector<int> nms_cpu(const vector<Rect>& _boxes, const vector<float>& _scores, fl
     vector<int> order(scores.size());
     iota(order.begin(), order.end(), 0);
     stable_sort(order.begin(), order.end(), [&scores](size_t i1, size_t i2) {return scores[i1] > scores[i2];});
-    for (size_t i = 0; i < order.size(); i++) {
-        cerr << order[i] << " " << scores[order[i]] << " " << raw_indices[order[i]] << " ";
-    }
-    cerr << endl;
-    
+
     vector<int> keep;
     while (!order.empty()) {
         int i = order[0];
+
         keep.push_back(raw_indices[i]);
         vector<int> new_order;
         for (size_t j = 1; j < order.size(); ++j) {
@@ -85,7 +79,7 @@ pair<vector<int>, vector<int>> multiclass_nms_class_unaware_cpu(const vector<Rec
     
     inputs:
         boxes: NDArray (num_boxes, 4) in xyxy
-        scores: NDArray (num_boxes, num_classes) in [0, 1]
+        scores: NDArray (num_boxes, num_classes) in [0, 1] -> scores[i][j] is the score of box i for class j
     
     output:
         [NDArray of indices to keep, NDArray of class id]
@@ -98,10 +92,11 @@ pair<vector<int>, vector<int>> multiclass_nms_class_unaware_cpu(const vector<Rec
         cls_inds[i] = distance(scores[i].begin(), max_it);
         cls_scores[i] = *max_it;
     }
+    // std::cout << endl;
+    // std::cout << "max cls_scores: " << *max_element(cls_scores.begin(), cls_scores.end()) << std::endl;
+    // std::cout << "max cls_scores pos: " << distance(cls_scores.begin(), max_element(cls_scores.begin(), cls_scores.end())) << std::endl;
     vector<int> valid_idx = nms_cpu(boxes, cls_scores, score_thr, nms_thr);
-    for (size_t i = 0; i < valid_idx.size(); ++i) {
-        cerr << valid_idx[i] << " ";
-    }
+
     if (valid_idx.empty()) {
         return {vector<int>(), vector<int>()};
     }
@@ -110,7 +105,6 @@ pair<vector<int>, vector<int>> multiclass_nms_class_unaware_cpu(const vector<Rec
     for (size_t i = 0; i < valid_idx.size(); ++i) {
         valid_idx_class_id[i] = cls_inds[valid_idx[i]];
     }
-
     return {valid_idx, valid_idx_class_id};
 }
 
@@ -123,9 +117,10 @@ void sigmoid(float* arr, int size) {
         arr[i] = 1 / (1 + exp(-arr[i]));
     }
 }
+} // namespace gusto_nms
 
 extern "C" {
-
+    using namespace gusto_nms;
     void nms_with_sigmoid(float* boxes, int* boxes_shape, float* scores, int* scores_shape, float score_thr, float nms_thr, int* ret_indices, int* ret_indices_cls, int* ret_len) {
         /*
             For example,
