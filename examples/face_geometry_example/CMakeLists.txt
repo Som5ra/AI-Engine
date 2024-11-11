@@ -58,6 +58,7 @@ if (BUILD_PLATFORM STREQUAL "macos")
     set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-minimal-macos)
     # set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-static-minimal)
     find_package(OpenCV REQUIRED)
+    message(STATUS "MACOS OpenCV: ${OpenCV_LIBS}")
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/include")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/lib/libonnxruntime.a")
 
