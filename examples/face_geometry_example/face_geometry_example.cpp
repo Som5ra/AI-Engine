@@ -14,8 +14,13 @@
 
 
 
-int main()
+int main(int argc, char *argv[])
 {
+
+    bool DISPLAY = true;
+    if (argc == 2 && argv[1] == std::string("no_display")) {
+        DISPLAY = false;
+    }
 
     std::string face_detector_path = "/media/sombrali/HDD1/facelandmark/weights/mediapipe/face_detector.onnx";
     std::string face_landmarker_path = "/media/sombrali/HDD1/facelandmark/weights/mediapipe/face_landmarks_detector.onnx";
@@ -23,6 +28,7 @@ int main()
     FaceDetector face_detector(face_detector_path);
     FaceLandmarker face_landmarker(face_landmarker_path);
 
+    // face_detector.check_names();
 
 
     gusto_face_geometry::FaceMeshCalculator face_mesh_calculator;
@@ -34,7 +40,7 @@ int main()
     }
 
     // cv::namedWindow("Frame", cv::WINDOW_NORMAL);
-    // // cv::Mat test_image = cv::imread("/media/sombrali/HDD1/opencv-unity/gusto_dnn/000000000785.jpg");
+    // cv::Mat test_image = cv::imread("/media/sombrali/HDD1/opencv-unity/gusto_dnn/000000000785.jpg");
     // cv::Mat test_image = cv::imread("/media/sombrali/HDD1/opencv-unity/gusto_dnn/download.png", cv::IMREAD_COLOR);
     // auto [boxes, scores, indices, indices_cls] = face_detector.forward(test_image);
     // auto painted_image = face_detector.draw_boxes(test_image, boxes, scores, indices, indices_cls);
@@ -48,22 +54,30 @@ int main()
     float total_time = 0;
     int num_frames = 0;
 
-
     cv::VideoCapture cap;
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, 1024);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
-    cap.open(0);
-
-    if (!cap.isOpened()) {
-        std::cerr << "Failed to open camera!" << std::endl;
-        return 1;
+    try{
+        cap.set(cv::CAP_PROP_FRAME_WIDTH, 1024);
+        cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+        cap.open(0);
+    }catch (const std::exception& e) {
+        std::cerr << "Failed to open camera! Load Same Image Instead" << std::endl;
     }
+    if (!cap.isOpened()) {
+        std::cerr << "Failed to open camera! Load Same Image Instead" << std::endl;
+    }
+
     cv::Mat frame;
-    cv::namedWindow("Frame", cv::WINDOW_NORMAL);
+    if (DISPLAY){
+        cv::namedWindow("Frame", cv::WINDOW_NORMAL);
+    }
     // cv::namedWindow("cropped_face", cv::WINDOW_NORMAL);
     while (true)
     {
-        cap >> frame; // so fkng slow
+        if (!cap.isOpened()){
+            frame = cv::imread("demo.png");            
+        }else{
+            cap >> frame; // so fkng slow
+        }
         auto start = std::chrono::high_resolution_clock::now();
         auto [boxes, scores, indices, indices_cls] = face_detector.forward(frame);
         std::vector<gusto_face_geometry::NormalizedLandmarkList> multi_face_landmarks;
@@ -90,8 +104,10 @@ int main()
                 thislandmark.landmark.push_back(landmark);
             }
             multi_face_landmarks.push_back(thislandmark);
-            cropped_face = face_landmarker.draw_points(cropped_face, points);
-            // cv::imshow("cropped_face", cropped_face);
+            if (DISPLAY){
+                cropped_face = face_landmarker.draw_points(cropped_face, points);
+                // cv::imshow("cropped_face", cropped_face);
+            }
         }
         auto [multi_pose_mat, process_status] = face_mesh_calculator.Process(std::make_pair(frame.size[0], frame.size[1]), multi_face_landmarks);
         if (process_status == GustoStatus::ERR_OK) {
@@ -115,14 +131,16 @@ int main()
         num_frames++;
         std::cout << "\rmin_time: " << min_time << "ms  |  max_time: " << max_time << "ms  |  avg_time: " << std::ceil(total_time / num_frames * 100) / 100 << "ms " << std::flush;    
 
-        // auto painted_image = face_detector.draw_boxes(frame, boxes, scores, indices, indices_cls);
-        cv::imshow("Frame", frame);
-        if (cv::waitKey(25) >= 0)
-            break;
+        if (DISPLAY){
+            // auto painted_image = face_detector.draw_boxes(frame, boxes, scores, indices, indices_cls);
+            cv::imshow("Frame", frame);
+            if (cv::waitKey(25) >= 0)
+                break;
+        }
+
 
     }
     
-    // face_detector.check_names();
 
 
     return 0;
