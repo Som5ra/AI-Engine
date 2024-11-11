@@ -68,12 +68,13 @@ int main(int argc, char *argv[])
     if (!cap.isOpened()) {
         std::cerr << "Failed to open camera! Load Same Image Instead" << std::endl;
     }
-    #endif
-
-    cv::Mat frame;
     if (DISPLAY){
         cv::namedWindow("Frame", cv::WINDOW_NORMAL);
     }
+    #endif
+
+    cv::Mat frame;
+
     // cv::namedWindow("cropped_face", cv::WINDOW_NORMAL);
     while (true)
     {
