@@ -33,7 +33,22 @@ endif()
 if (BUILD_PLATFORM STREQUAL "macos")
     set(CMAKE_BUILD_TYPE Release)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+    
+    set(CMAKE_C_COMPILER "/opt/homebrew/Cellar/llvm/19.1.3/bin/clang")
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/llvm/19.1.3/bin/clang++")
+    set(OPENMP_LIBRARIES "/opt/homebrew/Cellar/llvm/19.1.3/lib")
+    set(OPENMP_INCLUDES "/opt/homebrew/Cellar/llvm/19.1.3/include")
+    
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang\$")
+        set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_C_LIB_NAMES "omp")
+    endif()
 
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang\$")
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+    endif()
+    set(OpenMP_omp_LIBRARY "/opt/homebrew/opt/libomp/lib/libomp.a")
 
     find_package(Eigen3 REQUIRED)    
     find_package(OpenMP REQUIRED)
