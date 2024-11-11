@@ -1,7 +1,6 @@
 #ifndef GUSTO_UTILS_H
 #define GUSTO_UTILS_H
 
-
 #include <iostream>
 #include <optional>
 #include <utility>
@@ -10,7 +9,7 @@
 #include <chrono>
 #include <omp.h>
 #include <fstream>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 namespace GustoStatus {
     const int ERR_OK = 0x00000000;
@@ -22,12 +21,14 @@ namespace GustoStatus {
     const int ERR_GENERAL_NOT_SUPPORT = -(ERR_GENERAL_ERROR | 0x00000005);
 }
 
-class GustoSerializer
-{
-    public:
-        nlohmann::json load_json(const char* filename);
-        nlohmann::json load_json(const std::string& filename);
-};
+// [Sombra] -> nlohamnn::json as the return type is not valid for C# Unity Side, I guess it's some non-standard c++ feature implemented by nlohmann
+// class GustoSerializer 
+// {
+//     public:
+//         nlohmann::json load_json(const char* filename);
+//         // nlohmann::json load_json(const std::string& filename);
+// };
+
 
 class Net_config
 {
