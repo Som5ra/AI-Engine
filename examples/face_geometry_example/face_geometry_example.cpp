@@ -53,7 +53,8 @@ int main(int argc, char *argv[])
     float max_time = 0;
     float total_time = 0;
     int num_frames = 0;
-
+    
+    #if defined(BUILD_PLATFORM_LINUX)
     cv::VideoCapture cap;
     try{
         cap.set(cv::CAP_PROP_FRAME_WIDTH, 1024);
@@ -65,6 +66,7 @@ int main(int argc, char *argv[])
     if (!cap.isOpened()) {
         std::cerr << "Failed to open camera! Load Same Image Instead" << std::endl;
     }
+    #endif
 
     cv::Mat frame;
     if (DISPLAY){
@@ -73,11 +75,15 @@ int main(int argc, char *argv[])
     // cv::namedWindow("cropped_face", cv::WINDOW_NORMAL);
     while (true)
     {
+        #if defined(BUILD_PLATFORM_LINUX)
         if (!cap.isOpened()){
             frame = cv::imread("demo.png");            
         }else{
             cap >> frame; // so fkng slow
         }
+        #else
+        frame = cv::imread("demo.png");
+        #endif
         auto start = std::chrono::high_resolution_clock::now();
         auto [boxes, scores, indices, indices_cls] = face_detector.forward(frame);
         std::vector<gusto_face_geometry::NormalizedLandmarkList> multi_face_landmarks;

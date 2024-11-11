@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20.0)
 
 project(face_geometry_example)
 
-
+add_definitions("-DBUILD_PLATFORM_${BUILD_PLATFORM}")
 if(BUILD_PLATFORM STREQUAL "linux")
     set(CMAKE_BUILD_TYPE Release)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
