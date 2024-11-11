@@ -7,12 +7,11 @@
 // #include <filesystem>
 // namespace fs = std::filesystem;
 
-extern "C" 
+extern "C"
 {
     int net_new(GenericDetector** net)
     {
-
-        int32_t error = ERR_OK;
+        int32_t error = GustoStatus::ERR_OK;
         *net = new GenericDetector();
         return error;
     }
@@ -22,10 +21,10 @@ extern "C"
                     float confThreshold, float nmsThreshold, 
                     char* modelpath, char* cls_names_path, int len_string = 1024
     ){
-        int32_t error = ERR_OK;
+        int32_t error = GustoStatus::ERR_OK;
         int _compile_error_code = detector->compile(inpHeight, inpWidth, confThreshold, nmsThreshold, modelpath, cls_names_path, len_string);
         if (_compile_error_code != 0) {
-            error = ERR_GENERAL_ERROR;
+            error = GustoStatus::ERR_GENERAL_ERROR;
         }
         return error;
     }

@@ -79,7 +79,7 @@ else()
     # add_library( ${PROJECT_NAME} SHARED face_geometry.cpp procrustes_solver.cpp )
     
     target_include_directories(${PROJECT_NAME} PRIVATE ${OPENMP_INCLUDES} )
-    target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX Eigen3::Eigen)
+    target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX Eigen3::Eigen nlohmann_json::nlohmann_json)
 endif()
 
 

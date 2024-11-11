@@ -46,8 +46,9 @@ class landmark_metadata
 
 void landmark_metadata::serialize_json(const std::string& filename)
 {
-    GustoSerializer serializer;
-    json data = serializer.load_json(filename);
+    // GustoSerializer serializer;
+    // json data = serializer.load_json(filename.c_str());
+    json data = json::parse(std::ifstream(filename.c_str()));
     this->input_source = data.template get<InputSource>();
     assert(this->input_source == InputSource::FACE_LANDMARK_PIPELINE);
     for(auto& it : data["procrustes_landmark_basis"]) {

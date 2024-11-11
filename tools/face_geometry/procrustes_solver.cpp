@@ -45,10 +45,11 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
     Eigen::VectorXf sqrt_weights = ExtractSquareRoot(point_weights);
 
     // // Try to solve the WEOP problem.
-    // MP_RETURN_IF_ERROR(InternalSolveWeightedOrthogonalProblem(
-    //     source_points, target_points, sqrt_weights, transform_mat))
-    //     << "Failed to solve the WEOP problem!";
-
+    if (InternalSolveWeightedOrthogonalProblem(
+            source_points, target_points, sqrt_weights, transform_mat) != GustoStatus::ERR_OK) {
+        std::cerr << "Failed to solve the WEOP problem!" << std::endl;
+        return GustoStatus::ERR_GENERAL_ERROR;
+    }
     return GustoStatus::ERR_OK;
   }
 
@@ -144,7 +145,7 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
   // Note: the output `transform_mat` argument is used instead of `StatusOr<>`
   // return type in order to avoid Eigen memory alignment issues. Details:
   // https://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
-  static int InternalSolveWeightedOrthogonalProblem(
+  static GUSTO_RET InternalSolveWeightedOrthogonalProblem(
       const Eigen::Matrix3Xf& sources, const Eigen::Matrix3Xf& targets,
       const Eigen::VectorXf& sqrt_weights, Eigen::Matrix4f& transform_mat) {
     // tranposed(A_w).

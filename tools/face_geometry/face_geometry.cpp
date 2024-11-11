@@ -123,8 +123,16 @@ namespace gusto_face_geometry {
 
     GUSTO_RET GeometryPipelineMetadata::serialize_json(const std::string& filename)
     {
-        GustoSerializer serializer;
-        json data = serializer.load_json(filename);
+        // GustoSerializer serializer;
+        // json data = serializer.load_json(filename.c_str());
+        json data;
+        try{
+            data = json::parse(std::ifstream(filename.c_str()));
+        }catch (const std::exception& e) {
+            std::cerr << "Error parsing json file: " << filename << std::endl;
+            return GustoStatus::ERR_GENERAL_ERROR;
+        }
+
         this->input_source = data.template get<InputSource>();
         for(auto& it : data["procrustes_landmark_basis"]) {
             this->procrustes_landmark_basis.push_back(WeightedLandmarkRef{it["landmark_id"].get<int>(), it["weight"].get<float>()});

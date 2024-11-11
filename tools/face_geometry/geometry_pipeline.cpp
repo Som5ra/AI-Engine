@@ -124,8 +124,7 @@ class ScreenToMetricSpaceConverter {
         std::cerr << "Failed to estimate pose transform matrix!" << std::endl;
         return GustoStatus::ERR_GENERAL_ERROR;
     }
-
-    // We do not use face detection result to predict the pose here, so deleted it.
+    // std::cout << "\nDebug pose_transform_mat after SolveWeightedOrthogonalProblem: \n" << pose_transform_mat << std::endl;
 
     // Multiply each of the metric landmarks by the inverse pose
     // transformation matrix to align the runtime metric face landmarks with
@@ -298,9 +297,11 @@ class GeometryPipelineImpl : public GeometryPipeline {
         // _face_geometry.mesh = canonical_mesh_;
         // _face_geometry.pose_transform_matrix = MatrixData{4, 4, Layout::COLUMN_MAJOR};
         for (int i = 0; i < 4; ++i) {
+            std::cout << std::endl;
             for (int j = 0; j < 4; ++j) {
                 _face_geometry.pose_transform_matrix.at(i, j) = pose_transform_mat(i, j);
             }
+            std::cout << std::endl;
         }
         multi_face_geometry.push_back(_face_geometry);
     }
@@ -366,7 +367,6 @@ std::pair<std::unique_ptr<GeometryPipeline>, GUSTO_RET> CreateGeometryPipeline(c
     uint32_t canonical_mesh_vertex_size = canonical_mesh.canonical_mesh_vertex_size;
     uint32_t canonical_mesh_num_vertices = canonical_mesh.canonical_mesh_num_vertices;
     uint32_t canonical_mesh_vertex_position_offset = canonical_mesh.canonical_mesh_vertex_position_offset;
-
     // Put the Procrustes landmark basis into Eigen matrices for an easier access.
     Eigen::Matrix3Xf canonical_metric_landmarks = Eigen::Matrix3Xf::Zero(3, canonical_mesh_num_vertices);
     Eigen::VectorXf landmark_weights = Eigen::VectorXf::Zero(canonical_mesh_num_vertices);
@@ -388,7 +388,6 @@ std::pair<std::unique_ptr<GeometryPipeline>, GUSTO_RET> CreateGeometryPipeline(c
         uint32_t landmark_id = wlr.landmark_id;
         landmark_weights(landmark_id) = wlr.weight;
     }
-
     std::unique_ptr<GeometryPipeline> result = 
         std::make_unique<GeometryPipelineImpl>(
             environment.perspective_camera, canonical_mesh,
