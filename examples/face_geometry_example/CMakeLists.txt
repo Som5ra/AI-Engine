@@ -64,7 +64,7 @@ if (BUILD_PLATFORM STREQUAL "macos")
     message(STATUS "MACOS OpenCV: ${OpenCV_LIBS}")
     message(STATUS "MACOS OpenCV Include: ${OpenCV_INCLUDE_DIRS}")
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/Headers")
-    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/macos-arm64_x86_64")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/macos-arm64_x86_64/libonnxruntime.a")
     # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/include")
     # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/lib/libonnxruntime.a")
 
