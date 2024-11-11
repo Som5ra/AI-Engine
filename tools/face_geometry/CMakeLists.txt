@@ -32,7 +32,7 @@ if(BUILD_PLATFORM STREQUAL "macos")
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
-    
+
     if(CMAKE_C_COMPILER_ID MATCHES "Clang\$")
         set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
         set(OpenMP_C_LIB_NAMES "omp")
