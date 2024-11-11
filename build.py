@@ -46,6 +46,7 @@ def build_linux(install = True):
     compile_cmd.append('-DBUILD_PLATFORM=linux')
     compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')
     compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
+    # compile_cmd.append('-DCMAKE_CXX_STANDARD=14')
 
     compile_cmd.append('-S .')
     compile_cmd.append(f'-B {binary_dir}')
@@ -159,26 +160,27 @@ if __name__ == '__main__':
     parser.add_argument('--linux', action='store_true')
     parser.add_argument('--windows', action='store_true')
     parser.add_argument('--ios', action='store_true')
-    parser.add_argument('--install', type=bool, default=True)
+    parser.add_argument('--noinstall', action='store_true')
 
     args = parser.parse_args()
 
+    _install = False if args.noinstall else True
 
     if args.linux: 
-        build_linux(install = args.install)
+        build_linux(install = _install)
 
     if args.android:
         abis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
         for abi in abis:
-            build_android(ANDROID_ABI=abi, install = args.install)
-        # build_android(install = args.install)
+            build_android(ANDROID_ABI=abi, install = _install)
+        # build_android(install = _install)
     
     if args.macos:
-        build_macos(install = args.install)
+        build_macos(install = _install)
 
 
     if args.windows:
-        build_windows(install = args.install)
+        build_windows(install = _install)
 
     if args.ios:
-        build_ios(install = args.install)
+        build_ios(install = _install)
