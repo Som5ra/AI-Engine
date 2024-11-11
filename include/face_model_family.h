@@ -3,7 +3,8 @@
 #include "utils.h"
 #include "BaseONNX.h"
 #include "tools/nms/nms.h"
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 
 class FaceDetector : public BaseONNX {
