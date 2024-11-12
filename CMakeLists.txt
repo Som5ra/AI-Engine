@@ -24,4 +24,4 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/nlohmann_json-3.11)
 
 add_subdirectory(tools)
 add_subdirectory(examples)
-add_subdirectory(src)
+# add_subdirectory(src)
