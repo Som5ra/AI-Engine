@@ -61,8 +61,9 @@ if(BUILD_PLATFORM STREQUAL "macos")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/build/static_lib/libonnxruntime.a")
     add_executable( ${PROJECT_NAME} ort_test.cpp )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
-
+    set(AppleLink "-framework Foundation")
     target_link_libraries( ${PROJECT_NAME}
+        ${AppleLink}
         ${onnxruntime_LIBS}
     )
 
