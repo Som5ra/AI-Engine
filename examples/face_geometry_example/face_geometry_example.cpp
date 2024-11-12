@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
 
     std::cout << "[Debug] -> " << "Before Initialization" << std::endl;
     FaceDetector face_detector(face_detector_path);
+    std::cout << "[Debug] -> " << "Before face_landmarker" << std::endl;
     FaceLandmarker face_landmarker(face_landmarker_path);
     std::cout << "[Debug] -> " << "After Initialization" << std::endl;
 
