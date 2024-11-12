@@ -1,11 +1,11 @@
 #include "face_model_family.h"
 
 
-FaceDetector::FaceDetector(const std::string& model_path)
+FaceDetector::FaceDetector(const std::string& model_path, const std::string& anchor_path)
     : BaseONNX(model_path, "FaceDetector") {
     anchor_rows = 896;
     anchor_cols = 4;
-    anchors = LoadBinaryFile2D("/media/sombrali/HDD1/mmlib/anchor.bin", anchor_rows, anchor_cols);
+    anchors = LoadBinaryFile2D(anchor_path, anchor_rows, anchor_cols);
     INPUT_SIZE = 128;
     class_mapper[0] = "Face";
 }

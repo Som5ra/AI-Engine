@@ -24,20 +24,18 @@ int main(int argc, char *argv[])
         DISPLAY = false;
     }
 
-    std::string face_detector_path = "/media/sombrali/HDD1/facelandmark/weights/mediapipe/face_detector.onnx";
-    std::string face_landmarker_path = "/media/sombrali/HDD1/facelandmark/weights/mediapipe/face_landmarks_detector.onnx";
+    std::string face_detector_path = "face_detector.onnx";
+    std::string anchor_path = "anchor.bin";
+    std::string face_landmarker_path = "face_landmarks_detector.onnx";
 
-    std::cout << "[Debug] -> " << "Before Initialization" << std::endl;
-    FaceDetector face_detector(face_detector_path);
-    std::cout << "[Debug] -> " << "Before face_landmarker" << std::endl;
+    FaceDetector face_detector(face_detector_path, anchor_path);
     FaceLandmarker face_landmarker(face_landmarker_path);
-    std::cout << "[Debug] -> " << "After Initialization" << std::endl;
 
     // face_detector.check_names();
 
 
     gusto_face_geometry::FaceMeshCalculator face_mesh_calculator;
-    const std::string face_GeometryPipelineMetadata = "/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/face_geometry/geometry_pipeline_metadata_including_iris_landmarks.json";
+    const std::string face_GeometryPipelineMetadata = "geometry_pipeline_metadata_including_iris_landmarks.json";
     GUSTO_RET open_status = face_mesh_calculator.Open(face_GeometryPipelineMetadata);
     if (open_status != GustoStatus::ERR_OK) {
         std::cerr << "Failed to open Geometry Pipeline Metadata!" << std::endl;
