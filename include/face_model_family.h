@@ -9,7 +9,7 @@
 
 class FaceDetector : public BaseONNX {
     public:
-        FaceDetector(const std::string& model_path);
+        FaceDetector(const std::string& model_path, const std::string& anchor_path);
 
         cv::Mat preprocess_img(const cv::Mat& image);
 
