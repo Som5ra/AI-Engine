@@ -58,6 +58,8 @@ elseif(BUILD_PLATFORM STREQUAL "macos")
     endif()
     set(OpenMP_omp_LIBRARY "/opt/homebrew/opt/libomp/lib/libomp.a")
     find_package(OpenMP REQUIRED)
+
+    
     include_directories(${OPENMP_INCLUDES})
     message(STATUS ${OPENMP_INCLUDES})
 endif()

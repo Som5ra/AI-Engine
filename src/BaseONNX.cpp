@@ -10,6 +10,7 @@ BaseONNX::BaseONNX(const std::string& model_path, const std::string& model_name)
     Ort::SessionOptions session_options;
     // session_options.SetIntraOpNumThreads(1);
     // session_options.SetInterOpNumThreads(1); 
+    std::cout << "[Debug] -> " << "Ort::Session" << std::endl;
     ort_session = Ort::Session(ort_env, model_path.c_str(), session_options);
     std::cout << "[Debug] -> " << "After session_options" << std::endl;
 
