@@ -13,7 +13,7 @@ if(BUILD_PLATFORM STREQUAL "android")
     if (ANDROID_ABI STREQUAL "arm64-v8a")
         set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-4.10.0-android-sdk/OpenCV-android-sdk/sdk/native/jni/abi-arm64-v8a)
         set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/aarch64/libomp.a")
-
+        set(onnxruntime_LIBS )
     elseif (ANDROID_ABI STREQUAL "armeabi-v7a")
         set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-4.10.0-android-sdk/OpenCV-android-sdk/sdk/native/jni/abi-armeabi-v7a)
         set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/arm/libomp.a")
@@ -28,6 +28,7 @@ if(BUILD_PLATFORM STREQUAL "android")
 
     find_package(OpenMP REQUIRED)
     include_directories("/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/include")
+
 elseif(BUILD_PLATFORM STREQUAL "linux")
     
     find_package(Eigen3 REQUIRED)
@@ -70,7 +71,7 @@ find_package(nlohmann_json REQUIRED CONFIG)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 
-add_library( ${PROJECT_NAME} SHARED detector2d.cpp ${SOURCES})
+add_library( ${PROJECT_NAME} SHARED detector2d.cpp BaseONNX.cpp face_model_family.cpp ${SOURCES})
 
 if(BUILD_PLATFORM STREQUAL "linux")
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
