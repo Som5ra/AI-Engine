@@ -55,7 +55,7 @@ if(BUILD_PLATFORM STREQUAL "macos")
     # set(OPENMP_LIBRARIES "/opt/homebrew/Cellar/llvm/19.1.3/lib")
     # set(OPENMP_INCLUDES "/opt/homebrew/Cellar/llvm/19.1.3/include")
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
+    set(CMAKE_CXX_EXTENSIONS OFF) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/include")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/build/static_lib/libonnxruntime.a")
