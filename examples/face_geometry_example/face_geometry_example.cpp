@@ -27,8 +27,9 @@ int main(int argc, char *argv[])
     std::string face_detector_path = "face_detector.onnx";
     std::string anchor_path = "anchor.bin";
     std::string face_landmarker_path = "face_landmarks_detector.onnx";
-
+    std::cout << "Loading Face Detector Model: " << face_detector_path << std::endl;
     FaceDetector face_detector(face_detector_path, anchor_path);
+    std::cout << "Loading Face Landmarker Model: " << face_landmarker_path << std::endl;
     FaceLandmarker face_landmarker(face_landmarker_path);
 
     // face_detector.check_names();
