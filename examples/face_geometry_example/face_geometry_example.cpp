@@ -27,8 +27,10 @@ int main(int argc, char *argv[])
     std::string face_detector_path = "/media/sombrali/HDD1/facelandmark/weights/mediapipe/face_detector.onnx";
     std::string face_landmarker_path = "/media/sombrali/HDD1/facelandmark/weights/mediapipe/face_landmarks_detector.onnx";
 
+    std::cout << "[Debug] -> " << "Before Initialization" << std::endl;
     FaceDetector face_detector(face_detector_path);
     FaceLandmarker face_landmarker(face_landmarker_path);
+    std::cout << "[Debug] -> " << "After Initialization" << std::endl;
 
     // face_detector.check_names();
 
