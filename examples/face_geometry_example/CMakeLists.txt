@@ -37,8 +37,8 @@ if (BUILD_PLATFORM STREQUAL "macos")
     set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
 
-    # set(CMAKE_C_COMPILER "/opt/homebrew/Cellar/llvm/19.1.3/bin/clang")
-    # set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/llvm/19.1.3/bin/clang++")
+    set(CMAKE_C_COMPILER "/opt/homebrew/Cellar/llvm/19.1.3/bin/clang")
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/llvm/19.1.3/bin/clang++")
     set(OPENMP_LIBRARIES "/opt/homebrew/Cellar/llvm/19.1.3/lib")
     set(OPENMP_INCLUDES "/opt/homebrew/Cellar/llvm/19.1.3/include")
     
@@ -65,8 +65,10 @@ if (BUILD_PLATFORM STREQUAL "macos")
     message(STATUS "MACOS OpenCV Include: ${OpenCV_INCLUDE_DIRS}")
     # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/Headers")
     # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/macos-arm64_x86_64/libonnxruntime.a")
+    # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/include")
+    # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/lib/libonnxruntime.a")
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/include")
-    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/lib/libonnxruntime.a")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/build/static_lib/libonnxruntime.a")
 
     include_directories(${CMAKE_SOURCE_DIR}/include)
     include_directories(${OpenCV_INCLUDE_DIRS})
