@@ -120,16 +120,17 @@ std::vector<std::vector<float>> FaceDetector::LoadBinaryFile2D(const std::string
 FaceLandmarker::FaceLandmarker(const std::string& model_path)
     : BaseONNX(model_path, "FaceLandmarker") {}
 
-cv::Mat FaceLandmarker::crop_face(const cv::Mat& image, const std::vector<int>& box) {
+std::tuple<cv::Mat, std::vector<int>>  FaceLandmarker::crop_face(const cv::Mat& image, const std::vector<int>& box) {
     int w = box[3] - box[1];
     int h = box[2] - box[0];
-    float margin = 0.25 / 2;
+    float margin = 0.25;
     int x1 = std::max(0, box[0] - static_cast<int>(margin * h));
     int x2 = std::min(box[2] + static_cast<int>(margin * h), image.rows);
     int y1 = std::max(0, box[1] - static_cast<int>(margin * w));
     int y2 = std::min(box[3] + static_cast<int>(margin * w), image.cols);
     cv::Rect roi(y1, x1, y2 - y1, x2 - x1);
-    return image(roi);
+    std::vector<int> box_with_margin = {x1, y1, x2, y2};
+    return {image(roi), box_with_margin};
 }
 
 std::tuple<cv::Mat, float, float> FaceLandmarker::preprocess(const cv::Mat& image) {
