@@ -20,7 +20,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #endif
 
-
+#if defined(BUILD_PLATFORM_LINUX)
 cv::Mat draw_axis(cv::Mat img, cv::Mat R, cv::Mat t, cv::Mat K, cv::Point2f origin) {
     // unit is mm
     cv::Mat rotV;
@@ -47,7 +47,7 @@ cv::Mat draw_axis(cv::Mat img, cv::Mat R, cv::Mat t, cv::Mat K, cv::Point2f orig
 
     return img;
 }
-
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -183,10 +183,12 @@ int main(int argc, char *argv[])
                     }
                     std::cout << std::endl;
                 }
+                #if defined(BUILD_PLATFORM_LINUX)
                 if (DISPLAY){
                     cv::Point2d nose = cv::Point2d(multi_face_landmarks[idx].landmark[4].x * frame.size[1], multi_face_landmarks[idx].landmark[4].y * frame.size[0]);
                     frame = draw_axis(frame, R, t, K, nose);
                 }
+                #endif
             }
         }
 
