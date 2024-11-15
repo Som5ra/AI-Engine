@@ -19,6 +19,7 @@ namespace GustoStatus {
     const int ERR_GENERAL_SERIALIZATION = -(ERR_GENERAL_ERROR | 0x00000003);
     const int ERR_GENERAL_INVALID_PARAMETER = -(ERR_GENERAL_ERROR | 0x00000004);
     const int ERR_GENERAL_NOT_SUPPORT = -(ERR_GENERAL_ERROR | 0x00000005);
+    const int ERR_PARTIAL_FAIL = 0x76000001;
 }
 
 // [Sombra] -> nlohamnn::json as the return type is not valid for C# Unity Side, I guess it's some non-standard c++ feature implemented by nlohmann

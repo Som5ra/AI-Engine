@@ -32,7 +32,7 @@ class FaceLandmarker : public BaseONNX {
     public:
         FaceLandmarker(const std::string& model_path);
 
-        cv::Mat crop_face(const cv::Mat& image, const std::vector<int>& box);
+        std::tuple<cv::Mat, std::vector<int>> crop_face(const cv::Mat& image, const std::vector<int>& box);
 
         std::tuple<cv::Mat, float, float> preprocess(const cv::Mat& image);
 

@@ -260,11 +260,20 @@ class GeometryPipelineImpl : public GeometryPipeline {
     // From this point, the meaning of "face landmarks" is clarified further as
     // "screen face landmarks". This is done do distinguish from "metric face
     // landmarks" that are derived during the face geometry estimation process.
+    GUSTO_RET ret_signal = GustoStatus::ERR_OK;
     for (const NormalizedLandmarkList& screen_face_landmarks : multi_face_landmarks) {
+        MatrixData MatrixData{4, 4, Layout::COLUMN_MAJOR};
+        FaceGeometry _face_geometry{canonical_mesh_, MatrixData};
         // Having a too compact screen landmark list will result in numerical
         // instabilities, therefore such faces are filtered.
         if (IsScreenLandmarkListTooCompact(screen_face_landmarks)) {
             std::cerr << "Screen landmark list is too compact!" << std::endl;
+            for (int i = 0; i < 4; ++i) {
+              for (int j = 0; j < 4; ++j) {
+                  _face_geometry.pose_transform_matrix.at(i, j) = -9999;
+                }
+            }
+            ret_signal = GustoStatus::ERR_PARTIAL_FAIL;
             continue;
         }
         // Convert the screen landmarks into the metric landmarks and get the pose
@@ -273,7 +282,14 @@ class GeometryPipelineImpl : public GeometryPipeline {
         Eigen::Matrix4f pose_transform_mat;
         if (space_converter_->Convert(screen_face_landmarks, pcf, metric_face_landmarks, pose_transform_mat) != GustoStatus::ERR_OK) {
             std::cerr << "Failed to convert landmarks from the screen to the metric space!" << std::endl;
-            return std::make_pair(multi_face_geometry, GustoStatus::ERR_GENERAL_INVALID_PARAMETER);
+            for (int i = 0; i < 4; ++i) {
+              for (int j = 0; j < 4; ++j) {
+                  _face_geometry.pose_transform_matrix.at(i, j) = -9999;
+                }
+            }
+            ret_signal = GustoStatus::ERR_PARTIAL_FAIL;
+            continue;
+            // return std::make_pair(multi_face_geometry, GustoStatus::ERR_GENERAL_INVALID_PARAMETER);
             // return std::nullptr;
         }
         // [Sombra] -> I think it's for protobuf to send the pose matrix back
@@ -292,16 +308,13 @@ class GeometryPipelineImpl : public GeometryPipeline {
         // }
         // // Populate the face pose transformation matrix.
         // mediapipe::MatrixDataProtoFromMatrix(pose_transform_mat, face_geometry.mutable_pose_transform_matrix());
-        MatrixData MatrixData{4, 4, Layout::COLUMN_MAJOR};
-        FaceGeometry _face_geometry{canonical_mesh_, MatrixData};
+
         // _face_geometry.mesh = canonical_mesh_;
         // _face_geometry.pose_transform_matrix = MatrixData{4, 4, Layout::COLUMN_MAJOR};
         for (int i = 0; i < 4; ++i) {
-            std::cout << std::endl;
             for (int j = 0; j < 4; ++j) {
                 _face_geometry.pose_transform_matrix.at(i, j) = pose_transform_mat(i, j);
             }
-            std::cout << std::endl;
         }
         multi_face_geometry.push_back(_face_geometry);
     }
