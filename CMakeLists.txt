@@ -13,10 +13,7 @@ message(STATUS "CMAKE_EXPORT_COMPILE_COMMANDS: ${CMAKE_EXPORT_COMPILE_COMMANDS}"
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
-set(SOURCES
-    ${CMAKE_SOURCE_DIR}/src/utils.cpp
-)
+file(GLOB SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/nlohmann_json-3.11)
@@ -31,6 +28,15 @@ set(GLOBAL_LINK_3RD_PARTY_LIBS
 
 if(BUILD_PLATFORM STREQUAL "linux")
     find_package(OpenMP REQUIRED)
+
+    # opencv
+    # set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-ubuntu-2204/lib/cmake/opencv4)
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-static-full) # for debug build
+    
+    # onnxruntime
+    set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/include")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/lib/libonnxruntime.a")
+
 elseif(BUILD_PLATFORM STREQUAL "android")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0")
     set(OpenMP_CXX_FLAGS "-fopenmp")
@@ -46,14 +52,20 @@ elseif(BUILD_PLATFORM STREQUAL "android")
     endif()
 
     find_package(OpenMP REQUIRED)
-    
+
 elseif(BUILD_PLATFORM STREQUAL "macos")
     
+
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
 
     find_package(OpenMP REQUIRED)
+
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-macos)
+
+    set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/include")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/lib/libonnxruntime.a")
 
 elseif(BUILD_PLATFORM STREQUAL "ios")
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -61,11 +73,38 @@ elseif(BUILD_PLATFORM STREQUAL "ios")
     set(CMAKE_CXX_STANDARD 17)
 elseif(BUILD_PLATFORM STREQUAL "windows")
 
-
 endif()
 
+find_package(OpenCV REQUIRED)
 
 
 add_subdirectory(tools)
-# add_subdirectory(examples)
+add_subdirectory(examples)
 # add_subdirectory(src)
+
+
+message("")
+message("Compile Summary:")
+message("========================================================================")
+# ============================ Options ===========================
+message("")
+
+message(STATUS "  Build options: ")
+message(STATUS "    BUILD_PLATFORM:"           ${BUILD_PLATFORM}      )
+message(STATUS "    ANDROID_ABI:"              ${ANDROID_ABI}         )
+# ============================ OpenCV ===========================
+message("")
+message(STATUS "  OpenCV: ")
+message(STATUS "    Version:" "${OpenCV_VERSION}" )
+message(STATUS "    OpenCV_DIR:" "${OpenCV_DIR}"  )
+# message(STATUS "    OpenCV_LIBS:" "${OpenCV_LIBS}" )
+# message(STATUS "    OpenCV_INCLUDE_DIRS:" "${OpenCV_INCLUDE_DIRS}" )
+
+message("")
+message(STATUS "  OpenMP: ")
+message(STATUS "    OpenMP_FOUND:" "${OpenMP_FOUND}"  )
+
+message("")
+message(STATUS "  SOURCE: ")
+message(STATUS "    SOURCES:" "${SOURCES}" )
+message("========================================================================")

@@ -115,29 +115,3 @@ elseif(BUILD_PLATFORM STREQUAL "linux")
     install(FILES $<TARGET_FILE:GustoEngine> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
 endif()
 
-
-message("")
-message("Compile Summary:")
-message("========================================================================")
-# ============================ Options ===========================
-message("")
-
-message(STATUS "  Build options: ")
-message(STATUS "    BUILD_PLATFORM:"           ${BUILD_PLATFORM}      )
-message(STATUS "    ANDROID_ABI:"              ${ANDROID_ABI}         )
-# ============================ OpenCV ===========================
-message("")
-message(STATUS "  OpenCV: ")
-message(STATUS "    Version:" "${OpenCV_VERSION}" )
-message(STATUS "    OpenCV_DIR:" "${OpenCV_DIR}"  )
-# message(STATUS "    OpenCV_LIBS:" "${OpenCV_LIBS}" )
-# message(STATUS "    OpenCV_INCLUDE_DIRS:" "${OpenCV_INCLUDE_DIRS}" )
-
-message("")
-message(STATUS "  OpenMP: ")
-message(STATUS "    OpenMP_FOUND:" "${OpenMP_FOUND}"  )
-
-message("")
-message(STATUS "  SOURCE: ")
-message(STATUS "    SOURCES:" "${SOURCES}" )
-message("========================================================================")
