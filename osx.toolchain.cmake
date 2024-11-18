@@ -14,3 +14,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang\$")
     set(OpenMP_CXX_LIB_NAMES "omp")
 endif()
 set(OpenMP_omp_LIBRARY "/opt/homebrew/opt/libomp/lib/libomp.a")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc")
+set(AppleLink "-framework Foundation")
