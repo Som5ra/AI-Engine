@@ -30,7 +30,7 @@ if(BUILD_PLATFORM STREQUAL "android")
     include_directories("/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/include")
 
 elseif(BUILD_PLATFORM STREQUAL "linux")
-    
+
     find_package(Eigen3 REQUIRED)
     find_package(glog REQUIRED)
     set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-static-minimal)
@@ -59,6 +59,7 @@ elseif(BUILD_PLATFORM STREQUAL "macos")
     set(OpenMP_omp_LIBRARY "/opt/homebrew/opt/libomp/lib/libomp.a")
     find_package(OpenMP REQUIRED)
 
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-macos)
     
     include_directories(${OPENMP_INCLUDES})
     message(STATUS ${OPENMP_INCLUDES})
