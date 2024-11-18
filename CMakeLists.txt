@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20.0)
 
-# project(GustoEngine)
+project(AI-Engine)
 
 
 message(STATUS "BUILD_PLATFORM: ${BUILD_PLATFORM}")
