@@ -21,7 +21,9 @@ set(SOURCES
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/nlohmann_json-3.11)
 
+set(Eigen3_DIR ${CMAKE_SOURCE_DIR}/3rdparty/eigen-3.4.0/cmake/FindEigen3.cmake)
+
 
 add_subdirectory(tools)
 add_subdirectory(examples)
-# add_subdirectory(src)
+add_subdirectory(src)

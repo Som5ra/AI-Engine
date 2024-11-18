@@ -54,6 +54,8 @@ if(BUILD_PLATFORM STREQUAL "ios")
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
+
+    # set(Eigen3_DIR "/opt/homebrew/opt/eigen/share/cmake/Modules")
     # message(STATUS "[SOMBRA2] -> ${CMAKE_CXX_COMPILER}")
     # if(CMAKE_C_COMPILER_ID MATCHES "Clang\$")
     #     set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
@@ -90,7 +92,7 @@ if(BUILD_PLATFORM STREQUAL "windows")
     target_include_directories(${PROJECT_NAME} PRIVATE)
     target_link_libraries( ${PROJECT_NAME} )
 else()
-    find_package (Eigen3 REQUIRED)    
+    find_package(Eigen3 REQUIRED)
     find_package(OpenMP REQUIRED)
     # enable omp.h
     if(BUILD_PLATFORM STREQUAL "macos")
