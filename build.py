@@ -19,11 +19,12 @@ def execute(cmd, shell=False):
     except OSError as e:
         raise Exception("Execution failed: %d / %s" % (e.errno, e.strerror))
     
-def build_macos(install = True):
+def build_macos(toolchain = 'osx.toolchain.cmake', install = True):
     binary_dir = 'build/build-macos'
 
     compile_cmd = ['cmake']
     compile_cmd.append('-DBUILD_PLATFORM=macos')
+    compile_cmd.append(f'-DCMAKE_TOOLCHAIN_FILE={toolchain}')
     compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')
     compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
 
@@ -61,7 +62,7 @@ def build_linux(install = True):
         execute(install_cmd, shell=True)
 
 
-def build_windows(install = True):
+def build_windows(toolchain = 'win.toolchain.cmake', install = True):
     binary_dir = 'build/build-windows'
     # Ensure the build directory exists
     if not os.path.exists(binary_dir):
@@ -69,6 +70,7 @@ def build_windows(install = True):
 
     compile_cmd = ['cmake']
     compile_cmd.append('-DBUILD_PLATFORM=windows')
+    compile_cmd.append(f'-DCMAKE_TOOLCHAIN_FILE={toolchain}')
     compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')
     compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
 
