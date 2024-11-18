@@ -58,7 +58,7 @@ if(BUILD_PLATFORM STREQUAL "macos")
     set(CMAKE_CXX_EXTENSIONS OFF) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/include")
-    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/build/static_lib/libonnxruntime.a")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/lib/libonnxruntime.a")
     add_executable( ${PROJECT_NAME} ort_test.cpp )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
     set(AppleLink "-framework Foundation")
