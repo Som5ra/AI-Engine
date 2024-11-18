@@ -7,9 +7,12 @@
 #include <vector>
 #include <string>
 #include <chrono>
-#include <omp.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
+
+#if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
+#include <omp.h>
+#endif
 
 namespace GustoStatus {
     const int ERR_OK = 0x00000000;
