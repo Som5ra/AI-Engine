@@ -3,28 +3,33 @@ cmake_minimum_required(VERSION 3.20.0)
 project(GustoEngine)
 
 
+file(GLOB FACE_GEOMETRY_LIBS ${CMAKE_SOURCE_DIR}/tools/face_geometry/*.cpp)
+file(GLOB NMS_LIBS ${CMAKE_SOURCE_DIR}/tools/nms/*.cpp)
 
 
-
-include_directories(${CMAKE_SOURCE_DIR}/include)
+set(Engine_Required_Modules
+    ${onnxruntime_LIBS}
+    ${OpenCV_LIBS}
+    ${GLOBAL_LINK_3RD_PARTY_LIBS}
+)
 
 if(BUILD_PLATFORM STREQUAL "android")
     include_directories(${onnxruntime_INCLUDE_DIRS})
-    add_library( ${PROJECT_NAME} SHARED utils.cpp BaseONNX.cpp face_model_family.cpp )
+    add_library( ${PROJECT_NAME} SHARED utils.cpp BaseONNX.cpp face_model_family.cpp ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
-    target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS}  OpenMP::OpenMP_CXX )
+    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Modules} OpenMP::OpenMP_CXX )
 elseif(BUILD_PLATFORM STREQUAL "linux")
-    add_library( ${PROJECT_NAME} SHARED utils.cpp BaseONNX.cpp face_model_family.cpp )
+    add_library( ${PROJECT_NAME} SHARED utils.cpp BaseONNX.cpp face_model_family.cpp ${FACE_GEOMETRY_LIBS} ${NMS_LIBS})
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
-    target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} OpenMP::OpenMP_CXX )
+    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Modules} OpenMP::OpenMP_CXX )
 elseif(BUILD_PLATFORM STREQUAL "macos")
-    add_library( ${PROJECT_NAME} SHARED utils.cpp BaseONNX.cpp face_model_family.cpp )
+    add_library(${PROJECT_NAME} SHARED utils.cpp BaseONNX.cpp face_model_family.cpp ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
-    target_link_libraries(${PROJECT_NAME} ${AppleLink} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS}  OpenMP::OpenMP_CXX )
+    target_link_libraries(${PROJECT_NAME} ${AppleLink} ${Engine_Required_Modules} OpenMP::OpenMP_CXX)
 elseif(BUILD_PLATFORM STREQUAL "ios")
-    add_library( ${PROJECT_NAME} STATIC utils.cpp BaseONNX.cpp face_model_family.cpp )
+    add_library( ${PROJECT_NAME} STATIC utils.cpp BaseONNX.cpp face_model_family.cpp ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
+    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Modules} ${GLOBAL_LINK_3RD_PARTY_LIBS} )
 endif()
 
 

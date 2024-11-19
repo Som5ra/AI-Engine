@@ -94,6 +94,10 @@ endif()
 find_package(OpenCV REQUIRED)
 
 
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+)
+
 add_subdirectory(tools)
 add_subdirectory(examples)
 add_subdirectory(src)
