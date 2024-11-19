@@ -7,11 +7,11 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if(BUILD_PLATFORM STREQUAL "windows")
 
-    add_executable( ${PROJECT_NAME} SHARED json_test.cpp ${CMAKE_SOURCE_DIR}/src/utils.cpp)
+    add_executable( ${PROJECT_NAME} json_test.cpp ${CMAKE_SOURCE_DIR}/src/utils.cpp)
     
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".dll")
     target_include_directories(${PROJECT_NAME} PRIVATE)
-    target_link_libraries( ${PROJECT_NAME} )
+    target_link_libraries( ${PROJECT_NAME} ${GLOBAL_LINK_3RD_PARTY_LIBS})
 elseif(BUILD_PLATFORM STREQUAL "ios")
     add_library( ${PROJECT_NAME} STATIC json_test.cpp ${CMAKE_SOURCE_DIR}/src/utils.cpp)
     target_include_directories(${PROJECT_NAME} PRIVATE)

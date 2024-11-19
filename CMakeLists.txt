@@ -43,12 +43,16 @@ elseif(BUILD_PLATFORM STREQUAL "android")
     set(OpenMP_CXX_LIB_NAMES "omp")
     if (ANDROID_ABI STREQUAL "arm64-v8a")
         set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/aarch64/libomp.a")
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android/opencv-mobile-4.10.0-android/sdk/native/jni/abi-arm64-v8a)
     elseif (ANDROID_ABI STREQUAL "armeabi-v7a")
         set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/arm/libomp.a")
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android/opencv-mobile-4.10.0-android/sdk/native/jni/abi-armeabi-v7a)
     elseif(ANDROID_ABI STREQUAL "x86")
         set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/i386/libomp.a")
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android/opencv-mobile-4.10.0-android/sdk/native/jni/abi-x86)
     elseif(ANDROID_ABI STREQUAL "x86_64")
         set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/x86_64/libomp.a")
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android/opencv-mobile-4.10.0-android/sdk/native/jni/abi-x86_64)
     endif()
 
     find_package(OpenMP REQUIRED)
@@ -71,8 +75,18 @@ elseif(BUILD_PLATFORM STREQUAL "ios")
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
-elseif(BUILD_PLATFORM STREQUAL "windows")
 
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-ios)
+elseif(BUILD_PLATFORM STREQUAL "windows")
+    set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+    set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
+    set(CMAKE_CXX_STANDARD 17)
+
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-windows-vs2022/x64/x64/vc17/staticlib)
+
+    # need msvc compiler
+    # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-win-x64-static_lib-1.19.2/include")
+    # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-win-x64-static_lib-1.19.2/lib/onnxruntime.lib")
 endif()
 
 find_package(OpenCV REQUIRED)
