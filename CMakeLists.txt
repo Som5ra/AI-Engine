@@ -39,6 +39,7 @@ if(BUILD_PLATFORM STREQUAL "linux")
 
 elseif(BUILD_PLATFORM STREQUAL "android")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0")
+    set(ANDROID_SYSROOT ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot)
     set(OpenMP_CXX_FLAGS "-fopenmp")
     set(OpenMP_CXX_LIB_NAMES "omp")
     if (ANDROID_ABI STREQUAL "arm64-v8a")
@@ -56,6 +57,7 @@ elseif(BUILD_PLATFORM STREQUAL "android")
     endif()
 
     find_package(OpenMP REQUIRED)
+    include_directories("/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/include")
 
 elseif(BUILD_PLATFORM STREQUAL "macos")
     
@@ -94,7 +96,7 @@ find_package(OpenCV REQUIRED)
 
 add_subdirectory(tools)
 add_subdirectory(examples)
-# add_subdirectory(src)
+add_subdirectory(src)
 
 
 message("")
