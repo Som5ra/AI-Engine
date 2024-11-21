@@ -12,7 +12,7 @@
 #include <map>
 #include <cmath>
 
-#if defined(BUILD_PLATFORM_LINUX)
+#if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
 #include <opencv2/opencv.hpp>
 #else
 #include <opencv2/core/core.hpp>
@@ -20,7 +20,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #endif
 
-#if defined(BUILD_PLATFORM_LINUX)
+#if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
 cv::Mat draw_axis(cv::Mat img, cv::Mat R, cv::Mat t, cv::Mat K, cv::Point2f origin) {
     // unit is mm
     cv::Mat rotV;
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     float total_time = 0;
     int num_frames = 0;
     
-    #if defined(BUILD_PLATFORM_LINUX)
+    #if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
     cv::VideoCapture cap;
     try{
         cap.set(cv::CAP_PROP_FRAME_WIDTH, 720);
@@ -113,8 +113,8 @@ int main(int argc, char *argv[])
     // cv::namedWindow("cropped_face", cv::WINDOW_NORMAL);
     while (true)
     {
-        #if defined(BUILD_PLATFORM_LINUX)
-        if (!cap.isOpened()){
+        #if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
+        if (!cap.isOpened()){ 
             frame = cv::imread("demo.png");            
         }else{
             cap >> frame; // so fkng slow
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
                     }
                     std::cout << std::endl;
                 }
-                #if defined(BUILD_PLATFORM_LINUX)
+                #if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
                 if (DISPLAY){
                     cv::Point2d nose = cv::Point2d(multi_face_landmarks[idx].landmark[4].x * frame.size[1], multi_face_landmarks[idx].landmark[4].y * frame.size[0]);
                     frame = draw_axis(frame, R, t, K, nose);

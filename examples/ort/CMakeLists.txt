@@ -8,7 +8,6 @@ if(BUILD_PLATFORM STREQUAL "linux")
     # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/lib/libonnxruntime.a")
     # set(onnxruntime_DIR "${CMAKE_CURRENT_LIST_DIR}/../../3rdparty/ort-builder/onnxruntime/build_static/Linux/MinSizeRel")
 
-
     add_executable( ${PROJECT_NAME} ort_test.cpp )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
 

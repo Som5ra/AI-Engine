@@ -140,6 +140,11 @@ def build_ios(toolchain = 'ios.toolchain.cmake', install = True):
     compile_cmd.append(f'-G Xcode')
     compile_cmd.append(f'-DCMAKE_TOOLCHAIN_FILE={toolchain}')
     compile_cmd.append(f'-DPLATFORM=OS64')
+    compile_cmd.append(f'-DENABLE_ARC=1')
+    compile_cmd.append(f'-DENABLE_VISIBILITY=0')
+    compile_cmd.append(f'-DCMAKE_INSTALL_PREFIX=./install')
+    compile_cmd.append(f'-DBUILD_SHARED_LIBS=OFF')
+    
 
 
     compile_cmd.append('-S .')
