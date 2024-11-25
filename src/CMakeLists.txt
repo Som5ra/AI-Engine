@@ -29,7 +29,17 @@ elseif(BUILD_PLATFORM STREQUAL "macos")
 elseif(BUILD_PLATFORM STREQUAL "ios")
     add_library( ${PROJECT_NAME} STATIC utils.cpp BaseONNX.cpp face_model_family.cpp ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Modules} ${GLOBAL_LINK_3RD_PARTY_LIBS} )
+    target_link_libraries(${PROJECT_NAME} "-framework Foundation" ${Engine_Required_Modules} ${GLOBAL_LINK_3RD_PARTY_LIBS} )
+
+
+    # make a bundle
+    # cannot auto-configure ${EFFECTIVE_PLATFORM_NAME} in $<TARGET_FILE:xxx>, so hardcode it here
+    # pls see https://cmake.org/pipermail/cmake/2016-March/063050.html
+    set(STATUS custom_target_path ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}-"iphoneos"/${PROJECT_NAME}.a)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${libtool} -static -o libgusto_engine_fat.a ${custom_target_path} ${OpenCV_LIB_FILES} ${onnxruntime_LIBS}
+        COMMENT "Bundling ${PROJECT_NAME}"
+        VERBATIM)
 endif()
 
 
