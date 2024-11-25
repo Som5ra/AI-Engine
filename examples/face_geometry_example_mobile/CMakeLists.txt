@@ -8,8 +8,6 @@ file(GLOB FACE_GEOMETRY_LIBS ${CMAKE_SOURCE_DIR}/tools/face_geometry/*.cpp)
 file(GLOB NMS_LIBS ${CMAKE_SOURCE_DIR}/tools/nms/*.cpp)
 
 if(BUILD_PLATFORM STREQUAL "ios")
-    set( )
-
     include_directories(${CMAKE_SOURCE_DIR}/include )
     # add_executable( ${PROJECT_NAME} face_geometry_example.cpp ${CMAKE_SOURCE_DIR}/src/utils.cpp ${CMAKE_SOURCE_DIR}/tools/nms/nms.cpp ${CMAKE_SOURCE_DIR}/src/BaseONNX.cpp ${CMAKE_SOURCE_DIR}/src/face_model_family.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/face_geometry.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/procrustes_solver.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/geometry_pipeline.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/calculator.cpp)
     add_library( ${PROJECT_NAME} STATIC face_geometry_example_mobile.cpp ${SOURCES} ${NMS_LIBS} ${FACE_GEOMETRY_LIBS})
