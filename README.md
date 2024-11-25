@@ -18,4 +18,4 @@ python3 build.py --macos --ios (--noinstall)
 
 
 ### NOTES
-Refer to Notion for docs[https://www.notion.so/gustolabs/AI-Engine-Build-Process-13b5f7c72a4a80b0b8c4e3a31933caa3]
+Refer to Notion for [docs](https://www.notion.so/gustolabs/AI-Engine-Build-Process-13b5f7c72a4a80b0b8c4e3a31933caa3)
