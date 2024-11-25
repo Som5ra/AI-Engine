@@ -16,13 +16,12 @@ if(BUILD_PLATFORM STREQUAL "ios")
     target_include_directories(${PROJECT_NAME} PRIVATE ${OPENMP_INCLUDES} ${onnxruntime_INCLUDE_DIRS})
     target_link_libraries( ${PROJECT_NAME} "-framework Foundation" ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS})
 
-
+    # combine
     add_custom_target(combined
         COMMAND libtool -static -o libfat_example.a $<TARGET_FILE:face_geometry_example_mobile> ${OpenCV_LIBS} ${onnxruntime_LIBS}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         DEPENDS face_geometry_example_mobile ${OpenCV_LIBS} ${onnxruntime_LIBS}
     )
-
 endif()
 
 if(BUILD_PLATFORM STREQUAL "linux")
