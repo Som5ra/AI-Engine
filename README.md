@@ -10,12 +10,12 @@
 
 ```
 Linux Host:
-python3 build.py --android --linux --windows
+python3 build.py --android --linux --windows (--noinstall)
 
 MACOS Host:
-python3 build.py --macos --ios
+python3 build.py --macos --ios (--noinstall)
 ```
 
 
 ### NOTES
-OPENMP does not support Windows and IOS for now
+Refer to Notion for docs[https://www.notion.so/gustolabs/AI-Engine-Build-Process-13b5f7c72a4a80b0b8c4e3a31933caa3]
