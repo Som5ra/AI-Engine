@@ -18,7 +18,6 @@ std::map<int, cv::Vec3b> CLASS_COLOR_MAPPER = {
     {5, cv::Vec3b(0, 128, 128)}    // others (accessories)
 };
 
-
 std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
     // seg_config* _config = new seg_config();
     // std::unique_ptr<seg_config> _config = std::make_unique<seg_config>();
@@ -33,7 +32,7 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
     }
 
     if(_config->model_type == model_lib::selfie_multiclass_256x256){
-        _config->model_path = "/media/sombrali/HDD1/weights_lib/human-seg/mediapipe/selfie_multiclass_256x256.onnx";
+        _config->model_path = "selfie_multiclass_256x256.onnx";
         _config->input_size = std::make_pair(256, 256);
         _config->class_mapper = {
             {0, "background"},
@@ -45,7 +44,7 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
         };
     }
     if(_config->model_type == model_lib::selfie_segmenter){
-        _config->model_path = "/media/sombrali/HDD1/weights_lib/human-seg/mediapipe/selfie_segmenter_refactor.onnx";
+        _config->model_path = "selfie_segmenter_refactor.onnx";
         _config->input_size = std::make_pair(256, 256);
         _config->class_mapper = {
             {0, "background"}, // [Sombra] -> added by me, easy to postprocess 
@@ -53,7 +52,7 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
         };
     }
     if(_config->model_type == model_lib::selfie_segmenter_landscape){
-        _config->model_path = "/media/sombrali/HDD1/weights_lib/human-seg/mediapipe/selfie_segmentation_landscape_refactor_fixed.onnx";
+        _config->model_path = "selfie_segmentation_landscape_refactor_fixed.onnx";
         _config->input_size = std::make_pair(256, 144),
         _config->class_mapper = {
             {0, "background"}, // [Sombra] -> added by me, easy to postprocess 
@@ -61,7 +60,7 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
         };
     }
     if(_config->model_type == model_lib::deeplab_v3){
-        _config->model_path = "/media/sombrali/HDD1/weights_lib/human-seg/mediapipe/deeplab_v3.onnx";
+        _config->model_path = "deeplab_v3.onnx";
         _config->input_size = std::make_pair(257, 257);
         _config->class_mapper = {
             {0, "background"},
@@ -74,6 +73,7 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
     std::cout << "model path: " << _config->model_path << std::endl;
     return _config;
 }
+
 
 
 
