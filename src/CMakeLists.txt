@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.20.0)
 project(GustoEngine)
 
 
+file(GLOB Gusto_Engine_Source ${CMAKE_SOURCE_DIR}/src/*.cpp)
+
 file(GLOB FACE_GEOMETRY_LIBS ${CMAKE_SOURCE_DIR}/tools/face_geometry/*.cpp)
 file(GLOB NMS_LIBS ${CMAKE_SOURCE_DIR}/tools/nms/*.cpp)
 
@@ -15,19 +17,19 @@ set(Engine_Required_Modules
 
 if(BUILD_PLATFORM STREQUAL "android")
     include_directories(${onnxruntime_INCLUDE_DIRS})
-    add_library( ${PROJECT_NAME} SHARED utils.cpp BaseONNX.cpp face_model_family.cpp ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
+    add_library( ${PROJECT_NAME} SHARED ${Gusto_Engine_Source} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
     target_link_libraries(${PROJECT_NAME} ${Engine_Required_Modules} OpenMP::OpenMP_CXX )
 elseif(BUILD_PLATFORM STREQUAL "linux")
-    add_library( ${PROJECT_NAME} SHARED utils.cpp BaseONNX.cpp face_model_family.cpp ${FACE_GEOMETRY_LIBS} ${NMS_LIBS})
+    add_library( ${PROJECT_NAME} SHARED ${Gusto_Engine_Source} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS})
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
     target_link_libraries(${PROJECT_NAME} ${Engine_Required_Modules} OpenMP::OpenMP_CXX )
 elseif(BUILD_PLATFORM STREQUAL "macos")
-    add_library(${PROJECT_NAME} SHARED utils.cpp BaseONNX.cpp face_model_family.cpp ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
+    add_library(${PROJECT_NAME} SHARED ${Gusto_Engine_Source} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
     target_link_libraries(${PROJECT_NAME} ${AppleLink} ${Engine_Required_Modules} OpenMP::OpenMP_CXX)
 elseif(BUILD_PLATFORM STREQUAL "ios")
-    add_library( ${PROJECT_NAME} STATIC utils.cpp BaseONNX.cpp face_model_family.cpp ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
+    add_library( ${PROJECT_NAME} STATIC ${Gusto_Engine_Source} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} "-framework Foundation" ${Engine_Required_Modules} ${GLOBAL_LINK_3RD_PARTY_LIBS} )
 
