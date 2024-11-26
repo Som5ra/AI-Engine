@@ -16,13 +16,18 @@ int main(int argc, char *argv[])
 
 
     bool DISPLAY = true;
-    if (argc == 2 && argv[1] == std::string("no_display")) {
+    if (argc >= 2 && argv[argc - 1] == std::string("no_display")) {
         DISPLAY = false;
     }
 
-    const std::string segmenter_name = "selfie_multiclass_256x256";
+    std::string segmenter_name = "selfie_multiclass_256x256";
+    if (argc >= 2 && argv[argc - 1] == std::string("selfie_segmenter")) {
+        segmenter_name = "selfie_segmenter";
+    }
+
+    // const std::string segmenter_name = "selfie_segmenter_landscape";
+    // const std::string segmenter_name = "deeplab_v3";
     std::unique_ptr<gusto_humanseg::seg_config> config = gusto_humanseg::fetch_model_config(segmenter_name);
-    std::cout << config->model_name << std::endl;
     std::unique_ptr<gusto_humanseg::Segmenter> human_segmenter = std::make_unique<gusto_humanseg::Segmenter>(config);
 
     float min_time = 1000000;

@@ -5,8 +5,8 @@ namespace gusto_humanseg{
 std::map<std::string, model_lib> MODEL_NAME_LIB_MAPPER = {
     {"selfie_multiclass_256x256", model_lib::selfie_multiclass_256x256},
     {"selfie_segmenter", model_lib::selfie_segmenter},
-    {"selfie_segmenter_landscape", model_lib::selfie_segmenter_landscape},
-    {"deeplab_v3", model_lib::deeplab_v3}
+    {"selfie_segmenter_landscape", model_lib::selfie_segmenter_landscape}, // trash
+    {"deeplab_v3", model_lib::deeplab_v3} // trash
 };
 
 std::map<int, cv::Vec3b> CLASS_COLOR_MAPPER = {
@@ -26,7 +26,7 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
     std::cout <<  "input model name: " << _model_name << std::endl;
     try{
         _config->model_name = _model_name;
-        _config->model_type == MODEL_NAME_LIB_MAPPER[_model_name];
+        _config->model_type = MODEL_NAME_LIB_MAPPER[_model_name];
     }catch(const std::exception& e){
         std::cerr << "input model name is not valid! " << std::endl;
         return _config;
@@ -48,14 +48,16 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
         _config->model_path = "/media/sombrali/HDD1/weights_lib/human-seg/mediapipe/selfie_segmenter_refactor.onnx";
         _config->input_size = std::make_pair(256, 256);
         _config->class_mapper = {
-            {0, "person"}
+            {0, "background"}, // [Sombra] -> added by me, easy to postprocess 
+            {1, "person"}
         };
     }
     if(_config->model_type == model_lib::selfie_segmenter_landscape){
         _config->model_path = "/media/sombrali/HDD1/weights_lib/human-seg/mediapipe/selfie_segmentation_landscape_refactor_fixed.onnx";
         _config->input_size = std::make_pair(256, 144),
         _config->class_mapper = {
-            {0, "person"}
+            {0, "background"}, // [Sombra] -> added by me, easy to postprocess 
+            {1, "person"}
         };
     }
     if(_config->model_type == model_lib::deeplab_v3){
@@ -69,6 +71,7 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
             {4, "potted plant"}
         };
     }
+    std::cout << "model path: " << _config->model_path << std::endl;
     return _config;
 }
 
@@ -146,20 +149,40 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
     // Create a cv::Mat to hold the argmax results
     cv::Mat argmax_mat(target_size.first, target_size.second, CV_8U);
 
-    for (int h = 0; h < target_size.first; ++h) {
-        for (int w = 0; w < target_size.second; ++w) {
-            float max_val = channel_mats[0].at<float>(h, w);
-            int max_idx = 0;
-            for (int c = 1; c < channels; ++c) {
-                float val = channel_mats[c].at<float>(h, w);
-                if (val > max_val) {
-                    max_val = val;
-                    max_idx = c;
-                }
+    if (channels == 1){
+        #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
+        omp_set_num_threads(omp_get_max_threads() / 2);
+        #pragma omp parallel for
+        #endif
+        for (int h = 0; h < target_size.first; ++h) {
+            for (int w = 0; w < target_size.second; ++w) {
+                float max_val = channel_mats[0].at<float>(h, w);
+                int max_idx = max_val >= 0.5 ? 1 : 0;
+                argmax_mat.at<uchar>(h, w) = static_cast<uchar>(max_idx);
             }
-            argmax_mat.at<uchar>(h, w) = static_cast<uchar>(max_idx);
+        }
+    }else{
+        #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
+        omp_set_num_threads(omp_get_max_threads() / 2);
+        #pragma omp parallel for
+        #endif
+        for (int h = 0; h < target_size.first; ++h) {
+            for (int w = 0; w < target_size.second; ++w) {
+                float max_val = channel_mats[0].at<float>(h, w);
+                int max_idx = 0;
+                for (int c = 1; c < channels; ++c) {
+                    float val = channel_mats[c].at<float>(h, w);
+                    if (val > max_val) {
+                        max_val = val;
+                        max_idx = c;
+                    }
+                }
+                argmax_mat.at<uchar>(h, w) = static_cast<uchar>(max_idx);
+            }
         }
     }
+
+
 
     cv::Mat colorized_output(target_size.first, target_size.second, CV_8UC3);
     // Create a colorized output image
