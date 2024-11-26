@@ -3,13 +3,18 @@ cmake_minimum_required(VERSION 3.20.0)
 project(GustoEngine)
 
 
-file(GLOB Gusto_Engine_Source ${CMAKE_SOURCE_DIR}/src/*.cpp)
-
-file(GLOB FACE_GEOMETRY_LIBS ${CMAKE_SOURCE_DIR}/tools/face_geometry/*.cpp)
-file(GLOB NMS_LIBS ${CMAKE_SOURCE_DIR}/tools/nms/*.cpp)
-
-
 set(Engine_Required_Modules
+    # base modules: 
+    ${SOURCES}
+    # models:
+    ${FACE_MODEL_LIBS}
+    ${HUMAN_SEG_LIBS}
+    # tools(post-processing):
+    ${FACE_GEOMETRY_LIBS} 
+    ${NMS_LIBS}
+)
+
+set(Engine_Required_Link_Modules
     ${onnxruntime_LIBS}
     ${OpenCV_LIBS}
     ${GLOBAL_LINK_3RD_PARTY_LIBS}
@@ -17,24 +22,23 @@ set(Engine_Required_Modules
 
 if(BUILD_PLATFORM STREQUAL "android")
     include_directories(${onnxruntime_INCLUDE_DIRS})
-    add_library( ${PROJECT_NAME} SHARED ${Gusto_Engine_Source} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
+    add_library( ${PROJECT_NAME} SHARED ${Engine_Required_Modules} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
-    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Modules} OpenMP::OpenMP_CXX )
+    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Link_Modules} OpenMP::OpenMP_CXX )
 elseif(BUILD_PLATFORM STREQUAL "linux")
-    add_library( ${PROJECT_NAME} SHARED ${Gusto_Engine_Source} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS})
+    add_library( ${PROJECT_NAME} SHARED ${Engine_Required_Modules})
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
-    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Modules} OpenMP::OpenMP_CXX )
+    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Link_Modules} OpenMP::OpenMP_CXX )
 elseif(BUILD_PLATFORM STREQUAL "macos")
-    add_library(${PROJECT_NAME} SHARED ${Gusto_Engine_Source} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
+    add_library(${PROJECT_NAME} SHARED ${Engine_Required_Modules} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
-    target_link_libraries(${PROJECT_NAME} ${AppleLink} ${Engine_Required_Modules} OpenMP::OpenMP_CXX)
+    target_link_libraries(${PROJECT_NAME} ${AppleLink} ${Engine_Required_Link_Modules} OpenMP::OpenMP_CXX)
 elseif(BUILD_PLATFORM STREQUAL "ios")
-    add_library( ${PROJECT_NAME} STATIC ${Gusto_Engine_Source} ${FACE_GEOMETRY_LIBS} ${NMS_LIBS} )
+    add_library( ${PROJECT_NAME} STATIC ${Engine_Required_Modules} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} "-framework Foundation" ${Engine_Required_Modules} ${GLOBAL_LINK_3RD_PARTY_LIBS} )
+    target_link_libraries(${PROJECT_NAME} "-framework Foundation" ${Engine_Required_Link_Modules} ${GLOBAL_LINK_3RD_PARTY_LIBS} )
 
-
-    # make a bundle
+    # [Sombra] -> make a bundle here
     # cannot auto-configure ${EFFECTIVE_PLATFORM_NAME} in $<TARGET_FILE:xxx>, so hardcode it here
     # pls see https://cmake.org/pipermail/cmake/2016-March/063050.html
     set(STATUS custom_target_path ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}-"iphoneos"/${PROJECT_NAME}.a)
@@ -45,27 +49,6 @@ elseif(BUILD_PLATFORM STREQUAL "ios")
 endif()
 
 
-
-
-
-# if(BUILD_PLATFORM STREQUAL "linux")
-#     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
-#     # target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} nlohmann_json::nlohmann_json OpenMP::OpenMP_CXX ${onnxruntime_LIBS})
-#     # opencv protobuf conflicts with onnxruntime protobuf
-#     # while DNN/ONNX: Build OpenCV with Protobuf to import ONNX models in function 'readNetFromONNX'
-#     # so there can be only one module built in our engine between OPENCV::DNN and ONNX
-#     target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} nlohmann_json::nlohmann_json OpenMP::OpenMP_CXX )
-# elseif(BUILD_PLATFORM STREQUAL "android")
-#     target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} nlohmann_json::nlohmann_json ${OpenMP_omp_LIBRARY})
-# elseif(BUILD_PLATFORM STREQUAL "macos")
-#     target_include_directories(${PROJECT_NAME} PRIVATE ${OPENMP_INCLUDES})
-#     target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} nlohmann_json::nlohmann_json OpenMP::OpenMP_CXX)
-# endif()
-# file(COPY $<TARGET_FILE:GustoEngine>
-#      DESTINATION ${CMAKE_BINARY_DIR}/build/Android/${ANDROID_ABI})
-# get_filename_component(targetfile "$<TARGET_FILE:GustoEngine>" NAME)
-
-# message(${CMAKE_BINARY_DIR}/Android/${ANDROID_ABI}/${targetfile})
 
 if(BUILD_PLATFORM STREQUAL "android")
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/../lib/Android/${ANDROID_ABI}/)

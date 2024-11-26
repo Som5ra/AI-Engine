@@ -13,7 +13,6 @@ message(STATUS "CMAKE_EXPORT_COMPILE_COMMANDS: ${CMAKE_EXPORT_COMPILE_COMMANDS}"
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-file(GLOB SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/nlohmann_json-3.11)
@@ -101,6 +100,33 @@ find_package(OpenCV REQUIRED)
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
 )
+
+set(SOURCES 
+    ${CMAKE_SOURCE_DIR}/src/utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/BaseONNX.cpp
+)
+
+set(FACE_MODEL_LIBS
+    ${CMAKE_SOURCE_DIR}/src/face_model_family.cpp
+)
+
+set(HUMAN_SEG_LIBS
+    ${CMAKE_SOURCE_DIR}/src/human_seg_family.cpp
+)
+
+set(NMS_LIBS
+    ${CMAKE_SOURCE_DIR}/tools/nms/nms.cpp
+)
+
+set(FACE_GEOMETRY_LIBS
+    ${CMAKE_SOURCE_DIR}/tools/face_geometry/face_geometry.cpp
+    ${CMAKE_SOURCE_DIR}/tools/face_geometry/procrustes_solver.cpp
+    ${CMAKE_SOURCE_DIR}/tools/face_geometry/geometry_pipeline.cpp
+    ${CMAKE_SOURCE_DIR}/tools/face_geometry/calculator.cpp
+)
+
+
+
 
 add_subdirectory(tools)
 add_subdirectory(examples)

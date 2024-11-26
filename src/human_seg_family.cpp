@@ -87,7 +87,7 @@ cv::Mat Segmenter::preprocess_img(const cv::Mat& image) {
     return frame;
 }
 
-std::vector<Ort::Value> Segmenter::forward(const cv::Mat& raw){
+std::vector<Ort::Value> Segmenter::forward(const cv::Mat& raw) {
     cv::Mat frame = preprocess_img(raw);
     
     std::vector<cv::Mat> rgbsplit;
