@@ -75,8 +75,6 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
 }
 
 
-
-
 Segmenter::Segmenter(std::unique_ptr<seg_config>& _config)
     : BaseONNX(_config->model_path, _config->model_name) {
     this->_config = std::move(_config);
@@ -103,7 +101,7 @@ std::vector<Ort::Value> Segmenter::forward(const cv::Mat& raw) {
 
     std::vector<float> input_tensor_values(inputTensorSize);
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(omp_get_max_threads() / 2);
+    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
     #pragma omp parallel for
     #endif
     for (int i = 0; i < rgbsplit[0].size[0]; i++) {
@@ -133,7 +131,7 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
     std::vector<cv::Mat> channel_mats(channels);
 
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(omp_get_max_threads() / 2);
+    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
     #pragma omp parallel for
     #endif
     for (int c = 0; c < channels; ++c) {
@@ -151,7 +149,7 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
 
     if (channels == 1){
         #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-        omp_set_num_threads(omp_get_max_threads() / 2);
+        omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
         #pragma omp parallel for
         #endif
         for (int h = 0; h < target_size.first; ++h) {
@@ -163,7 +161,7 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
         }
     }else{
         #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-        omp_set_num_threads(omp_get_max_threads() / 2);
+        omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
         #pragma omp parallel for
         #endif
         for (int h = 0; h < target_size.first; ++h) {
@@ -187,7 +185,7 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
     cv::Mat colorized_output(target_size.first, target_size.second, CV_8UC3);
     // Create a colorized output image
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(omp_get_max_threads() / 2);
+    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
     #pragma omp parallel for
     #endif
     for (int h = 0; h < target_size.first; ++h) {

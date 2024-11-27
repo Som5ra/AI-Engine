@@ -9,6 +9,7 @@ set(Engine_Required_Modules
     # models:
     ${FACE_MODEL_LIBS}
     ${HUMAN_SEG_LIBS}
+    ${HUMAN_POSE_LIBS}
     # tools(post-processing):
     ${FACE_GEOMETRY_LIBS} 
     ${NMS_LIBS}

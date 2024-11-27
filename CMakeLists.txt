@@ -114,6 +114,10 @@ set(HUMAN_SEG_LIBS
     ${CMAKE_SOURCE_DIR}/src/human_seg_family.cpp
 )
 
+set(HUMAN_POSE_LIBS
+    ${CMAKE_SOURCE_DIR}/src/human_pose_family.cpp
+)
+
 set(NMS_LIBS
     ${CMAKE_SOURCE_DIR}/tools/nms/nms.cpp
 )

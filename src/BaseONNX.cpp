@@ -7,8 +7,10 @@ BaseONNX::BaseONNX(const std::string& model_path, const std::string& model_name)
         ort_session(nullptr) {
     
     Ort::SessionOptions session_options;
-    // session_options.SetIntraOpNumThreads(1);
-    // session_options.SetInterOpNumThreads(1); 
+    session_options.SetInterOpNumThreads(1);
+    session_options.SetIntraOpNumThreads(std::min(6, (int) std::thread::hardware_concurrency()));
+    session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
+
     std::cout << "Loading Model: " << model_path << std::endl;
     ort_session = Ort::Session(ort_env, model_path.c_str(), session_options);
     std::cout << "Model Loaded: " << model_path << std::endl;
@@ -32,6 +34,11 @@ BaseONNX::BaseONNX(const std::string& model_path, const std::string& model_name)
         Ort::AllocatedStringPtr output_name_ptr = ort_session.GetOutputNameAllocated(i, ort_allocator);
         const char* output_name = strdup(output_name_ptr.get());
         output_names.push_back(output_name);
+    }
+
+    inputTensorSize = 1;
+    for (auto dim : input_shape[0]) {
+        inputTensorSize *= dim;
     }
 
 }

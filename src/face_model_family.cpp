@@ -31,7 +31,7 @@ std::tuple<std::vector<gusto_nms::Rect>, std::vector<std::vector<float>>, std::v
 
     std::vector<float> input_tensor_values(inputTensorSize);
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(omp_get_max_threads() / 2);
+    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
     #pragma omp parallel for
     #endif
     for (int i = 0; i < rgbsplit[0].size[0]; i++) {
@@ -152,7 +152,7 @@ std::tuple<std::vector<cv::Point3f>, float, float> FaceLandmarker::forward(const
     std::vector<cv::Mat> rgbsplit;
     cv::split(frame, rgbsplit);
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(omp_get_max_threads() / 2);
+    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
     #pragma omp parallel for
     #endif
     for (int i = 0; i < rgbsplit[0].size[0]; i++) {
