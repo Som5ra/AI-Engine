@@ -36,12 +36,8 @@ std::map<int, cv::Vec3b> CLASS_COLOR_MAPPER = {
 };
 */
 
-struct seg_config{
-    std::string model_name;
-    model_lib model_type;
-    std::string model_path;
-    std::pair<int, int> input_size;
-    std::map<int, std::string> class_mapper;
+struct seg_config : basic_model_config{
+    model_lib model_type; 
 };
 
 std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name);
