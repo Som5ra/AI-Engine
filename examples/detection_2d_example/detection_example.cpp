@@ -1,4 +1,4 @@
-#include "human_pose_family.h"
+#include "detector2d_family.h"
 
 #include <onnxruntime_cxx_api.h>
 
@@ -10,7 +10,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #endif
 
-#include <filesystem>
 
 int main(int argc, char *argv[])
 {
@@ -21,12 +20,10 @@ int main(int argc, char *argv[])
         DISPLAY = false;
     }
 
-    std::string pose_detector_name = "rtmo-s";
-
-    // const std::string segmenter_name = "selfie_segmenter_landscape";
-    // const std::string segmenter_name = "deeplab_v3";
-    std::unique_ptr<gusto_humanpose::humanpose_config> config = gusto_humanpose::fetch_model_config(pose_detector_name);
-    std::unique_ptr<gusto_humanpose::PoseDetector> human_pose_detector = std::make_unique<gusto_humanpose::PoseDetector>(config);
+    const std::string _model_path = "/media/sombrali/HDD1/weights_lib/human-pose/mediapipe/pose_detector.onnx";
+    const std::string _model_name = "pose_detector";
+    std::unique_ptr<basic_model_config> config = gusto_detector2d::fetch_model_config(_model_name, _model_path);
+    std::unique_ptr<gusto_detector2d::Detector> human_detector = std::make_unique<gusto_detector2d::Detector>(config);
 
     float min_time = 1000000;
     float max_time = 0;
@@ -34,58 +31,45 @@ int main(int argc, char *argv[])
     int num_frames = 0;
     
     #if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
-    // VideoCapture cap(0);
     cv::VideoCapture cap;
     try{
-        // cap.set(cv::CAP_PROP_FRAME_WIDTH, 720);
-        // cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
-        // cap.set(cv::CAP_PROP_GSTREAMER_QUEUE_LENGTH, 1);
+        cap.set(cv::CAP_PROP_FRAME_WIDTH, 720);
+        cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
         cap.open(0);
     }catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
         std::cerr << "Failed to open camera! Load Same Image Instead" << std::endl;
     }
     if (!cap.isOpened()) {
-        std::cerr << "cap.isOpened() Failed! Load Same Image Instead" << std::endl;
+        std::cerr << "Failed to open camera! Load Same Image Instead" << std::endl;
     }
     if (DISPLAY){
-        cv::namedWindow("fb", cv::WINDOW_NORMAL);
+        cv::namedWindow("Raw", cv::WINDOW_NORMAL);
     }
     #endif
 
     cv::Mat frame;
 
     // cv::namedWindow("cropped_face", cv::WINDOW_NORMAL);
-    int img_idx = 0;
-
-    std::string path = "./2/";
-    std::vector<std::string> img_paths;
-    for (const auto & entry : std::filesystem::directory_iterator(path))
-        img_paths.push_back(entry.path());
-    std::sort(img_paths.begin(), img_paths.end());
     while (true)
     {
         #if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
         if (!cap.isOpened()){ 
             frame = cv::imread("demo.png");            
         }else{
-            if (img_idx >= img_paths.size())
-                img_idx = 0;
-            frame = cv::imread(img_paths[img_idx]);
-            img_idx += 1;
-            // cap >> frame; // so fkng slow
-            // frame = cv::imread("demo.png");
+            cap >> frame; // so fkng slow
         }
         #else
         frame = cv::imread("demo.png");
         #endif
         auto start = std::chrono::high_resolution_clock::now();
-        // auto inter_image = human_pose_detector->Debug_Preprocess(frame);
-        auto inter_output = human_pose_detector->forward(frame);
-        auto all_person_kpts = human_pose_detector->postprocess(inter_output, 0.5);
-        for (auto single_person_kpts : all_person_kpts){
-            frame = human_pose_detector->draw_single_person_keypoints(frame, single_person_kpts);
+        auto inter_output = human_detector->forward(frame);
+        auto dets_out = human_detector->postprocess(inter_output);
+        for(size_t i = 0; i < dets_out.size(); i++){
+            std::cout << "x1: " << dets_out[i].x1 << " y1: " << dets_out[i].y1 << " x2: " << dets_out[i].x2 << " y2: " << dets_out[i].y2 << std::endl;
+            cv::rectangle(frame, cv::Point(dets_out[i].x1, dets_out[i].y1), cv::Point(dets_out[i].x2, dets_out[i].y2), cv::Scalar(0, 255, 0), 2);
         }
+        
+
         auto end = std::chrono::high_resolution_clock::now();
         float duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         min_time = std::min(min_time, duration);
@@ -96,7 +80,7 @@ int main(int argc, char *argv[])
 
         if (DISPLAY){
             // auto painted_image = face_detector.draw_boxes(frame, boxes, scores, indices, indices_cls);
-            cv::imshow("fb", frame);
+            cv::imshow("Raw", frame);
             if (cv::waitKey(25) >= 0)
                 break;
         }
