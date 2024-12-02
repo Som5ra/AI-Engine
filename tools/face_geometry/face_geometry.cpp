@@ -111,7 +111,7 @@ namespace gusto_face_geometry {
         // actually canonical_mesh.vertex_buffer.size() / 5 == 478
         // this->canonical_mesh_num_vertices = this->canonical_mesh.vertex_buffer.size() / 5;
         try{
-            assert(this->canonical_mesh.vertex_buffer.size() / 5 == canonical_mesh_num_vertices);
+            assert(this->canonical_mesh.vertex_buffer.size() / 5 == this->canonical_mesh.canonical_mesh_num_vertices);
             assert(this->canonical_mesh.canonical_mesh_vertex_size == 5);
             assert(this->canonical_mesh.canonical_mesh_vertex_position_offset == 0);
         }catch (const std::exception& e) {

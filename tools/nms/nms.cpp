@@ -110,7 +110,7 @@ pair<vector<int>, vector<int>> multiclass_nms_class_unaware_cpu(const vector<Rec
 
 void sigmoid(float* arr, int size) {
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(omp_get_max_threads() / 2);
+    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
     #pragma omp parallel for
     #endif
     for (int i = 0; i < size; i++) {
@@ -137,7 +137,7 @@ extern "C" {
         sigmoid(scores, scores_shape[0] * scores_shape[1] * scores_shape[2]);
 
         #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-        omp_set_num_threads(omp_get_max_threads() / 2);
+        omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
         #pragma omp parallel for
         #endif
         for (size_t batch = 0; batch < boxes_shape[0]; batch++) {
@@ -180,7 +180,7 @@ extern "C" {
         int scorearr_size_per_batch = scores_shape[1] * scores_shape[2];
         int current_ret_len = 0;   
         #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-        omp_set_num_threads(omp_get_max_threads() / 2);
+        omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
         #pragma omp parallel for
         #endif
         for (size_t batch = 0; batch < boxes_shape[0]; batch++) {
@@ -212,7 +212,7 @@ extern "C" {
 
 // int main() {
 //     // Set the number of threads to half of the available threads
-//     num_threads = omp_get_max_threads() / 2;
+//     num_threads = std::max(1, omp_get_max_threads() / 2);
 //    ;
 
 //     vector<Rect> boxes = {Rect(0, 0, 10, 10), Rect(1, 1, 10, 10), Rect(2, 2, 10, 10),
