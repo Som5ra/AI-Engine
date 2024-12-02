@@ -3,7 +3,6 @@
 
 #include <memory>
 #include "Eigen/Dense"
-extern "C" {
 
 namespace gusto_face_geometry {
 #define GUSTO_RET int
@@ -50,9 +49,8 @@ class ProcrustesSolver {
 
 std::unique_ptr<ProcrustesSolver> CreateFloatPrecisionProcrustesSolver();
 
-}  // namespace mediapipe::face_geometry
+}  // namespace gusto_face_geometry
 
 
-}
 
 #endif // GUSTO_FACE_GEOMETRY_PROCRUSTES_SOLVER_H
