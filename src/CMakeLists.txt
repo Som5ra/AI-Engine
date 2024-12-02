@@ -47,6 +47,11 @@ elseif(BUILD_PLATFORM STREQUAL "ios")
         COMMAND ${libtool} -static -o libgusto_engine_fat.a ${custom_target_path} ${OpenCV_LIB_FILES} ${onnxruntime_LIBS}
         COMMENT "Bundling ${PROJECT_NAME}"
         VERBATIM)
+elseif(BUILD_PLATFORM STREQUAL "windows")
+    add_library(${PROJECT_NAME} SHARED ${Engine_Required_Modules} )
+    target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
+    # target_link_libraries(${PROJECT_NAME} ${AppleLink} ${Engine_Required_Link_Modules} OpenMP::OpenMP_CXX)
+    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Link_Modules})
 endif()
 
 
