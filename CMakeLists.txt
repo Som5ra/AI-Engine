@@ -37,26 +37,28 @@ if(BUILD_PLATFORM STREQUAL "linux")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/lib/libonnxruntime.a")
 
 elseif(BUILD_PLATFORM STREQUAL "android")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0 -fPIC")
     set(ANDROID_SYSROOT ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot)
     set(OpenMP_CXX_FLAGS "-fopenmp")
     set(OpenMP_CXX_LIB_NAMES "omp")
+
+    set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.19.2/headers")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.19.2/${ANDROID_ABI}/libonnxruntime_static_lib.a")
+
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android-ndk26/${ANDROID_ABI}/install/sdk/native/jni)
+
     if (ANDROID_ABI STREQUAL "arm64-v8a")
-        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/aarch64/libomp.a")
-        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android/opencv-mobile-4.10.0-android/sdk/native/jni/abi-arm64-v8a)
+        set(OpenMP_omp_LIBRARY "${CMAKE_SOURCE_DIR}/android-ndk-r26d-linux/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux/aarch64/libomp.a")
     elseif (ANDROID_ABI STREQUAL "armeabi-v7a")
-        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/arm/libomp.a")
-        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android/opencv-mobile-4.10.0-android/sdk/native/jni/abi-armeabi-v7a)
+        set(OpenMP_omp_LIBRARY "${CMAKE_SOURCE_DIR}/android-ndk-r26d-linux/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux/arm/libomp.a")
     elseif(ANDROID_ABI STREQUAL "x86")
-        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/i386/libomp.a")
-        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android/opencv-mobile-4.10.0-android/sdk/native/jni/abi-x86)
+        set(OpenMP_omp_LIBRARY "${CMAKE_SOURCE_DIR}/android-ndk-r26d-linux/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux/i386/libomp.a")
     elseif(ANDROID_ABI STREQUAL "x86_64")
-        set(OpenMP_omp_LIBRARY "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/lib/linux/x86_64/libomp.a")
-        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android/opencv-mobile-4.10.0-android/sdk/native/jni/abi-x86_64)
+        set(OpenMP_omp_LIBRARY "${CMAKE_SOURCE_DIR}/android-ndk-r26d-linux/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux/x86_64/libomp.a")
     endif()
 
     find_package(OpenMP REQUIRED)
-    include_directories("/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/12.0.8/include")
+    include_directories("android-ndk-r26d-linux/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/include")
 
 elseif(BUILD_PLATFORM STREQUAL "macos")
     
@@ -83,15 +85,15 @@ elseif(BUILD_PLATFORM STREQUAL "ios")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/ios-arm64/libonnxruntime.a")
 
 elseif(BUILD_PLATFORM STREQUAL "windows")
-    set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
 
     set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-windows-vs2022/x64/x64/vc17/staticlib)
 
     # need msvc compiler
-    # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-win-x64-static_lib-1.19.2/include")
-    # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-win-x64-static_lib-1.19.2/lib/onnxruntime.lib")
+    set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-win-x64-static_lib-1.19.2/include")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-win-x64-static_lib-1.19.2/lib/onnxruntime.lib")
 endif()
 
 find_package(OpenCV REQUIRED)
@@ -104,6 +106,10 @@ include_directories(
 set(SOURCES 
     ${CMAKE_SOURCE_DIR}/src/utils.cpp
     ${CMAKE_SOURCE_DIR}/src/BaseONNX.cpp
+)
+
+set(DETECTION_2D_LIBS
+    ${CMAKE_SOURCE_DIR}/src/detector2d_family.cpp
 )
 
 set(FACE_MODEL_LIBS
