@@ -17,13 +17,38 @@ std::unique_ptr<basic_model_config> fetch_model_config(const std::string _model_
     std::cout << "model path: " << _config->model_path << std::endl;
     return _config;
 }
+std::unique_ptr<basic_model_config> fetch_model_config(const std::string _model_name, const std::string _model_path, const std::pair<int, int> _input_size){
+    // seg_config* _config = new seg_config();
+    // std::unique_ptr<seg_config> _config = std::make_unique<seg_config>();
+    std::unique_ptr<basic_model_config> _config(new basic_model_config());
+    _config->model_name = _model_name;
+    _config->model_path = _model_path;
+    _config->class_mapper = {
+        {0, "dets"},
+        {1, "scores"},
+    };
+    _config->input_size = _input_size;
+    std::cout <<  "input model name: " << _model_name << std::endl;
+    std::cout << "model path: " << _config->model_path << std::endl;
+    std::cout << "input size: " << _config->input_size.first << " " << _config->input_size.second << std::endl;
+    return _config;
+}
 
 
 Detector::Detector(std::unique_ptr<basic_model_config>& _config)
     : BaseONNX(_config->model_path, _config->model_name) {
     this->_config = std::move(_config);
-    std::cout << "input size: " << input_shape[0][2] << " " << input_shape[0][3] << std::endl;
-    this->_config->input_size = std::make_pair(input_shape[0][2], input_shape[0][3]);
+    if (this->_config->input_size.first > 0 && this->_config->input_size.second > 0) {
+        this->input_shape[0][2] = this->_config->input_size.first;
+        this->input_shape[0][3] = this->_config->input_size.second;
+        this->inputTensorSize = 3 * this->_config->input_size.first * this->_config->input_size.second; // overwriting the input size for allocating memory later
+        std::cout << "input size: " << this->_config->input_size.first << " " << this->_config->input_size.second << std::endl;
+    }else if (this->input_shape[0][2] == -1 || this->input_shape[0][3] == -1) {
+        throw std::runtime_error("Invalid input size");
+    }else{
+        this->_config->input_size = std::make_pair(this->input_shape[0][2], this->input_shape[0][3]);
+        std::cout << "input size: " << this->input_shape[0][2] << " " << this->input_shape[0][3] << std::endl;
+    }
 }
 
 std::vector<float> Detector::preprocess_img(const cv::Mat& image) {
@@ -58,7 +83,6 @@ std::vector<float> Detector::preprocess_img(const cv::Mat& image) {
 std::vector<Ort::Value> Detector::forward(const cv::Mat& raw) {
     std::vector<float> input_tensor_values = preprocess_img(raw);
 
-
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
     Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), inputTensorSize, input_shape[0].data(), input_shape[0].size());
 
@@ -77,7 +101,6 @@ std::vector<gusto_nms::Rect> Detector::postprocess(const std::vector<Ort::Value>
         dets.push_back(rect);
         std::vector<float> score = {_scores[i]};
         scores.push_back(score);
-        std::cout << "x1: " << rect.x1 << " y1: " << rect.y1 << " x2: " << rect.x2 << " y2: " << rect.y2 << " score: " << _scores[i] << std::endl;
     }
     // std::vector<float> dets(_dets, _dets + net_out[0].GetTensorTypeAndShapeInfo().GetElementCount());
     // std::vector<float> scores(_scores, _scores + net_out[1].GetTensorTypeAndShapeInfo().GetElementCount());

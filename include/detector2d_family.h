@@ -11,7 +11,7 @@ namespace gusto_detector2d{
 
 
 std::unique_ptr<basic_model_config> fetch_model_config(const std::string _model_name, const std::string _model_path);
-
+std::unique_ptr<basic_model_config> fetch_model_config(const std::string _model_name, const std::string _model_path, const std::pair<int, int> _input_size);
 
 class Detector : public BaseONNX {
     public:
