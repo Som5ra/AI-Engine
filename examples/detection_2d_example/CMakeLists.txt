@@ -24,6 +24,12 @@ if (BUILD_PLATFORM STREQUAL "macos")
     target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX ${AppleLink} ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS})
 endif()
 
+if (BUILD_PLATFORM STREQUAL "android")
+    include_directories(${CMAKE_SOURCE_DIR}/include)
+    add_library( detection_csharp_example SHARED detection_example_mobile.cc ${SOURCES} ${DETECTION_2D_LIBS} ${NMS_LIBS})
+    target_include_directories(detection_csharp_example PRIVATE ${OPENMP_INCLUDES} ${onnxruntime_INCLUDE_DIRS})
+    target_link_libraries( detection_csharp_example OpenMP::OpenMP_CXX ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS})
+endif()
 
 # [Sombra] -> need msvc compiler
 # if(BUILD_PLATFORM STREQUAL "windows")
