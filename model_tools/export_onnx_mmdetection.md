@@ -1,8 +1,11 @@
 
-### IMPORTANT NOTES:
-- EXPORT_CFG determine the input batch: "detection_onnxruntime_static.py" and "detection_onnxruntime_dynamic.py"
+## mmdetection models export:
 
-``` # without nms
+- IMPORTANT NOTES:
+    - EXPORT_CFG determine the input batch: "detection_onnxruntime_static.py" and "detection_onnxruntime_dynamic.py"
+
+### without nms
+``` 
 EXPORT_CFG="/media/sombrali/HDD1/mmlib/mmdeploy/configs/mmdet/detection/detection_onnxruntime_dynamic.py" && \
 MODEL_CFG="mmdetection/work_dirs/mbnv3_20241203/mbnv3_20241203.py" && \
 CHECKPOINT="mmdetection/work_dirs/mbnv3_20241203/epoch_120.pth" && \
@@ -30,13 +33,8 @@ python convert_to_fp16_int8.py \
     --input ${ONNX_NONMS_MODEL}
 ```
 
-### Option: (Add a preprocessor for unity sentis inference engine)
-```
-python add_preprocessor_sentis.py
-```
-
-
-``` # with nms
+### with nms
+``` 
 EXPORT_CFG="/media/sombrali/HDD1/mmlib/mmdeploy/configs/mmdet/detection/detection_onnxruntime_dynamic.py" && \
 MODEL_CFG="/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/retinanet_mbnv2-1x_coco/retinanet_mbnv2-1x_coco.py" && \
 CHECKPOINT="/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/retinanet_mbnv2-1x_coco/epoch_12.pth" && \
@@ -59,9 +57,17 @@ python convert_to_fp16_int8.py \
     --input ${ONNX_MODEL}
 ```
 
+### Option: (Add a preprocessor for unity sentis inference engine)
+```
+python add_preprocessor_sentis.py
+```
 
 
-### Use Opset 12 to support some operator in ort1.19.2
+
+## mmyolo models export:
+
+- IMPORTANT NOTES:
+    - Use Opset 12 to support some operator in ort1.19.2
 ```YOLO EXPORT
 MODEL_CFG="/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_hsv_20241101/rtmdet_tiny_disney_headband_v7_largesyn_hsv_20241101.py" && \
 CHECKPOINT="/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_hsv_20241101/epoch_150.pth" && \
