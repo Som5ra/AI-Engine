@@ -2,6 +2,16 @@
 
 #include <onnxruntime_cxx_api.h>
 
+#if defined(BUILD_PLATFORM_ANDROID)
+#include <android/log.h>
+    
+#define LOGV(TAG, ...) __android_log_print(ANDROID_LOG_VERBOSE, TAG,__VA_ARGS__)
+#define LOGD(TAG, ...) __android_log_print(ANDROID_LOG_DEBUG  , TAG,__VA_ARGS__)
+#define LOGI(TAG, ...) __android_log_print(ANDROID_LOG_INFO   , TAG,__VA_ARGS__)
+#define LOGW(TAG, ...) __android_log_print(ANDROID_LOG_WARN   , TAG,__VA_ARGS__)
+#define LOGE(TAG, ...) __android_log_print(ANDROID_LOG_ERROR  , TAG,__VA_ARGS__)
+#endif
+
 #if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
 #include <opencv2/opencv.hpp>
 #else
@@ -30,11 +40,24 @@ extern "C"{
         int input_h
     ){
         try{
-            std::unique_ptr<basic_model_config> config = gusto_detector2d::fetch_model_config("Generic Detector", _model_path, std::make_pair(input_w, input_h));
+            std::string model_path;
+            model_path.assign(_model_path);
+            std::unique_ptr<basic_model_config> config = gusto_detector2d::fetch_model_config("Generic Detector", model_path, std::make_pair(input_w, input_h));
+
+            #if defined(BUILD_PLATFORM_ANDROID)
+            LOGI("GUSTO_DETECTION", "debugf1");
+            #endif
             human_detector = std::move(std::make_unique<gusto_detector2d::Detector>(config));
             std::cout << "Successfully loaded model" << std::endl;
+            #if defined(BUILD_PLATFORM_ANDROID)
+            LOGI("GUSTO_DETECTION", "Successfully loaded model");
+            #endif
         }catch(const std::exception& e){
-            std::cerr << "Failed to open Geometry Pipeline Metadata!" << std::endl;
+            #if defined(BUILD_PLATFORM_ANDROID)
+            LOGE("GUSTO_DETECTION", "Failed to load model!");
+            LOGE("GUSTO_DETECTION", "%s", e.what());
+            #endif
+            std::cerr << "Failed to load model!" << std::endl;
             std::cerr << e.what() << '\n';
         }
         return ;
@@ -43,6 +66,9 @@ extern "C"{
     void Start_Session(char* _frame_path){
         std::string frame_path;
         frame_path.assign(_frame_path);
+        #if defined(BUILD_PLATFORM_ANDROID)
+        LOGI("GUSTO_DETECTION", "Processing Frame: %s", frame_path.c_str());
+        #endif
         std::cout << "Processing Frame: " << frame_path << std::endl;
         frame = cv::imread(frame_path);
         auto start = std::chrono::high_resolution_clock::now();
@@ -55,6 +81,9 @@ extern "C"{
         max_time = std::max(max_time, duration);
         total_time += duration;
         num_frames++;
+        #if defined(BUILD_PLATFORM_ANDROID)
+        LOGI("GUSTO_DETECTION", "Frame Processed in: %f ms, avg: %f ms", duration, std::ceil(total_time / num_frames * 100) / 100);
+        #endif
         std::cout << "\rmin_time: " << min_time << "ms  |  max_time: " << max_time << "ms  |  avg_time: " << std::ceil(total_time / num_frames * 100) / 100 << "ms " << std::flush;    
         return ;
     }

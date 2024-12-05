@@ -31,6 +31,26 @@ if (BUILD_PLATFORM STREQUAL "android")
     target_link_libraries( detection_csharp_example OpenMP::OpenMP_CXX ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS})
 endif()
 
+if(BUILD_PLATFORM STREQUAL "ios")
+    include_directories(${CMAKE_SOURCE_DIR}/include )
+    # add_executable( ${PROJECT_NAME} face_geometry_example.cpp ${CMAKE_SOURCE_DIR}/src/utils.cpp ${CMAKE_SOURCE_DIR}/tools/nms/nms.cpp ${CMAKE_SOURCE_DIR}/src/BaseONNX.cpp ${CMAKE_SOURCE_DIR}/src/face_model_family.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/face_geometry.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/procrustes_solver.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/geometry_pipeline.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/calculator.cpp)
+    
+    add_library( detection_csharp_example STATIC detection_example_mobile.cc  ${SOURCES} ${DETECTION_2D_LIBS} ${NMS_LIBS})
+    target_include_directories(detection_csharp_example PRIVATE ${OPENMP_INCLUDES} ${onnxruntime_INCLUDE_DIRS})
+    target_link_libraries( detection_csharp_example "-framework Foundation" ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS})
+
+
+    # make a bundle
+    # cannot auto-configure ${EFFECTIVE_PLATFORM_NAME} in $<TARGET_FILE:xxx>, so hardcode it here
+    # pls see https://cmake.org/pipermail/cmake/2016-March/063050.html
+    set(STATUS custom_target_path ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}-"iphoneos"/detection_csharp_example.a)
+    add_custom_command(TARGET detection_csharp_example POST_BUILD
+        COMMAND ${libtool} -static -o libfat_example.a ${custom_target_path} ${OpenCV_LIB_FILES} ${onnxruntime_LIBS}
+        COMMENT "Bundling detection_csharp_example"
+        VERBATIM)
+endif()
+
+
 # [Sombra] -> need msvc compiler
 # if(BUILD_PLATFORM STREQUAL "windows")
 #     include_directories(${CMAKE_SOURCE_DIR}/include)

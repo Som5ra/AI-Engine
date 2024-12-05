@@ -29,7 +29,8 @@ int main(int argc, char *argv[])
     // const std::pair<int, int> _input_size = std::make_pair(320, 320);
 
 
-    std::string _model_path = "/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_20241027/best_coco_bbox_mAP_epoch_150/best_coco_bbox_mAP_epoch_150_nonms_fp16.onnx";
+    // std::string _model_path = "/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_20241027/best_coco_bbox_mAP_epoch_150/best_coco_bbox_mAP_epoch_150_nonms_fp16.onnx";
+    std::string _model_path = "/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/StreamingAssets/Weights/rtmdet_t_v7_20241028_preprocessor.onnx";
     std::string _model_name = "rtmdet-tiny";
     std::pair<int, int> _input_size = std::make_pair(320, 320);
 
@@ -47,7 +48,8 @@ int main(int argc, char *argv[])
 
 
     std::unique_ptr<basic_model_config> config = gusto_detector2d::fetch_model_config(_model_name, _model_path, _input_size);
-    std::unique_ptr<gusto_detector2d::Detector> human_detector = std::make_unique<gusto_detector2d::Detector>(config);
+    std::unique_ptr<gusto_detector2d::Detector> human_detector;
+    human_detector = std::move(std::make_unique<gusto_detector2d::Detector>(config));
     std::cout << "Successfully loaded model" << std::endl;
     float min_time = 1000000;
     float max_time = 0;
