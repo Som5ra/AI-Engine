@@ -51,11 +51,18 @@ Detector::Detector(std::unique_ptr<basic_model_config>& _config)
     }
 }
 
-std::vector<float> Detector::preprocess_img(const cv::Mat& image) {
+std::vector<float> Detector::preprocess_img(const cv::Mat& image, bool bgr2rgb) {
     cv::Mat frame;
-    cv::cvtColor(image, frame, cv::COLOR_BGR2RGB);
+    if (bgr2rgb) {
+        cv::cvtColor(image, frame, cv::COLOR_BGR2RGB);
+    }else{
+        frame = image.clone();
+    }
+    this->h_ratio = image.rows / (float)_config->input_size.first;
+    this->w_ratio = image.cols / (float)_config->input_size.second;
     cv::resize(frame, frame, cv::Size(_config->input_size.second, _config->input_size.first), 0, 0, cv::INTER_LINEAR);
     frame.convertTo(frame, CV_32FC3, 1.0 / 127.5, -1); // NHWC
+    // frame.convertTo(frame, CV_32FC3, 1.0 / 255.0); // NHWC
     
     std::vector<cv::Mat> rgbsplit;
     cv::split(frame, rgbsplit);
@@ -81,7 +88,11 @@ std::vector<float> Detector::preprocess_img(const cv::Mat& image) {
 }
 
 std::vector<Ort::Value> Detector::forward(const cv::Mat& raw) {
-    std::vector<float> input_tensor_values = preprocess_img(raw);
+    bool bgr2rgb = true;
+    if (this->_config->model_name.find("rtm") != std::string::npos){
+        bgr2rgb = false;
+    }
+    std::vector<float> input_tensor_values = preprocess_img(raw, bgr2rgb);
 
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
     Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), inputTensorSize, input_shape[0].data(), input_shape[0].size());
@@ -91,15 +102,21 @@ std::vector<Ort::Value> Detector::forward(const cv::Mat& raw) {
 
 }
 
+
+
 std::vector<gusto_nms::Rect> Detector::postprocess(const std::vector<Ort::Value>& net_out, float score_thr, float nms_thr) {
-    const float* _dets = net_out[1].GetTensorData<float>();
-    const float* _scores = net_out[0].GetTensorData<float>();
+    const float* _dets = net_out[0].GetTensorData<float>();
+    const float* _scores = net_out[1].GetTensorData<float>();
+
     std::vector<gusto_nms::Rect> dets;
     std::vector<std::vector<float>> scores;
-    for(size_t i = 0; i < net_out[0].GetTensorTypeAndShapeInfo().GetElementCount() / 16; i++){
-        gusto_nms::Rect rect(_dets[i * 16], _dets[i * 16 + 1], _dets[i * 16 + 2], _dets[i * 16 + 3]);
+    // std::cout << "net_out[0].GetTensorTypeAndShapeInfo().GetElementCount(): " << net_out[0].GetTensorTypeAndShapeInfo().GetElementCount() << std::endl;
+    // std::cout << "net_out[1].GetTensorTypeAndShapeInfo().GetElementCount(): " << net_out[1].GetTensorTypeAndShapeInfo().GetElementCount() << std::endl;
+    float max_score = 0;
+    for(size_t i = 0; i < net_out[0].GetTensorTypeAndShapeInfo().GetElementCount() / 4; i++){
+        gusto_nms::Rect rect(_dets[i * 4], _dets[i * 4 + 1], _dets[i * 4 + 2], _dets[i * 4 + 3]);
         dets.push_back(rect);
-        std::vector<float> score = {_scores[i]};
+        std::vector<float> score = {_scores[i], _scores[i + 2100], _scores[i + 4200]};
         scores.push_back(score);
     }
     // std::vector<float> dets(_dets, _dets + net_out[0].GetTensorTypeAndShapeInfo().GetElementCount());
@@ -110,10 +127,40 @@ std::vector<gusto_nms::Rect> Detector::postprocess(const std::vector<Ort::Value>
 
     std::vector<gusto_nms::Rect> filtered_boxes;
     for (size_t i = 0; i < indices.size(); i++) {
-        filtered_boxes.push_back(dets[indices[i]]);
+        // std::cout << "indices[i]: " << indices[i] << std::endl;
+        // std::cout << "dets[i]: " << dets[indices[i]].x1 << " " << dets[indices[i]].y1 << " " << dets[indices[i]].x2 << " " << dets[indices[i]].y2 << std::endl;
+        // std::cout << "rescaled: " << dets[indices[i]].x1 * h_ratio << " " << dets[indices[i]].y1 * w_ratio << " " << dets[indices[i]].x2 * h_ratio << " " << dets[indices[i]].y2 * w_ratio << std::endl;
+        gusto_nms::Rect rescaled_rect(dets[indices[i]].x1 * w_ratio, dets[indices[i]].y1 * h_ratio, dets[indices[i]].x2 * w_ratio, dets[indices[i]].y2 * h_ratio);
+        filtered_boxes.push_back(rescaled_rect);
     }
 
     return filtered_boxes;
 }
+
+
+// std::vector<gusto_nms::Rect> Detector::postprocess_mediapipe(const std::vector<Ort::Value>& net_out, float score_thr, float nms_thr) {
+//     const float* _dets = net_out[1].GetTensorData<float>();
+//     const float* _scores = net_out[0].GetTensorData<float>();
+//     std::vector<gusto_nms::Rect> dets;
+//     std::vector<std::vector<float>> scores;
+//     for(size_t i = 0; i < net_out[0].GetTensorTypeAndShapeInfo().GetElementCount() / 16; i++){
+//         gusto_nms::Rect rect(_dets[i * 16], _dets[i * 16 + 1], _dets[i * 16 + 2], _dets[i * 16 + 3]);
+//         dets.push_back(rect);
+//         std::vector<float> score = {_scores[i]};
+//         scores.push_back(score);
+//     }
+//     // std::vector<float> dets(_dets, _dets + net_out[0].GetTensorTypeAndShapeInfo().GetElementCount());
+//     // std::vector<float> scores(_scores, _scores + net_out[1].GetTensorTypeAndShapeInfo().GetElementCount());
+//     auto ret = gusto_nms::multiclass_nms_class_unaware_cpu(dets, scores, score_thr, nms_thr);
+//     std::vector<int> indices = ret.first;
+//     std::vector<int> indices_cls = ret.second;
+
+//     std::vector<gusto_nms::Rect> filtered_boxes;
+//     for (size_t i = 0; i < indices.size(); i++) {
+//         filtered_boxes.push_back(dets[indices[i]]);
+//     }
+
+//     return filtered_boxes;
+// }
 
 } //namespace gusto_humanseg

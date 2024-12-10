@@ -7,6 +7,7 @@ add_definitions("-DBUILD_PLATFORM_${BUILD_PLATFORM}")
 
 
 if(BUILD_PLATFORM STREQUAL "linux")
+    add_definitions("-DDEBUG")
     include_directories(${CMAKE_SOURCE_DIR}/include )
     # add_executable( ${PROJECT_NAME} face_geometry_example.cpp ${CMAKE_SOURCE_DIR}/src/utils.cpp ${CMAKE_SOURCE_DIR}/tools/nms/nms.cpp ${CMAKE_SOURCE_DIR}/src/BaseONNX.cpp ${CMAKE_SOURCE_DIR}/src/face_model_family.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/face_geometry.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/procrustes_solver.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/geometry_pipeline.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/calculator.cpp)
     add_executable( ${PROJECT_NAME} face_geometry_example.cpp ${SOURCES} ${FACE_MODEL_LIBS} ${NMS_LIBS} ${FACE_GEOMETRY_LIBS})

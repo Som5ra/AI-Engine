@@ -16,11 +16,13 @@ std::unique_ptr<basic_model_config> fetch_model_config(const std::string _model_
 class Detector : public BaseONNX {
     public:
         Detector(std::unique_ptr<basic_model_config>& _config);
-        std::vector<float> preprocess_img(const cv::Mat& image);
+        std::vector<float> preprocess_img(const cv::Mat& image, bool bgr2rgb = false);
         std::vector<Ort::Value> forward(const cv::Mat& raw);
         std::vector<gusto_nms::Rect> postprocess(const std::vector<Ort::Value>& net_out, float score_thr = 0.5, float nms_thr = 0.5) ;
     private:
         std::unique_ptr<basic_model_config> _config;
+        float h_ratio;
+        float w_ratio;
 
 };
 

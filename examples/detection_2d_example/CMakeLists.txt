@@ -14,6 +14,11 @@ if(BUILD_PLATFORM STREQUAL "linux")
     add_executable( ${PROJECT_NAME} detection_example.cpp ${SOURCES} ${DETECTION_2D_LIBS} ${NMS_LIBS})
     target_include_directories(${PROJECT_NAME} PRIVATE ${OPENMP_INCLUDES} ${onnxruntime_INCLUDE_DIRS})
     target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS})
+
+
+    add_executable( headband_tracking_example headband_tracking_example.cc ${SOURCES} ${DETECTION_2D_LIBS} ${NMS_LIBS} ${FACE_MODEL_LIBS} ${FACE_GEOMETRY_LIBS})
+    target_include_directories(headband_tracking_example PRIVATE ${OPENMP_INCLUDES} ${onnxruntime_INCLUDE_DIRS})
+    target_link_libraries( headband_tracking_example OpenMP::OpenMP_CXX ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS})
 endif()
 
 if (BUILD_PLATFORM STREQUAL "macos")
