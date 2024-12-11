@@ -204,7 +204,8 @@ class ScreenToMetricSpaceConverter {
     landmark_list.Clear();
 
     for (int i = 0; i < eigen_matrix.cols(); ++i) {
-      // const Landmark landmark{x: eigen_matrix(0, i), y: eigen_matrix(1, i), z: eigen_matrix(2, i)}; //MSVC do NOT support
+      // [Sombra] -> MSVC does NOT support this initialization method
+      // const Landmark landmark{x: eigen_matrix(0, i), y: eigen_matrix(1, i), z: eigen_matrix(2, i)}; 
       const Landmark landmark = { eigen_matrix(0, i), eigen_matrix(1, i), eigen_matrix(2, i) };
       landmark_list.add_landmark(landmark);
       // auto& landmark = *landmark_list.add_landmark();
