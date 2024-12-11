@@ -95,6 +95,7 @@ pair<vector<int>, vector<int>> multiclass_nms_class_unaware_cpu(const vector<Rec
     // std::cout << endl;
     // std::cout << "max cls_scores: " << *max_element(cls_scores.begin(), cls_scores.end()) << std::endl;
     // std::cout << "max cls_scores pos: " << distance(cls_scores.begin(), max_element(cls_scores.begin(), cls_scores.end())) << std::endl;
+    // std::cout << "max score box: " << boxes[distance(cls_scores.begin(), max_element(cls_scores.begin(), cls_scores.end()))].x1 << " " << boxes[distance(cls_scores.begin(), max_element(cls_scores.begin(), cls_scores.end()))].y1 << " " << boxes[distance(cls_scores.begin(), max_element(cls_scores.begin(), cls_scores.end()))].x2 << " " << boxes[distance(cls_scores.begin(), max_element(cls_scores.begin(), cls_scores.end()))].y2 << std::endl;   
     vector<int> valid_idx = nms_cpu(boxes, cls_scores, score_thr, nms_thr);
 
     if (valid_idx.empty()) {
