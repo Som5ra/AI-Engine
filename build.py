@@ -73,7 +73,9 @@ def build_windows(toolchain = 'win.toolchain.cmake', install = True):
     compile_cmd.append(f'-DCMAKE_TOOLCHAIN_FILE={toolchain}')
     compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')
     compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
-
+    compile_cmd.append('-DBUILD_SHARED_LIBS=OFF')
+    compile_cmd.append('-DOpenCV_STATIC=ON')
+    
     # compile_cmd.append('-DCMAKE_TOOLCHAIN_FILE=~/mingw-w64-x86_64.cmake')
     # compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
     # compile_cmd.append('-DCMAKE_MAKE_PROGRAM=mingw32-make')
@@ -84,8 +86,9 @@ def build_windows(toolchain = 'win.toolchain.cmake', install = True):
     execute(compile_cmd)
     
     # windows_make_path = binary_dir.replace("/", "\\")
-    build_cmd = ['cmake', '--build', binary_dir, '-j8']
+    build_cmd = ['cmake', '--build', binary_dir, '-j8', '--config', 'Release']
     execute(build_cmd)
+
 
     if install:
         install_cmd = [f'cmake --install {binary_dir}']

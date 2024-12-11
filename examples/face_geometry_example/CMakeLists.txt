@@ -27,9 +27,9 @@ endif()
 
 
 # [Sombra] -> need msvc compiler
-# if(BUILD_PLATFORM STREQUAL "windows")
-#     include_directories(${CMAKE_SOURCE_DIR}/include)
-#     add_executable( ${PROJECT_NAME} face_geometry_example.cpp ${SOURCES} ${FACE_MODEL_LIBS} ${NMS_LIBS} ${FACE_GEOMETRY_LIBS})
-#     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
-#     target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${onnxruntime_LIBS}  ${GLOBAL_LINK_3RD_PARTY_LIBS})
-# endif()
+if(BUILD_PLATFORM STREQUAL "windows")
+    include_directories(${CMAKE_SOURCE_DIR}/include)
+    add_executable( ${PROJECT_NAME} face_geometry_example.cpp ${SOURCES} ${FACE_MODEL_LIBS} ${NMS_LIBS} ${FACE_GEOMETRY_LIBS})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
+    target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${onnxruntime_LIBS}  ${GLOBAL_LINK_3RD_PARTY_LIBS})
+endif()

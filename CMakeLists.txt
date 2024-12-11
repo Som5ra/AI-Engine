@@ -85,16 +85,57 @@ elseif(BUILD_PLATFORM STREQUAL "ios")
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/Headers")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/ios-arm64/libonnxruntime.a")
 
-elseif(BUILD_PLATFORM STREQUAL "windows")
+    elseif(BUILD_PLATFORM STREQUAL "windows")
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
+    # set(opencv_perf_test OFF)
+    
+    # add_compile_definitions("-DBUILD_WITH_STATIC_CRT=ON")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
 
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-windows-vs2022/x64/x64/vc17/staticlib)
+
+    if (MSVC_VERSION GREATER_EQUAL "1900")
+        include(CheckCXXCompilerFlag)
+        CHECK_CXX_COMPILER_FLAG("/std:c++latest" _cpp_latest_flag_supported)
+        if (_cpp_latest_flag_supported)
+            add_compile_options("/std:c++latest")
+        endif()
+    endif()
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0/build/install/x64/vc17/staticlib)
 
     # need msvc compiler
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-win-x64-static_lib-1.19.2/include")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-win-x64-static_lib-1.19.2/lib/onnxruntime.lib")
+
+    
+    add_definitions(-DNOMINMAX) # Otherwise, std::max() and std::min() won't work
+  
+    # disable various warnings for MSVC
+    # 4244: 'return': conversion from 'unsigned __int64' to 'int', possible loss of data
+    # 4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+    # 4305: 'argument': truncation from 'double' to 'const float'
+    # 4334: '<<': result of 32-bit shift implicitly converted to 64 bits
+    # 4800: 'int': forcing value to bool 'true' or 'false'
+    # 4996: 'fopen': This function or variable may be unsafe
+    set(disabled_warnings
+        /wd4244
+        /wd4267
+        /wd4305
+        /wd4334
+        /wd4800
+        /wd4996
+    )
+    message(STATUS "Disabled warnings: ${disabled_warnings}")
+    foreach(w IN LISTS disabled_warnings)
+    string(APPEND CMAKE_CXX_FLAGS " ${w} ")
+    endforeach()
+
+    
+    # add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+    # add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 endif()
 
 find_package(OpenCV REQUIRED)
