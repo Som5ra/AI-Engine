@@ -107,8 +107,8 @@ std::vector<float> PoseDetector::preprocess_img(const cv::Mat& image) {
         for (int j = 0; j < w; j++) {
             for (int k = 0; k < rgbsplit.size(); k++) {
                 // std::cout << "i: " <<  i << " j: " << j << " k: " << k << " value: " << rgbsplit[k].at<float>(i, j)<< std::endl;
-                // std::cout << "i: " <<  i << " j: " << j << " k: " << k << " value: " << static_cast<float>(rgbsplit[k].at<u_int8_t>(i, j)) << std::endl;
-                input_tensor_values[k * h * w + i * w + j] = static_cast<float>(rgbsplit[k].at<u_int8_t>(i, j)); // CHW
+                // std::cout << "i: " <<  i << " j: " << j << " k: " << k << " value: " << static_cast<float>(rgbsplit[k].at<uint8_t>(i, j)) << std::endl;
+                input_tensor_values[k * h * w + i * w + j] = static_cast<float>(rgbsplit[k].at<uint8_t>(i, j)); // CHW
             }
         }
     }
