@@ -6,60 +6,42 @@ std::map<std::string, model_lib> MODEL_NAME_LIB_MAPPER = {
     {"rtmo-s", model_lib::RTMO_S}
 };
 
-
-std::unique_ptr<humanpose_config> fetch_model_config(const std::string _model_name){
-    std::unique_ptr<humanpose_config> _config(new humanpose_config());
-    std::cout <<  "input model name: " << _model_name << std::endl;
+std::unique_ptr<basic_model_config> fetch_model_config(std::unique_ptr<basic_model_config>& base_config){
+    // std::unique_ptr<base_model_config> _config(new base_model_config());
+    std::cout <<  "input model name: " << base_config->model_name << std::endl;
+    model_lib model_type;
     try{
-        _config->model_name = _model_name;
-        _config->model_type = MODEL_NAME_LIB_MAPPER[_model_name];
+        model_type = MODEL_NAME_LIB_MAPPER.at(base_config->model_name);
+        // _config->model_name = _model_name;
+        // _config->model_type = MODEL_NAME_LIB_MAPPER[_model_name];
     }catch(const std::exception& e){
         std::cerr << "input model name is not valid! " << std::endl;
-        return _config;
+        return nullptr;
+        // return _config;
     }
 
-    if(_config->model_type == model_lib::RTMO_S){
-        _config->model_path = "rtmo-s.onnx";
-        _config->input_size = std::make_pair(640, 640);
-        _config->class_mapper = {
+    if(model_type == model_lib::RTMO_S){
+        base_config->model_path = "rtmo-s.onnx";
+        base_config->input_size = std::make_pair(640, 640);
+        base_config->class_mapper = {
             // to be written
         };
     }
 
-    std::cout << "model path: " << _config->model_path << std::endl;
-    return _config;
+    std::cout << "model path: " << base_config->model_path << std::endl;
+    return std::move(base_config);
 }
 
-PoseDetector::PoseDetector(std::unique_ptr<humanpose_config>& _config)
-    : BaseONNX(_config->model_path, _config->model_name) {
+PoseDetector::PoseDetector(const std::string& model_path, const std::string& config_path)
+    : BaseONNX(model_path, config_path) {
     this->_config = std::move(_config);
 }
 
-// template<typename in_t, typename out_t> void _hwc_to_chw(in_t* input, size_t* input_shape, out_t* ret, bool flip_rb = false, int num_threads = -1){
-//     if (num_threads <= 0)
-//         num_threads = std::max(1, omp_get_num_procs() / 2);
-    
-//     size_t hw = input_shape[0] * input_shape[1];
-//     size_t num_ch = input_shape[2];
-//     if (flip_rb){
-//         // rgb -> bgr, bgr -> rgb
-//         #pragma omp parallel for num_threads(num_threads)
-//         for(size_t stride = 0; stride < hw; stride++){
-//             ret[hw * 2 + stride] = (out_t)input[stride * 3 + 0];
-//             ret[hw * 1 + stride] = (out_t)input[stride * 3 + 1];
-//             ret[hw * 0 + stride] = (out_t)input[stride * 3 + 2];
-//         }
-//     }else{
-//         #pragma omp parallel for num_threads(num_threads)
-//         for(size_t stride = 0; stride < hw; stride++){
-//             for(size_t ch = 0; ch < num_ch; ch++){
-//                 ret[hw * ch + stride] = (out_t)input[stride * num_ch + ch];
-//             }
-//         }
-//     }
+PoseDetector::PoseDetector(std::unique_ptr<basic_model_config> _config)
+    : BaseONNX(std::move(_config)) {
+    this->_config = std::move(_config);
+}
 
-//     return ;
-// }
 
 cv::Mat PoseDetector::Debug_Preprocess(const cv::Mat& image){
     cv::Mat frame;
@@ -76,56 +58,60 @@ cv::Mat PoseDetector::Debug_Preprocess(const cv::Mat& image){
     return padded_img;
 }
 
-std::vector<float> PoseDetector::preprocess_img(const cv::Mat& image) {
-    cv::Mat frame;
-    frame = image.clone();
-    cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
-    float ratio = std::min(static_cast<float>(_config->input_size.first) / image.rows, static_cast<float>(_config->input_size.second) / image.cols);
-    this->preprocess_ratio = ratio;
-    cv::Mat resized_img;
-    cv::resize(frame, resized_img, cv::Size(static_cast<int>(image.cols * ratio), static_cast<int>(image.rows * ratio)), 0, 0, cv::INTER_LINEAR);
+// std::vector<float> PoseDetector::preprocess_img(const cv::Mat& image) {
+//     cv::Mat frame;
+//     frame = image.clone();
+//     cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
+//     float ratio = std::min(static_cast<float>(_config->input_size.first) / image.rows, static_cast<float>(_config->input_size.second) / image.cols);
+//     this->preprocess_ratio = ratio;
+//     cv::Mat resized_img;
+//     cv::resize(frame, resized_img, cv::Size(static_cast<int>(image.cols * ratio), static_cast<int>(image.rows * ratio)), 0, 0, cv::INTER_LINEAR);
 
-    cv::Rect roi(cv::Point(0, 0), resized_img.size());
-    cv::Mat padded_img(_config->input_size.first, _config->input_size.second, CV_8UC3, cv::Scalar(114, 114, 114));
-    resized_img.copyTo(padded_img(roi));
-    // cv::resize(frame, frame, cv::Size(_config->input_size.second, _config->input_size.first), 0, 0, cv::INTER_LINEAR);
-    // frame.convertTo(frame, CV_32FC3, 1.0 / 127.5, -1); 
-    // padded_img.convertTo(frame, CV_32FC3, 1.0, 0.0); 
-    std::vector<cv::Mat> rgbsplit;
-    cv::split(padded_img, rgbsplit);
+//     cv::Rect roi(cv::Point(0, 0), resized_img.size());
+//     cv::Mat padded_img(_config->input_size.first, _config->input_size.second, CV_8UC3, cv::Scalar(114, 114, 114));
+//     resized_img.copyTo(padded_img(roi));
+//     // cv::resize(frame, frame, cv::Size(_config->input_size.second, _config->input_size.first), 0, 0, cv::INTER_LINEAR);
+//     // frame.convertTo(frame, CV_32FC3, 1.0 / 127.5, -1); 
+//     // padded_img.convertTo(frame, CV_32FC3, 1.0, 0.0); 
+//     std::vector<cv::Mat> rgbsplit;
+//     cv::split(padded_img, rgbsplit);
 
-    std::vector<float> input_tensor_values(inputTensorSize);
+//     std::vector<float> input_tensor_values(inputTensorSize);
 
 
-    int h = rgbsplit[0].size[0];
-    int w = rgbsplit[0].size[1];
-    #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-    #pragma omp parallel for
-    #endif
-    for (int i = 0; i < h; i++) {
-        for (int j = 0; j < w; j++) {
-            for (int k = 0; k < rgbsplit.size(); k++) {
-                // std::cout << "i: " <<  i << " j: " << j << " k: " << k << " value: " << rgbsplit[k].at<float>(i, j)<< std::endl;
-                // std::cout << "i: " <<  i << " j: " << j << " k: " << k << " value: " << static_cast<float>(rgbsplit[k].at<uint8_t>(i, j)) << std::endl;
-                input_tensor_values[k * h * w + i * w + j] = static_cast<float>(rgbsplit[k].at<uint8_t>(i, j)); // CHW
-            }
-        }
-    }
+//     int h = rgbsplit[0].size[0];
+//     int w = rgbsplit[0].size[1];
+//     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
+//     omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
+//     #pragma omp parallel for
+//     #endif
+//     for (int i = 0; i < h; i++) {
+//         for (int j = 0; j < w; j++) {
+//             for (int k = 0; k < rgbsplit.size(); k++) {
+//                 // std::cout << "i: " <<  i << " j: " << j << " k: " << k << " value: " << rgbsplit[k].at<float>(i, j)<< std::endl;
+//                 // std::cout << "i: " <<  i << " j: " << j << " k: " << k << " value: " << static_cast<float>(rgbsplit[k].at<uint8_t>(i, j)) << std::endl;
+//                 input_tensor_values[k * h * w + i * w + j] = static_cast<float>(rgbsplit[k].at<uint8_t>(i, j)); // CHW
+//             }
+//         }
+//     }
 
-    return input_tensor_values;
-}
+//     return input_tensor_values;
+// }
 
-std::vector<Ort::Value> PoseDetector::forward(const cv::Mat& image){
-    std::vector<float> input_tensor_values = preprocess_img(image);
+std::unique_ptr<PostProcessResult> PoseDetector::forward(const cv::Mat& image){
+    // std::vector<float> input_tensor_values = preprocess_img(image);
+    auto input_tensor_values = preprocess(image);
 
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
     Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), inputTensorSize, input_shape[0].data(), input_shape[0].size());
 
     Ort::RunOptions run_options{};
-    std::vector<Ort::Value> output_tensors = ort_session.Run(run_options, input_names.data(), &input_tensor, 1, output_names.data(), 2);
+    std::vector<Ort::Value> output_tensors = ort_session.Run(run_options, input_names.data(), &input_tensor, input_names.size(), output_names.data(), output_names.size());
     // std::vector<Ort::Value> output_tensors;
-    return output_tensors;
+    std::unique_ptr<KeyPointResult> result = std::make_unique<KeyPointResult>();
+    result->keypoints = postprocess(output_tensors, 0.5);
+    // return output_tensors;
+    return result;
 }
 
 std::vector<std::vector<std::tuple<int, int, int>>> PoseDetector::postprocess(const std::vector<Ort::Value>& output_tensors, float threshold) {

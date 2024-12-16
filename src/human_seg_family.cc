@@ -18,23 +18,22 @@ std::map<int, cv::Vec3b> CLASS_COLOR_MAPPER = {
     {5, cv::Vec3b(0, 128, 128)}    // others (accessories)
 };
 
-std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
-    // seg_config* _config = new seg_config();
-    // std::unique_ptr<seg_config> _config = std::make_unique<seg_config>();
-    std::unique_ptr<seg_config> _config(new seg_config());
-    std::cout <<  "input model name: " << _model_name << std::endl;
+// std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
+std::unique_ptr<basic_model_config> fetch_model_config(std::unique_ptr<basic_model_config>& base_config){
+    std::cout <<  "input model name: " << base_config->model_name << std::endl;
+    model_lib _model_type;
     try{
-        _config->model_name = _model_name;
-        _config->model_type = MODEL_NAME_LIB_MAPPER[_model_name];
+        // _config->model_type = MODEL_NAME_LIB_MAPPER[_model_name];
+        _model_type = MODEL_NAME_LIB_MAPPER[base_config->model_name];
     }catch(const std::exception& e){
         std::cerr << "input model name is not valid! " << std::endl;
-        return _config;
+        return nullptr;
     }
 
-    if(_config->model_type == model_lib::selfie_multiclass_256x256){
-        _config->model_path = "selfie_multiclass_256x256.onnx";
-        _config->input_size = std::make_pair(256, 256);
-        _config->class_mapper = {
+    if(_model_type == model_lib::selfie_multiclass_256x256){
+        // _config->model_path = "selfie_multiclass_256x256.onnx";
+        base_config->input_size = std::make_pair(256, 256);
+        base_config->class_mapper = {
             {0, "background"},
             {1, "hair"},
             {2, "body-skin"},
@@ -43,26 +42,26 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
             {5, "others (accessories)"}
         };
     }
-    if(_config->model_type == model_lib::selfie_segmenter){
-        _config->model_path = "selfie_segmenter_refactor.onnx";
-        _config->input_size = std::make_pair(256, 256);
-        _config->class_mapper = {
+    if(_model_type == model_lib::selfie_segmenter){
+        // base_config->model_path = "selfie_segmenter_refactor.onnx";
+        base_config->input_size = std::make_pair(256, 256);
+        base_config->class_mapper = {
             {0, "background"}, // [Sombra] -> added by me, easy to postprocess 
             {1, "person"}
         };
     }
-    if(_config->model_type == model_lib::selfie_segmenter_landscape){
-        _config->model_path = "selfie_segmentation_landscape_refactor_fixed.onnx";
-        _config->input_size = std::make_pair(256, 144),
-        _config->class_mapper = {
+    if(_model_type == model_lib::selfie_segmenter_landscape){
+        // base_config->model_path = "selfie_segmentation_landscape_refactor_fixed.onnx";
+        base_config->input_size = std::make_pair(256, 144),
+        base_config->class_mapper = {
             {0, "background"}, // [Sombra] -> added by me, easy to postprocess 
             {1, "person"}
         };
     }
-    if(_config->model_type == model_lib::deeplab_v3){
-        _config->model_path = "deeplab_v3.onnx";
-        _config->input_size = std::make_pair(257, 257);
-        _config->class_mapper = {
+    if(_model_type == model_lib::deeplab_v3){
+        // base_config->model_path = "deeplab_v3.onnx";
+        base_config->input_size = std::make_pair(257, 257);
+        base_config->class_mapper = {
             {0, "background"},
             {1, "person"},
             {2, "cat"},
@@ -70,53 +69,43 @@ std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name){
             {4, "potted plant"}
         };
     }
-    std::cout << "model path: " << _config->model_path << std::endl;
-    return _config;
+    std::cout << "model path: " << base_config->model_path << std::endl;
+    return std::move(base_config);
 }
 
 
-Segmenter::Segmenter(std::unique_ptr<seg_config>& _config)
-    : BaseONNX(_config->model_path, _config->model_name) {
-    this->_config = std::move(_config);
+Segmenter::Segmenter(const std::string& model_path, const std::string& config_path)
+    : BaseONNX(model_path, config_path) {
+    _seg_config = std::move(fetch_model_config(this->_config));
 }
 
-cv::Mat Segmenter::preprocess_img(const cv::Mat& image) {
-    cv::Mat frame;
-    cv::cvtColor(image, frame, cv::COLOR_BGR2RGB);
-    cv::resize(frame, frame, cv::Size(_config->input_size.second, _config->input_size.first), 0, 0, cv::INTER_LINEAR);
-    frame.convertTo(frame, CV_32FC3, 1.0 / 127.5, -1); // NHWC
-    return frame;
+Segmenter::Segmenter(std::unique_ptr<basic_model_config> _config)
+    : BaseONNX(std::move(_config)) {
+    _seg_config = std::move(fetch_model_config(this->_config));
 }
 
-std::vector<Ort::Value> Segmenter::forward(const cv::Mat& raw) {
-    cv::Mat frame = preprocess_img(raw);
-    
-    std::vector<cv::Mat> rgbsplit;
-    cv::split(frame, rgbsplit);
+// cv::Mat Segmenter::preprocess_img(const cv::Mat& image) {
+//     cv::Mat frame;
+//     cv::cvtColor(image, frame, cv::COLOR_BGR2RGB);
+//     cv::resize(frame, frame, cv::Size(_config->input_size.second, _config->input_size.first), 0, 0, cv::INTER_LINEAR);
+//     frame.convertTo(frame, CV_32FC3, 1.0 / 127.5, -1); // NHWC
+//     return frame;
+// }
 
-    size_t inputTensorSize = 1;
-    for (auto dim : input_shape[0]) {
-        inputTensorSize *= dim;
-    }
-
-    std::vector<float> input_tensor_values(inputTensorSize);
-    #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-    #pragma omp parallel for
-    #endif
-    for (int i = 0; i < rgbsplit[0].size[0]; i++) {
-        for (int j = 0; j < rgbsplit[0].size[1]; j++) {
-            for (int k = 0; k < rgbsplit.size(); k++) {
-                input_tensor_values[i * rgbsplit[0].size[1] * rgbsplit.size() + j * rgbsplit.size() + k] = rgbsplit[k].at<float>(i, j);
-            }
-        }
-    }
+std::unique_ptr<PostProcessResult> Segmenter::forward(const cv::Mat& raw) {
+    // cv::Mat frame = preprocess_img(raw);
+    std::vector<float> input_tensor_values = preprocess(raw);
 
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
     Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), inputTensorSize, input_shape[0].data(), input_shape[0].size());
 
     std::vector<Ort::Value> output_tensors = ort_session.Run(Ort::RunOptions{nullptr}, input_names.data(), &input_tensor, 1, output_names.data(), 1);
-    return output_tensors;
+
+
+    std::unique_ptr<SegmentationResult> ret = std::make_unique<SegmentationResult>();
+    ret->mask = postprocess(output_tensors, std::make_pair(raw.rows, raw.cols));
+    return std::move(ret);
+    // return output_tensors;
 
 }
 

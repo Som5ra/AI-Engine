@@ -1,0 +1,27 @@
+{
+    "model_name": "face_landmark_mediapipe",
+    "result_type": "mp_keypoint",
+    "input_size": {
+        "height": 256,
+        "width": 256,
+        "channels": 3
+    },
+    "classes": [
+        "Face"
+    ],
+    "Preprocessing": {
+        "DIM_ORDER": "NHWC",
+        "CHANNEL_ORDER": "RGB",
+        "MEAN": [
+            127.5,
+            127.5,
+            127.5
+        ],
+        "STD": [
+            127.5,
+            127.5,
+            127.5
+        ]
+    }
+}
+

@@ -1,8 +1,12 @@
 #include "face_model_family.h"
+#include <filesystem>
 
+namespace gusto_mp_face{
+FaceDetector::FaceDetector(const std::string& model_path, const std::string& config_path)
+    : BaseONNX(model_path, config_path) {
 
-FaceDetector::FaceDetector(const std::string& model_path, const std::string& anchor_path)
-    : BaseONNX(model_path, "FaceDetector") {
+    std::filesystem::path model_dir = std::filesystem::path(model_path).parent_path();
+    std::string anchor_path = (model_dir / "anchor.bin").string();
     anchor_rows = 896;
     anchor_cols = 4;
     anchors = LoadBinaryFile2D(anchor_path, anchor_rows, anchor_cols);
@@ -10,48 +14,24 @@ FaceDetector::FaceDetector(const std::string& model_path, const std::string& anc
     class_mapper[0] = "Face";
 }
 
-cv::Mat FaceDetector::preprocess_img(const cv::Mat& image) {
-    cv::Mat frame;
-    cv::cvtColor(image, frame, cv::COLOR_BGR2RGB);
-    cv::resize(frame, frame, cv::Size(INPUT_SIZE, INPUT_SIZE), 0, 0, cv::INTER_LINEAR);
-    frame.convertTo(frame, CV_32FC3, 1.0 / 127.5, -1);
-    return frame;
+FaceDetector::FaceDetector(std::unique_ptr<basic_model_config> config)
+    : BaseONNX(std::move(config)) {
+
+    std::filesystem::path model_dir = std::filesystem::path(this->_config->model_path).parent_path();
+    std::string anchor_path = (model_dir / "anchor.bin").string();
+    anchor_rows = 896;
+    anchor_cols = 4;
+    anchors = LoadBinaryFile2D(anchor_path, anchor_rows, anchor_cols);
+    INPUT_SIZE = 128;
+    class_mapper[0] = "Face";
 }
 
-std::tuple<std::vector<gusto_nms::Rect>, std::vector<std::vector<float>>, std::vector<int>, std::vector<int>> FaceDetector::forward(const cv::Mat& raw) {
-    cv::Mat frame = preprocess_img(raw);
-
-    std::vector<cv::Mat> rgbsplit;
-    cv::split(frame, rgbsplit);
-
-    size_t inputTensorSize = 1;
-    for (auto dim : input_shape[0]) {
-        inputTensorSize *= dim;
-    }
-
-    std::vector<float> input_tensor_values(inputTensorSize);
-    #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-    #pragma omp parallel for
-    #endif
-    for (int i = 0; i < rgbsplit[0].size[0]; i++) {
-        for (int j = 0; j < rgbsplit[0].size[1]; j++) {
-            for (int k = 0; k < rgbsplit.size(); k++) {
-                input_tensor_values[i * rgbsplit[0].size[1] * rgbsplit.size() + j * rgbsplit.size() + k] = rgbsplit[k].at<float>(i, j);
-            }
-        }
-    }
-
-    Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
-    Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), inputTensorSize, input_shape[0].data(), input_shape[0].size());
-
-    auto output_tensors = ort_session.Run(Ort::RunOptions{nullptr}, input_names.data(), &input_tensor, 1, output_names.data(), 2);
-
-    const float* raw_boxes = output_tensors[0].GetTensorData<float>();
+std::unique_ptr<PostProcessResult> FaceDetector::postprocess(const std::vector<Ort::Value>& net_out, const cv::Mat& frame) {
+    const float* raw_boxes = net_out[0].GetTensorData<float>();
     std::vector<gusto_nms::Rect> boxes = decode_boxes(raw_boxes, anchors);
     std::vector<std::vector<float>> scores;
-    std::vector<float> _scores(output_tensors[1].GetTensorMutableData<float>(), output_tensors[1].GetTensorMutableData<float>() + output_tensors[1].GetTensorTypeAndShapeInfo().GetElementCount());
-    auto _scores_with_sigmoid = sigmoid(_scores);
+    std::vector<float> _scores(net_out[1].GetTensorData<float>(), net_out[1].GetTensorData<float>() + net_out[1].GetTensorTypeAndShapeInfo().GetElementCount());
+    // auto _scores_with_sigmoid = sigmoid(_scores);
 
     for (size_t i = 0; i < boxes.size(); i++) {
         std::vector<float> box_score = {sigmoid(_scores[i])};
@@ -62,8 +42,39 @@ std::tuple<std::vector<gusto_nms::Rect>, std::vector<std::vector<float>>, std::v
     std::vector<int> indices = res.first;
     std::vector<int> indices_cls = res.second;
 
-    return {boxes, scores, indices, indices_cls};
+    std::unique_ptr<MediaPipeDetectorResult> ret = std::make_unique<MediaPipeDetectorResult>();
+    for(size_t idx = 0; idx < indices.size(); idx++) {
+        std::vector<int> box_to_crop = {
+            static_cast<int>(boxes[indices[idx]].y1 * frame.size[0]),
+            static_cast<int>(boxes[indices[idx]].x1 * frame.size[1]),
+            static_cast<int>(boxes[indices[idx]].y2 * frame.size[0]),
+            static_cast<int>(boxes[indices[idx]].x2 * frame.size[1]), 
+        }; 
+        ret->boxes.push_back(boxes[indices[idx]]);
+        ret->scores.push_back(scores[indices[idx]]);
+        
+    }
+    // ret->boxes = boxes;
+    // ret->scores = scores;
+    return std::move(ret);
 }
+
+std::unique_ptr<PostProcessResult> FaceDetector::forward(const cv::Mat& raw) {
+
+    std::vector<float> input_tensor_values = preprocess(raw);
+
+    Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
+    Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), inputTensorSize, input_shape[0].data(), input_shape[0].size());
+
+    std::vector<Ort::Value> output_tensors = ort_session.Run(Ort::RunOptions{nullptr}, input_names.data(), &input_tensor, input_names.size(), output_names.data(), output_names.size());
+
+    auto output = postprocess(output_tensors, raw);
+
+    return std::move(output);
+}
+
+
+
 
 cv::Mat FaceDetector::draw_boxes(cv::Mat raw, const std::vector<gusto_nms::Rect>& boxes, const std::vector<std::vector<float>>& scores, const std::vector<int>& indices, const std::vector<int>& indices_cls) {
     for (size_t i = 0; i < indices.size(); ++i) {
@@ -117,8 +128,11 @@ std::vector<std::vector<float>> FaceDetector::LoadBinaryFile2D(const std::string
 }
 
 
-FaceLandmarker::FaceLandmarker(const std::string& model_path)
-    : BaseONNX(model_path, "FaceLandmarker") {}
+FaceLandmarker::FaceLandmarker(const std::string& model_path, const std::string& config_path)
+    : BaseONNX(model_path, config_path) {}
+
+FaceLandmarker::FaceLandmarker(std::unique_ptr<basic_model_config> config)
+    : BaseONNX(std::move(config)) {}
 
 std::tuple<cv::Mat, std::vector<int>>  FaceLandmarker::crop_face(const cv::Mat& image, const std::vector<int>& box) {
     int w = box[3] - box[1];
@@ -133,40 +147,16 @@ std::tuple<cv::Mat, std::vector<int>>  FaceLandmarker::crop_face(const cv::Mat& 
     return {image(roi), box_with_margin};
 }
 
-std::tuple<cv::Mat, float, float> FaceLandmarker::preprocess(const cv::Mat& image) {
-    cv::Mat frame;
-    cv::cvtColor(image, frame, cv::COLOR_BGR2RGB);
-    float h_ratio = static_cast<float>(image.rows) / 256.0f;
-    float w_ratio = static_cast<float>(image.cols) / 256.0f;
-    cv::resize(frame, frame, cv::Size(256, 256), 0, 0, cv::INTER_LINEAR);
-    frame.convertTo(frame, CV_32F, 1.0 / 127.5, -1);
-    return {frame, h_ratio, w_ratio};
-}
+std::unique_ptr<PostProcessResult> FaceLandmarker::forward(const cv::Mat& raw){
 
-std::tuple<std::vector<cv::Point3f>, float, float> FaceLandmarker::forward(const cv::Mat& image) {
-    auto [frame, h_ratio, w_ratio] = preprocess(image);
-
-    size_t inputTensorSize = 1 * 256 * 256 * 3;
-    std::vector<float> input_tensor_values(inputTensorSize);
-
-    std::vector<cv::Mat> rgbsplit;
-    cv::split(frame, rgbsplit);
-    #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-    #pragma omp parallel for
-    #endif
-    for (int i = 0; i < rgbsplit[0].size[0]; i++) {
-        for (int j = 0; j < rgbsplit[0].size[1]; j++) {
-            for (int k = 0; k < rgbsplit.size(); k++) {
-                input_tensor_values[i * rgbsplit[0].size[1] * rgbsplit.size() + j * rgbsplit.size() + k] = rgbsplit[k].at<float>(i, j);
-            }
-        }
-    }
+    std::vector<float> input_tensor_values = preprocess(raw);
+    float h_ratio = static_cast<float>(raw.rows) / static_cast<float>(_config->input_size.first);
+    float w_ratio = static_cast<float>(raw.cols) / static_cast<float>(_config->input_size.second);
 
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
     Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), inputTensorSize, input_shape[0].data(), input_shape[0].size());
 
-    auto output_tensors = ort_session.Run(Ort::RunOptions{nullptr}, input_names.data(), &input_tensor, 1, output_names.data(), output_names.size());
+    auto output_tensors = ort_session.Run(Ort::RunOptions{nullptr}, input_names.data(), &input_tensor, input_names.size(), output_names.data(), output_names.size());
 
     const float* points_data = output_tensors[0].GetTensorData<float>();
     const float* tongueOut_data = output_tensors[1].GetTensorData<float>();
@@ -177,7 +167,13 @@ std::tuple<std::vector<cv::Point3f>, float, float> FaceLandmarker::forward(const
         points.emplace_back(points_data[i * 3] * w_ratio, points_data[i * 3 + 1] * h_ratio, points_data[i * 3 + 2]);
     }
 
-    return {points, tongueOut_data[0], sigmoid(score_data[0])};
+    std::unique_ptr<MediapipeFaceLandmarkResult> ret = std::make_unique<MediapipeFaceLandmarkResult>();
+    ret->points = points;
+    ret->tongueOut = tongueOut_data[0];
+    ret->score = sigmoid(score_data[0]);
+    return std::move(ret);
+
+
 }
 
 cv::Mat FaceLandmarker::draw_points(cv::Mat image, const std::vector<cv::Point3f>& points, const cv::Point& offset, bool display_z) {
@@ -191,3 +187,5 @@ cv::Mat FaceLandmarker::draw_points(cv::Mat image, const std::vector<cv::Point3f
     }
     return image;
 }
+
+} // namespace gusto_mp_face

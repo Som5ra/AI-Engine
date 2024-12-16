@@ -95,9 +95,9 @@ def build_windows(toolchain = 'win.toolchain.cmake', install = True):
         execute(install_cmd, shell=True)
 
 def build_android(
-        toolchain = "/home/sombrali/Unity/Hub/Editor/2022.3.20f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/build/cmake/android.toolchain.cmake",
+        toolchain = "android-ndk-r26d-linux/android-ndk-r26d/build/cmake/android.toolchain.cmake",
         ANDROID_ABI = 'arm64-v8a', 
-        ANDROID_PLATFORM = 'android-22',
+        ANDROID_PLATFORM = 'android-26',
         install = True):
     
     android_abi_enum = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
@@ -180,7 +180,8 @@ if __name__ == '__main__':
         build_linux(install = _install)
 
     if args.android:
-        abis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
+        abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64']
+        # abis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
         for abi in abis:
             build_android(ANDROID_ABI=abi, install = _install)
         # build_android(install = _install)

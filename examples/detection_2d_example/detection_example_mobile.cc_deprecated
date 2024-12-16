@@ -2,16 +2,6 @@
 
 #include <onnxruntime_cxx_api.h>
 
-#if defined(BUILD_PLATFORM_ANDROID)
-#include <android/log.h>
-    
-#define LOGV(TAG, ...) __android_log_print(ANDROID_LOG_VERBOSE, TAG,__VA_ARGS__)
-#define LOGD(TAG, ...) __android_log_print(ANDROID_LOG_DEBUG  , TAG,__VA_ARGS__)
-#define LOGI(TAG, ...) __android_log_print(ANDROID_LOG_INFO   , TAG,__VA_ARGS__)
-#define LOGW(TAG, ...) __android_log_print(ANDROID_LOG_WARN   , TAG,__VA_ARGS__)
-#define LOGE(TAG, ...) __android_log_print(ANDROID_LOG_ERROR  , TAG,__VA_ARGS__)
-#endif
-
 #if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
 #include <opencv2/opencv.hpp>
 #else
@@ -19,8 +9,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #endif
-
-
 extern "C"{
 
 
@@ -28,8 +16,6 @@ extern "C"{
     float max_time = 0;
     float total_time = 0;
     int num_frames = 0;
-    
-    
 
     std::unique_ptr<gusto_detector2d::Detector> human_detector;
     cv::Mat frame;

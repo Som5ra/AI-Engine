@@ -36,21 +36,28 @@ std::map<int, cv::Vec3b> CLASS_COLOR_MAPPER = {
 };
 */
 
-struct seg_config : basic_model_config{
-    model_lib model_type; 
+class SegmentationResult : public PostProcessResult {
+public:
+    cv::Mat mask;
+    // std::vector<cv::Point3f> points;
+    // float tongueOut;
+    // float score;
 };
 
-std::unique_ptr<seg_config> fetch_model_config(const std::string _model_name);
+std::unique_ptr<basic_model_config> fetch_model_config(std::unique_ptr<basic_model_config>& base_config);
 
 
 class Segmenter : public BaseONNX {
     public:
-        Segmenter(std::unique_ptr<seg_config>& _config);
-        cv::Mat preprocess_img(const cv::Mat& image);
-        std::vector<Ort::Value> forward(const cv::Mat& raw);
+        // Segmenter(std::unique_ptr<seg_config>& _config);
+        Segmenter(const std::string& model_path, const std::string& config_path);
+        Segmenter(std::unique_ptr<basic_model_config> _config);
+        // cv::Mat preprocess_img(const cv::Mat& image);
+        // std::vector<Ort::Value> forward(const cv::Mat& raw);
+        std::unique_ptr<PostProcessResult> forward(const cv::Mat& raw) override;
         cv::Mat postprocess(const std::vector<Ort::Value>& mask_out, std::pair<int, int> target_size);
     private:
-        std::unique_ptr<seg_config> _config;
+        std::unique_ptr<basic_model_config> _seg_config;
 
 };
 

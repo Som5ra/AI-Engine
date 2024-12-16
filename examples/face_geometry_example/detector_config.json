@@ -1,0 +1,26 @@
+{
+    "model_name": "face_detector_mediapipe",
+    "result_type": "mp_detection",
+    "input_size": {
+        "height": 128,
+        "width": 128,
+        "channels": 3
+    },
+    "classes": [
+        "Face"
+    ],
+    "Preprocessing": {
+        "DIM_ORDER": "NHWC",
+        "CHANNEL_ORDER": "RGB",
+        "MEAN": [
+            127.5,
+            127.5,
+            127.5
+        ],
+        "STD": [
+            127.5,
+            127.5,
+            127.5
+        ]
+    }
+}

@@ -146,35 +146,35 @@ include_directories(
 )
 
 set(SOURCES 
-    ${CMAKE_SOURCE_DIR}/src/utils.cpp
-    ${CMAKE_SOURCE_DIR}/src/BaseONNX.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils.cc
+    ${CMAKE_SOURCE_DIR}/src/BaseONNX.cc
 )
 
 set(DETECTION_2D_LIBS
-    ${CMAKE_SOURCE_DIR}/src/detector2d_family.cpp
+    ${CMAKE_SOURCE_DIR}/src/detector2d_family.cc
 )
 
 set(FACE_MODEL_LIBS
-    ${CMAKE_SOURCE_DIR}/src/face_model_family.cpp
+    ${CMAKE_SOURCE_DIR}/src/face_model_family.cc
 )
 
 set(HUMAN_SEG_LIBS
-    ${CMAKE_SOURCE_DIR}/src/human_seg_family.cpp
+    ${CMAKE_SOURCE_DIR}/src/human_seg_family.cc
 )
 
 set(HUMAN_POSE_LIBS
-    ${CMAKE_SOURCE_DIR}/src/human_pose_family.cpp
+    ${CMAKE_SOURCE_DIR}/src/human_pose_family.cc
 )
 
 set(NMS_LIBS
-    ${CMAKE_SOURCE_DIR}/tools/nms/nms.cpp
+    ${CMAKE_SOURCE_DIR}/tools/nms/nms.cc
 )
 
 set(FACE_GEOMETRY_LIBS
-    ${CMAKE_SOURCE_DIR}/tools/face_geometry/face_geometry.cpp
-    ${CMAKE_SOURCE_DIR}/tools/face_geometry/procrustes_solver.cpp
-    ${CMAKE_SOURCE_DIR}/tools/face_geometry/geometry_pipeline.cpp
-    ${CMAKE_SOURCE_DIR}/tools/face_geometry/calculator.cpp
+    ${CMAKE_SOURCE_DIR}/tools/face_geometry/face_geometry.cc
+    ${CMAKE_SOURCE_DIR}/tools/face_geometry/procrustes_solver.cc
+    ${CMAKE_SOURCE_DIR}/tools/face_geometry/geometry_pipeline.cc
+    ${CMAKE_SOURCE_DIR}/tools/face_geometry/calculator.cc
 )
 
 
@@ -183,7 +183,7 @@ set(FACE_GEOMETRY_LIBS
 add_subdirectory(tools)
 add_subdirectory(examples)
 add_subdirectory(src)
-
+add_subdirectory(src_unity_api)
 
 message("")
 message("Compile Summary:")

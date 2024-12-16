@@ -16,22 +16,26 @@ enum class model_lib {
 
 extern std::map<std::string, model_lib> MODEL_NAME_LIB_MAPPER;
 
-struct humanpose_config : basic_model_config{
-    model_lib model_type; 
-};
+std::unique_ptr<basic_model_config> fetch_model_config(const std::unique_ptr<basic_model_config>& _config);
 
-std::unique_ptr<humanpose_config> fetch_model_config(const std::string _model_name);
+class KeyPointResult : public PostProcessResult {
+    public:
+        std::vector<std::vector<std::tuple<int, int, int>>> keypoints;
+        // std::vector<std::pair<int, int>> skeleton;
+};
 
 class PoseDetector : public BaseONNX {
     public:
-        PoseDetector(std::unique_ptr<humanpose_config>& _config);
-        std::vector<float> preprocess_img(const cv::Mat& image);
-        std::vector<Ort::Value> forward(const cv::Mat& image);
+        PoseDetector(const std::string& model_path, const std::string& config_path);
+        PoseDetector(std::unique_ptr<basic_model_config> _config);
+        // PoseDetector(std::unique_ptr<basic_model_config>& _config);
+        // std::vector<float> preprocess_img(const cv::Mat& image);
+        std::unique_ptr<PostProcessResult> forward(const cv::Mat& image);
         cv::Mat Debug_Preprocess(const cv::Mat& image);
         std::vector<std::vector<std::tuple<int, int, int>>>  postprocess(const std::vector<Ort::Value>& output_tensors, float threshold = 0.5);
         cv::Mat draw_single_person_keypoints(cv::Mat image, const std::vector<std::tuple<int, int, int>>& keypoints);
     private:
-        std::unique_ptr<humanpose_config> _config;
+        std::unique_ptr<basic_model_config> _config;
         float preprocess_ratio;
 
         const std::vector<std::pair<std::string, cv::Vec3i>> coco17_mapper = {

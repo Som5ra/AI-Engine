@@ -5,18 +5,83 @@
 #include <onnxruntime_cxx_api.h>
 
 
+#if defined(BUILD_PLATFORM_LINUX) && defined(DEBUG)
+#include <opencv2/opencv.hpp>
+#else
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#endif
+
+enum DimOrder {
+    NCHW,
+    NHWC,
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM( DimOrder, {
+    {NCHW, nullptr},
+    {NCHW, "NCHW"},
+    {NHWC, "NHWC"},
+})
+
+enum ChannelOrder {
+    RGB,
+    BGR,
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM( ChannelOrder, {
+    {RGB, nullptr},
+    {RGB, "RGB"},
+    {BGR, "BGR"},
+})
+
+
+enum ResultType {
+    DetectorResultType,
+
+    SegmentationResultType,
+    KeyPointResultType,
+
+    MediaPipeDetectorResultType,
+    MediapipeFaceLandmarkResultType,
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM( ResultType, {
+    {DetectorResultType, nullptr},
+    {DetectorResultType, "detection"},
+
+    {SegmentationResultType, "segmentation"},
+    {KeyPointResultType, "keypoint"},
+
+    {MediaPipeDetectorResultType, "mp_detection"},
+    {MediapipeFaceLandmarkResultType, "mp_keypoint"},
+})
+
+
+
 struct basic_model_config{
     std::string model_name;
     std::string model_path;
     std::pair<int, int> input_size;
+    int channels;
     std::map<int, std::string> class_mapper;
+
+    ResultType result_type;
+    DimOrder dim_order = DimOrder::NCHW;
+    ChannelOrder channel_order = ChannelOrder::RGB;
+
+};
+
+class PostProcessResult {
+public:
+    virtual ~PostProcessResult(){};
 };
 
 
 class BaseONNX {
 public:
-    BaseONNX(const std::string& model_path, const std::string& model_name);
-    
+    BaseONNX(const std::string& model_path, const std::string& config_path);
+    BaseONNX(std::unique_ptr<basic_model_config> _config);
     virtual ~BaseONNX() {
         for (const char* name : input_names) {
             free(const_cast<char*>(name));
@@ -26,6 +91,15 @@ public:
         }
     }
 
+    virtual std::vector<float> preprocess(const cv::Mat& image);
+    // virtual std::vector<Ort::Value> forward(const cv::Mat& raw) = 0;
+    // virtual std::unique_ptr<PostProcessResult> postprocess(const std::vector<Ort::Value>& net_out) = 0;
+    virtual std::unique_ptr<PostProcessResult> forward(const cv::Mat& raw) = 0;
+    // virtual ResultType getResultType() const = 0;
+    std::unique_ptr<basic_model_config> _config;
+
+    static std::unique_ptr<basic_model_config> ParseConfig(const std::string& model_path, const std::string& config_path);
+    void Compile();
 protected:
     Ort::Env ort_env;
     Ort::Session ort_session;

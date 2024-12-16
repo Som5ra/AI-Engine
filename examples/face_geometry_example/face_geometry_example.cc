@@ -58,14 +58,16 @@ int main(int argc, char *argv[])
     }
 
     std::string face_detector_path = "face_detector.onnx";
-    std::string anchor_path = "anchor.bin";
+    std::string face_detector_config_path = "detector_config.json";
+    // std::string anchor_path = "anchor.bin";
     std::string face_landmarker_path = "face_landmarks_detector.onnx";
+    std::string face_landmarker_config_path = "landmarker_config.json";
     std::cout << "Loading Face Detector Model: " << face_detector_path << std::endl;
-    FaceDetector face_detector(face_detector_path, anchor_path);
+    // gusto_mp_face::FaceDetector face_detector(face_detector_path, face_detector_config_path);
+    auto parsed_config = BaseONNX::ParseConfig(face_detector_path, face_detector_config_path);
+    gusto_mp_face::FaceDetector face_detector(std::move(parsed_config));
     std::cout << "Loading Face Landmarker Model: " << face_landmarker_path << std::endl;
-    FaceLandmarker face_landmarker(face_landmarker_path);
-
-    // face_detector.check_names();
+    gusto_mp_face::FaceLandmarker face_landmarker(face_landmarker_path, face_landmarker_config_path);
 
 
     gusto_face_geometry::FaceMeshCalculator face_mesh_calculator;
@@ -75,14 +77,6 @@ int main(int argc, char *argv[])
         std::cerr << "Failed to open Geometry Pipeline Metadata!" << std::endl;
         return 1;
     }
-
-    // cv::namedWindow("Frame", cv::WINDOW_NORMAL);
-    // cv::Mat test_image = cv::imread("/media/sombrali/HDD1/opencv-unity/gusto_dnn/000000000785.jpg");
-    // cv::Mat test_image = cv::imread("/media/sombrali/HDD1/opencv-unity/gusto_dnn/download.png", cv::IMREAD_COLOR);
-    // auto [boxes, scores, indices, indices_cls] = face_detector.forward(test_image);
-    // auto painted_image = face_detector.draw_boxes(test_image, boxes, scores, indices, indices_cls);
-    // cv::imshow("Frame", painted_image);
-    // cv::waitKey(0);
 
 
 
@@ -122,19 +116,34 @@ int main(int argc, char *argv[])
         #else
         frame = cv::imread("demo.png");
         #endif
+        
         auto start = std::chrono::high_resolution_clock::now();
-        auto [boxes, scores, indices, indices_cls] = face_detector.forward(frame);
+        cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
+        // auto [boxes, scores, indices, indices_cls] = face_detector.forward(frame);
+        auto ret = face_detector.forward(frame);
+        auto* face_detector_result = dynamic_cast<gusto_mp_face::MediaPipeDetectorResult*>(ret.get());
         std::vector<gusto_face_geometry::NormalizedLandmarkList> multi_face_landmarks;
-        for(size_t idx = 0; idx < indices.size(); idx++) {
+        for (size_t i = 0; i < face_detector_result->boxes.size(); i++){
+        // for(size_t idx = 0; idx < indices.size(); idx++) {
+            // std::vector<int> box_to_crop = {
+            //     static_cast<int>(boxes[indices[idx]].y1 * frame.size[0]),
+            //     static_cast<int>(boxes[indices[idx]].x1 * frame.size[1]),
+            //     static_cast<int>(boxes[indices[idx]].y2 * frame.size[0]),
+            //     static_cast<int>(boxes[indices[idx]].x2 * frame.size[1]), 
+            // }; 
             std::vector<int> box_to_crop = {
-                static_cast<int>(boxes[indices[idx]].y1 * frame.size[0]),
-                static_cast<int>(boxes[indices[idx]].x1 * frame.size[1]),
-                static_cast<int>(boxes[indices[idx]].y2 * frame.size[0]),
-                static_cast<int>(boxes[indices[idx]].x2 * frame.size[1]), 
-            }; 
+                static_cast<int>(face_detector_result->boxes[i].y1 * frame.size[0]),
+                static_cast<int>(face_detector_result->boxes[i].x1 * frame.size[1]),
+                static_cast<int>(face_detector_result->boxes[i].y2 * frame.size[0]),
+                static_cast<int>(face_detector_result->boxes[i].x2 * frame.size[1]), 
+            };
             // cv::Mat cropped_face = face_landmarker.crop_face(frame, box_to_crop);
-            auto [cropped_face, box_to_crop_with_margin]= face_landmarker.crop_face(frame, box_to_crop);
-            auto [points, tongueOut, score] = face_landmarker.forward(cropped_face);
+            auto [cropped_face, box_to_crop_with_margin] = face_landmarker.crop_face(frame, box_to_crop);
+            auto ret = face_landmarker.forward(cropped_face);
+            auto* face_landmarker_result = dynamic_cast<gusto_mp_face::MediapipeFaceLandmarkResult*>(ret.get());
+            auto points = face_landmarker_result->points;
+            auto score = face_landmarker_result->score;
+
             if (score < 0.49) {
                 continue;
             }
@@ -202,6 +211,7 @@ int main(int argc, char *argv[])
 
         if (DISPLAY){
             // auto painted_image = face_detector.draw_boxes(frame, boxes, scores, indices, indices_cls);
+            cv::cvtColor(frame, frame, cv::COLOR_RGB2BGR);
             cv::imshow("Frame", frame);
             if (cv::waitKey(25) >= 0)
                 break;

@@ -54,3 +54,13 @@ if(BUILD_PLATFORM STREQUAL "windows")
     target_link_libraries( ${PROJECT_NAME} ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS} OpenMP::OpenMP_CXX)
 
 endif()
+
+
+if(BUILD_PLATFORM STREQUAL "linux")
+    # file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/Linux/)
+    add_custom_command(TARGET face_geometry_example_mobile  POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:face_geometry_example_mobile> ${CMAKE_BINARY_DIR}/lib/Linux/
+    )
+    install(FILES $<TARGET_FILE:face_geometry_example_mobile> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
+endif()
+
