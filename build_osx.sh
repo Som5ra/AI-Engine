@@ -2,6 +2,16 @@
 
 set -e
 
+brew install wget
+brew install llvm@18
+brew install libomp
+brew install cmake
+
+export CC=$(brew --prefix)/opt/llvm@18/bin/clang
+export CXX=$(brew --prefix)/opt/llvm@18/bin/clang++
+export LDFLAGS="-L$(brew --prefix)/opt/llvm@18/lib -Wl,-rpath,$(brew --prefix)/opt/llvm@18/lib"
+export OpenMP_ROOT=$(brew --prefix)/opt/libomp
+
 TARGET_OS="macos"
 ONNXRUNTIME_SOURCE_URL="https://github.com/Som5ra/AI-Engine/releases/download/3rd-party/onnxruntime-osx-arm64-static_lib-1.19.2.zip"
 OPENCV_SOURCE_URL="https://github.com/Som5ra/AI-Engine/releases/download/3rd-party/opencv-mobile-4.10.0-macos.zip"
