@@ -10,13 +10,15 @@
 
 ```
 Linux Host:
-python3 build.py --android --linux
+./build_linux.sh
+# python3 build.py --android --linux
 
 MACOS Host:
-python3 build.py --macos --ios (--noinstall)
+./build_osx.sh
+# python3 build.py --macos --ios (--noinstall)
 
 Windows Host (with vs2022):
-python3 build.py --windows (--noinstall)
+# python3 build.py --windows (--noinstall)
 ```
 
 
