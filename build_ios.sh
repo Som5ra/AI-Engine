@@ -31,13 +31,20 @@ else
 fi
 
 
+
 cmake -DBUILD_PLATFORM=$TARGET_OS \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+      -GXcode \
       -DCMAKE_TOOLCHAIN_FILE=ios.toolchain.cmake \
+      -DPLATFORM=OS64 \
+      -DENABLE_ARC=1 \
+      -DENABLE_VISIBILITY=0 \
+      -DCMAKE_INSTALL_PREFIX=./install \
+    -DBUILD_SHARED_LIBS=OFF \
       -S . -B build/$TARGET_OS 
 
-cmake --build build/$TARGET_OS -j8
+cmake --build build/$TARGET_OS -j8 --config Release
 
 
 if [ "$1" == "install" ]; then

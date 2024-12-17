@@ -21,7 +21,7 @@ if(BUILD_PLATFORM STREQUAL "ios")
     # pls see https://cmake.org/pipermail/cmake/2016-March/063050.html
     set(STATUS custom_target_path ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}-"iphoneos"/${PROJECT_NAME}.a)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${libtool} -static -o libfat_example.a ${custom_target_path} ${OpenCV_LIB_FILES} ${onnxruntime_LIBS}
+        COMMAND libtool -static -o libfat_example.a ${custom_target_path} ${OpenCV_LIB_FILES} ${onnxruntime_LIBS}
         COMMENT "Bundling ${PROJECT_NAME}"
         VERBATIM)
 endif()
