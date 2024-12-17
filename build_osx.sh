@@ -34,6 +34,7 @@ fi
 cmake -DBUILD_PLATFORM=$TARGET_OS \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+      -DCMAKE_TOOLCHAIN_FILE=osx.toolchain.cmake \
       -S . -B build/$TARGET_OS 
 
 cmake --build build/$TARGET_OS -j8
