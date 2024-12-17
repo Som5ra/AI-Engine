@@ -11,7 +11,7 @@ if [ ! -d "3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2" ]; then
     echo "No Prebuilt onnxruntime found, Downloading from $ONNXRUNTIME_SOURCE_URL"
     cd 3rdparty/onnxruntime
     wget $ONNXRUNTIME_SOURCE_URL -O onnxruntime-osx-arm64-static_lib-1.19.2.zip
-    unzip onnxruntime-osx-x64-static_lib-1.19.2.zip
+    unzip onnxruntime-osx-arm64-static_lib-1.19.2.zip
     rm onnxruntime-osx-arm64-static_lib-1.19.2.zip
     cd ../../
 else
