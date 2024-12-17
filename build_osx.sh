@@ -23,7 +23,7 @@ if [ ! -d "3rdparty/opencv/opencv-mobile-4.10.0-macos" ]; then
     echo "No Prebuilt opencv found, Downloading from $OPENCV_SOURCE_URL"
     cd 3rdparty/opencv
     wget $OPENCV_SOURCE_URL -O opencv-mobile-4.10.0-macos.zip
-    unzip opencv-mobile-4.10.0-ubuntu-2204.zip
+    unzip opencv-mobile-4.10.0-macos.zip
     rm opencv-mobile-4.10.0-macos.zip
     cd ../../
 else
