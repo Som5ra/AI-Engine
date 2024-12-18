@@ -70,7 +70,7 @@ elseif(BUILD_PLATFORM STREQUAL "macos")
 
     find_package(OpenMP REQUIRED)
 
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-macos)
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-macos/lib/cmake/opencv4)
 
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/include")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/lib/libonnxruntime.a")
@@ -80,7 +80,7 @@ elseif(BUILD_PLATFORM STREQUAL "ios")
     set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
     set(CMAKE_CXX_STANDARD 17)
 
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-ios)
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-ios/lib/cmake/opencv4)
 
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/Headers")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2/onnxruntime.xcframework/ios-arm64/libonnxruntime.a")
