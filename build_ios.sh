@@ -18,8 +18,8 @@ else
     echo "Prebuilt onnxruntime found: 3rdparty/onnxruntime/onnxruntime.xcframework-1.19.2"
 fi
 
-# check if 3rdparty/opencv/opencv-mobile-4.10.0-macos exists
-if [ ! -d "3rdparty/opencv/opencv-mobile-4.10.0-macos" ]; then
+# check if 3rdparty/opencv/opencv-mobile-4.10.0-ios exists
+if [ ! -d "3rdparty/opencv/opencv-mobile-4.10.0-ios" ]; then
     echo "No Prebuilt opencv found, Downloading from $OPENCV_SOURCE_URL"
     cd 3rdparty/opencv
     wget $OPENCV_SOURCE_URL -O opencv-mobile-4.10.0-ios.zip
