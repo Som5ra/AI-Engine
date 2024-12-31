@@ -52,6 +52,13 @@ std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& mod
 void BaseONNX::Compile(){
 
     Ort::SessionOptions session_options;
+    #if defined(BUILD_PLATFORM_IOS)
+        uint32_t coreml_flags = 0;
+        Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CoreML(session_options, coreml_flags));
+    #elif defined(BUILD_PLATFORM_ANDROID)
+        session_options.AppendExecutionProvider("XNNPACK");
+    #endif
+    // session_options.AppendExecutionProvider("CPU");
     session_options.SetInterOpNumThreads(1);
     session_options.SetIntraOpNumThreads(std::min(6, (int) std::thread::hardware_concurrency()));
     session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
