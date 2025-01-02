@@ -1,7 +1,7 @@
 #ifndef GUSTO_GEOMETRY_PIPELINE_H_
 #define GUSTO_GEOMETRY_PIPELINE_H_
 #include "utils.h"
-#include "face_geometry.h"
+#include "tools/face_geometry/face_geometry.h"
 namespace gusto_face_geometry {
 
 // Encapsulates a stateless estimator of facial geometry in a Metric space based

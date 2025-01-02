@@ -13,6 +13,14 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #endif
 
+#if defined(BUILD_PLATFORM_IOS)
+#include "coreml_provider_factory.h"  // NOLINT
+#endif
+
+#if defined(BUILD_PLATFORM_ANDROID)
+#include "nnapi_provider_factory.h"  // NOLINT
+#endif
+
 enum DimOrder {
     NCHW,
     NHWC,
@@ -57,6 +65,13 @@ NLOHMANN_JSON_SERIALIZE_ENUM( ResultType, {
     {MediapipeFaceLandmarkResultType, "mp_keypoint"},
 })
 
+enum ProviderType {
+    CPU,
+    XNNPACK,
+    COREML,
+    NNAPI
+};
+
 
 
 struct basic_model_config{
@@ -69,6 +84,8 @@ struct basic_model_config{
     ResultType result_type;
     DimOrder dim_order = DimOrder::NCHW;
     ChannelOrder channel_order = ChannelOrder::RGB;
+
+    ProviderType provider = ProviderType::CPU;
 
 };
 
