@@ -39,20 +39,31 @@ if(BUILD_PLATFORM STREQUAL "linux")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/build/static_lib_xnn/libonnxruntime_static_lib.a")
 
 elseif(BUILD_PLATFORM STREQUAL "android")
+    
+    set(ANDROID_SYSROOT "${CMAKE_SOURCE_DIR}/android-ndk-r27c-linux/android-ndk-r27c")
+
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
+    set(CMAKE_CXX_STANDARD 17)
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g0 -fPIC")
-    set(ANDROID_SYSROOT ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot)
     set(OpenMP_CXX_FLAGS "-fopenmp")
     set(OpenMP_CXX_LIB_NAMES "omp")
+
+    include_directories("${ANDROID_SYSROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/include")
     
-    set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/output/static_lib_android_xnn_${ANDROID_ABI}/include")
-    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/output/static_lib_android_xnn_${ANDROID_ABI}/lib/libonnxruntime.a")
+    set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.19.2/static_lib_${ANDROID_ABI}/include")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.19.2/static_lib_${ANDROID_ABI}/lib/libonnxruntime.a")
 
     # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.19.2/headers")
     # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.19.2/${ANDROID_ABI}/libonnxruntime_static_lib.a")
 
     set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android-ndk26/${ANDROID_ABI}/install/sdk/native/jni)
 
-    set(OpenMP_Base_DIR "${CMAKE_SOURCE_DIR}/android-ndk-r26d-linux/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux")
+    # set(OpenMP_Base_DIR "${CMAKE_SOURCE_DIR}/android-ndk-r26d-linux/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux")
+    # set(OpenMP_Base_DIR "${CMAKE_SOURCE_DIR}/android-ndk-r27c-linux/android-ndk-r27c/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux")
+    set(OpenMP_Base_DIR "${ANDROID_SYSROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux")
+
     if (ANDROID_ABI STREQUAL "arm64-v8a")
         set(OpenMP_omp_LIBRARY "${OpenMP_Base_DIR}/aarch64/libomp.a")
     elseif (ANDROID_ABI STREQUAL "armeabi-v7a")
@@ -64,7 +75,6 @@ elseif(BUILD_PLATFORM STREQUAL "android")
     endif()
 
     find_package(OpenMP REQUIRED)
-    include_directories("android-ndk-r26d-linux/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/include")
 
 elseif(BUILD_PLATFORM STREQUAL "macos")
     

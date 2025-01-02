@@ -26,7 +26,28 @@ std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& mod
 
         _config->channels = data["input_size"]["channels"].get<int>();
 
+        std::string _provider = data["execution_provider"].get<std::string>();
         
+        if (_provider == "CPU") {
+            _config->provider = ProviderType::CPU;
+        } else if (_provider == "XNNPACK") {
+            _config->provider = ProviderType::XNNPACK;
+        } else if (_provider == "COREML") {
+            #if defined(BUILD_PLATFORM_IOS)
+                _config->provider = ProviderType::COREML;
+            #else
+                std::cerr << "COREML provider is not available, would use CPU provider instead" << std::endl;
+            #endif
+        } else if (_provider == "NNAPI") {
+            #if defined(BUILD_PLATFORM_ANDROID)
+                _config->provider = ProviderType::NNAPI;
+            #else
+                std::cerr << "NNAPI provider is not available, would use CPU provider instead" << std::endl;
+            #endif
+        } else {
+            std::cerr << "Provider name is not correct, would use CPU provider instead" << std::endl;
+            _config->provider = ProviderType::CPU;
+        }
 
     }
     catch(const std::exception& e)
@@ -52,13 +73,36 @@ std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& mod
 void BaseONNX::Compile(){
 
     Ort::SessionOptions session_options;
-    #if defined(BUILD_PLATFORM_IOS)
-        uint32_t coreml_flags = 0;
-        Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CoreML(session_options, coreml_flags));
-    #elif defined(BUILD_PLATFORM_ANDROID)
-        session_options.AppendExecutionProvider("XNNPACK");
-    #endif
-    // session_options.AppendExecutionProvider("CPU");
+    
+    switch (this->_config->provider)
+    {
+        case ProviderType::CPU:
+            break;
+        case ProviderType::XNNPACK:
+            session_options.AppendExecutionProvider("XNNPACK");
+            break;
+        case ProviderType::COREML:
+            #if defined(BUILD_PLATFORM_IOS)
+                uint32_t coreml_flags = 0;
+                Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CoreML(session_options, coreml_flags));
+            #else
+                std::cerr << "COREML provider is not available, would use CPU provider instead" << std::endl;
+            #endif
+            break;
+        case ProviderType::NNAPI:
+            #if defined(BUILD_PLATFORM_ANDROID)
+                // Please see
+                // https://onnxruntime.ai/docs/execution-providers/NNAPI-ExecutionProvider.html#usage
+                // to enable different flags
+                uint32_t nnapi_flags = 0;
+                // nnapi_flags |= NNAPI_FLAG_USE_FP16;
+                // nnapi_flags |= NNAPI_FLAG_CPU_DISABLED;
+                OrtStatus *status = OrtSessionOptionsAppendExecutionProvider_Nnapi(session_options, nnapi_flags);
+            #else
+                std::cerr << "NNAPI provider is not available, would use CPU provider instead" << std::endl;
+            #endif
+            break;
+    }
     session_options.SetInterOpNumThreads(1);
     session_options.SetIntraOpNumThreads(std::min(6, (int) std::thread::hardware_concurrency()));
     session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
