@@ -77,14 +77,17 @@ void BaseONNX::Compile(){
     switch (this->_config->provider)
     {
         case ProviderType::CPU:
+            std::cout << "[Provider] CPU" << std::endl;
             break;
         case ProviderType::XNNPACK:
             session_options.AppendExecutionProvider("XNNPACK");
+            std::cout << "[Provider] XNNPACK" << std::endl;
             break;
         case ProviderType::COREML:
             #if defined(BUILD_PLATFORM_IOS)
                 uint32_t coreml_flags = 0;
                 Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CoreML(session_options, coreml_flags));
+                std::cout << "[Provider] COREML" << std::endl;
             #else
                 std::cerr << "COREML provider is not available, would use CPU provider instead" << std::endl;
             #endif
@@ -98,6 +101,8 @@ void BaseONNX::Compile(){
                 // nnapi_flags |= NNAPI_FLAG_USE_FP16;
                 // nnapi_flags |= NNAPI_FLAG_CPU_DISABLED;
                 OrtStatus *status = OrtSessionOptionsAppendExecutionProvider_Nnapi(session_options, nnapi_flags);
+                std::cout << "[Provider] NNAPI" << std::endl;
+
             #else
                 std::cerr << "NNAPI provider is not available, would use CPU provider instead" << std::endl;
             #endif
