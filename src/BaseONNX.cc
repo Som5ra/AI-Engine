@@ -76,14 +76,16 @@ void BaseONNX::Compile(){
     
     switch (this->_config->provider)
     {
-        case ProviderType::CPU:
+        case ProviderType::CPU:{
             std::cout << "[Provider] CPU" << std::endl;
             break;
-        case ProviderType::XNNPACK:
+        }
+        case ProviderType::XNNPACK:{
             session_options.AppendExecutionProvider("XNNPACK");
             std::cout << "[Provider] XNNPACK" << std::endl;
             break;
-        case ProviderType::COREML:
+        }
+        case ProviderType::COREML:{
             #if defined(BUILD_PLATFORM_IOS)
                 uint32_t coreml_flags = 0;
                 Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CoreML(session_options, coreml_flags));
@@ -92,7 +94,8 @@ void BaseONNX::Compile(){
                 std::cerr << "COREML provider is not available, would use CPU provider instead" << std::endl;
             #endif
             break;
-        case ProviderType::NNAPI:
+        }
+        case ProviderType::NNAPI:{
             #if defined(BUILD_PLATFORM_ANDROID)
                 // Please see
                 // https://onnxruntime.ai/docs/execution-providers/NNAPI-ExecutionProvider.html#usage
@@ -107,6 +110,8 @@ void BaseONNX::Compile(){
                 std::cerr << "NNAPI provider is not available, would use CPU provider instead" << std::endl;
             #endif
             break;
+        }
+
     }
     session_options.SetInterOpNumThreads(1);
     session_options.SetIntraOpNumThreads(std::min(6, (int) std::thread::hardware_concurrency()));
