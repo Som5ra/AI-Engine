@@ -1,4 +1,4 @@
-
+This is a lite library with pure C++ for AI model inference, aiming to deploy on mobile devices easily. This can be built to be migrated into **Unity** and used by C#.
 
 ## NN Inference (Developing):
 
@@ -6,15 +6,15 @@ Strongly depending on module: onnxruntime.
 
 **Click to Check Demo**
 
-1. [2D detection Model](https://www.notion.so/Demo-2D-Detection-14a5f7c72a4a800f917feeb9b4a3f186?pvs=21)
+1. 2D detection Model
     1. RTMDet-series
     2. YOLO-series
-2. [Face Landmark Model](https://www.notion.so/Demo-Face-Landmarker-14a5f7c72a4a80258ce6c77b00f23ad7?pvs=21)
+2. [Face Landmark Model](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/face_geometry_demo.gif)
     1. Face Detector
     2. Face Landmarker
-3. [Human Segmentation Model](https://www.notion.so/Demo-Human-Segmentation-14a5f7c72a4a80dc8987f7ed729ac1a4?pvs=21)
+3. [Human Segmentation Model](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/human_segmentation_demo.gif)
     1. Selfie (Close to camera)
-4. [Human Pose Model](https://www.notion.so/Demo-Human-Pose-14b5f7c72a4a80558d72df207c76404f?pvs=21)
+4. Human Pose Model
     1. RTMO `Far Scenario`   `Single Stage`
     2. VIT Pose ****`Pending`
 
@@ -46,14 +46,6 @@ Strongly depending on module: onnxruntime.
 | nlohmann json (header only) | ✅     | ✅              | ✅     | ✅   | ✅       |
 |     Eigen (header only)     | ✅     | ✅              | ✅     | ✅   | ✅       |
 |            OpenMP           | ✅     | ✅              | ✅     | -   | -       |
-
-### Demo
-
-**Face Geometry**
-![Face Geometry](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/face_geometry_demo.gif)
-
-**Human Segmentation**
-![Human Segmentation](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/human_segmentation_demo.gif)
 
 ### Build
 
