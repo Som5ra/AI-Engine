@@ -6,7 +6,7 @@ Strongly depending on module: onnxruntime.
 
 **Click to Check Demo**
 
-1. 2D detection Model
+1. **2D detection Model**
     1. RTMDet-series
     2. YOLO-series
 2. [Face Landmark Model](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/face_geometry_demo.gif)
@@ -14,9 +14,9 @@ Strongly depending on module: onnxruntime.
     2. Face Landmarker
 3. [Human Segmentation Model](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/human_segmentation_demo.gif)
     1. Selfie (Close to camera)
-4. Human Pose Model
+4. **Human Pose Model**
     1. RTMO `Far Scenario`   `Single Stage`
-    2. VIT Pose ****`Pending`
+    2. VIT Pose `Pending`
 
 ### Supported Providers:
 |         | Linux | Android (exclude x86) | MacOS     | IOS       | Windows |
@@ -32,6 +32,7 @@ Strongly depending on module: onnxruntime.
 
 1. [Non-maximum Suppression](https://www.notion.so/Post-Processing-NMS-13b5f7c72a4a804b8751ea6bf1272c3c?pvs=21)
 2. [Face-Geometry](https://www.notion.so/Post-Processing-Face-Geometry-13b5f7c72a4a809bbd5cdc7ccfea48ca?pvs=21)
+
 |                         | Linux | Android | MacOS | IOS | Windows |
 |-------------------------|-------|---------|-------|-----|---------|
 | Non-maximum Suppression | ✅     | ✅       | ✅     | ✅   | ✅       |
@@ -42,7 +43,7 @@ Strongly depending on module: onnxruntime.
 |                             | Linux |     Android    | MacOS | IOS | Windows |
 |:---------------------------:|:-----:|:--------------:|:-----:|:---:|:-------:|
 |       OpenCV - Mobile       | ✅     | ✅              | ✅     | ✅   | ✅       |
-|         ONNXRuntime         | ✅     | ✅excluding x86 | ✅     | ✅   | ✅       |
+|         ONNXRuntime         | ✅     | ✅ excluding x86 | ✅     | ✅   | ✅       |
 | nlohmann json (header only) | ✅     | ✅              | ✅     | ✅   | ✅       |
 |     Eigen (header only)     | ✅     | ✅              | ✅     | ✅   | ✅       |
 |            OpenMP           | ✅     | ✅              | ✅     | -   | -       |
