@@ -1,4 +1,4 @@
-This is a lite library with pure C++ for AI model inference, aiming to deploy on mobile devices easily. This can be built to be migrated into **Unity** and used by C#.
+👏👋This is a lite library with pure C++ for AI model inference, aiming to deploy on mobile devices easily. This can be built to be migrated into **Unity** and used by C#.🎉🎉
 
 ## NN Inference (Developing):
 
@@ -18,7 +18,7 @@ Strongly depending on module: onnxruntime.
     1. RTMO `Far Scenario`   `Single Stage`
     2. VIT Pose `Pending`
 
-### Supported Providers:
+### Supported ONNXRuntime Execution Providers:
 |         | Linux | Android (exclude x86) | MacOS     | IOS       | Windows |
 |---------|-------|-----------------------|-----------|-----------|---------|
 | CPU     | ✅     | ✅                     | ✅         | ✅         | ✅       |
