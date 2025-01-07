@@ -49,9 +49,11 @@ Strongly depending on module: onnxruntime.
 
 ### Demo
 
+**Face Geometry**
 ![Face Geometry](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/face_geometry_demo.gif)
 
-![Human Segmentation](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/face_geometry_demo.gif)
+**Human Segmentation**
+![Human Segmentation](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/human_segmentation_demo.gif)
 
 ### Build
 
