@@ -10,6 +10,7 @@ project(pysrt3d LANGUAGES CXX C)
 # =============================================================================
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE "Release")
 # set(CMAKE_BUILD_TYPE "Release")
 
 
@@ -117,17 +118,17 @@ target_link_libraries(${PROJECT_NAME}
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "pysrt3d" PREFIX "")
 
 
-# Unity Plugin Compiling
+# CPP Source Compiling
 # =============================================================================
-
-add_library(model_target SHARED
+add_library(csrt3d_module SHARED
     ${FILES_CPP}
     "${PROJECT_SOURCE_DIR}/csrt3d/csrt3d.cc"
     "${PROJECT_SOURCE_DIR}/csrt3d/unity_api.cc"
 )
 
+
 ## include
-target_include_directories(model_target
+target_include_directories(csrt3d_module
     PUBLIC
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/csrt3d
@@ -135,7 +136,7 @@ target_include_directories(model_target
 )
 
 ## linking
-target_link_libraries(model_target
+target_link_libraries(csrt3d_module
     PUBLIC
         Eigen3::Eigen
     PRIVATE
@@ -145,9 +146,8 @@ target_link_libraries(model_target
         glfw
 )
 
-
-install(FILES $<TARGET_FILE:model_target> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
-
+# example
+# =============================================================================
 
 ## example
 add_executable(run_on_webcam
@@ -169,7 +169,7 @@ target_include_directories(run_on_webcam
 target_link_libraries(run_on_webcam
 
     PUBLIC
-        model_target
+        csrt3d_module
         Eigen3::Eigen
     PRIVATE
         ${OpenCV_LIBS}
@@ -177,6 +177,45 @@ target_link_libraries(run_on_webcam
         GLEW::GLEW
         glfw
 )
+
+
+
+# Unity Plugin Compiling
+# =============================================================================
+
+
+set(FILES_CPP_WO_OPENGL src/body.cpp src/camera.cpp src/common.cpp src/model.cpp src/region_modality.cpp src/tracker.cpp)
+
+
+add_library(model_target SHARED
+    ${FILES_CPP_WO_OPENGL}
+    "${PROJECT_SOURCE_DIR}/csrt3d/csrt3d.cc"
+    "${PROJECT_SOURCE_DIR}/csrt3d/unity_api.cc"
+)
+
+target_compile_definitions(model_target PRIVATE __DISABLE_OPENGL__)
+
+
+## include
+target_include_directories(model_target
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/csrt3d
+        ${PROJECT_SOURCE_DIR}/third_party
+)
+
+## linking
+target_link_libraries(model_target
+    PUBLIC
+        Eigen3::Eigen
+    PRIVATE
+        ${OpenCV_LIBS}
+        # OpenGL::GL
+        # GLEW::GLEW
+        # glfw
+)
+
+install(FILES $<TARGET_FILE:model_target> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
 
 
 

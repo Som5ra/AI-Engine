@@ -156,12 +156,14 @@ bool Tracker::UpdateCameras() {
   return true;
 }
 
+#if !defined(__DISABLE_OPENGL__)
 bool Tracker::StartOcclusionRendering() {
   for (auto &occlusion_renderer_ptr : occlusion_renderer_ptrs_) {
     if (!occlusion_renderer_ptr->StartRendering()) return false;
   }
   return true;
 }
+#endif // !defined(__DISABLE_OPENGL__)
 
 bool Tracker::CalculateCorrespondences(int corr_iteration) {
   for (auto &region_modality_ptr : region_modality_ptrs_) {
@@ -249,22 +251,29 @@ bool Tracker::set_up() const { return set_up_; }
 
 void Tracker::AssambleDerivedObjectPtrs() {
   camera_ptrs_.clear();
+  #if !defined(__DISABLE_OPENGL__)
   occlusion_renderer_ptrs_.clear();
+  #endif // !defined(__DISABLE_OPENGL_)
   // renderer_geometry_ptrs_.clear();
   for (auto &region_modality_ptr : region_modality_ptrs_) {
     if (region_modality_ptr->camera_ptr())
       AddPtrIfNameNotExists(region_modality_ptr->camera_ptr(), &camera_ptrs_);
     if (region_modality_ptr->model_ptr())
       AddPtrIfNameNotExists(region_modality_ptr->model_ptr(), &model_ptrs_);
+    #if !defined(__DISABLE_OPENGL__)
     if (region_modality_ptr->occlusion_renderer_ptr())
       AddPtrIfNameNotExists(region_modality_ptr->occlusion_renderer_ptr(),
                             &occlusion_renderer_ptrs_);
+    #endif // !defined(__DISABLE_OPENGL_)
   }
+  #if !defined(__DISABLE_OPENGL__)
   for (auto &occlusion_renderer_ptr : occlusion_renderer_ptrs_) {
     if (occlusion_renderer_ptr->renderer_geometry_ptr())
       AddPtrIfNameNotExists(occlusion_renderer_ptr->renderer_geometry_ptr(),
                             &renderer_geometry_ptrs_);
   }
+  #endif // !defined(__DISABLE_OPENGL_)
+
   // for (auto &viewer_ptr : viewer_ptrs_) {
   //   if (viewer_ptr->camera_ptr())
   //     AddPtrIfNameNotExists(viewer_ptr->camera_ptr(), &camera_ptrs_);
@@ -275,11 +284,18 @@ void Tracker::AssambleDerivedObjectPtrs() {
 }
 
 bool Tracker::SetUpAllObjects() {
-  return SetUpObjectPtrs(&renderer_geometry_ptrs_) &&
-         SetUpObjectPtrs(&camera_ptrs_) && // SetUpObjectPtrs(&viewer_ptrs_) &&
+  #if !defined(__DISABLE_OPENGL__)
+    return SetUpObjectPtrs(&renderer_geometry_ptrs_) &&
+          SetUpObjectPtrs(&camera_ptrs_) && // SetUpObjectPtrs(&viewer_ptrs_) &&
+          SetUpObjectPtrs(&model_ptrs_) &&
+          SetUpObjectPtrs(&occlusion_renderer_ptrs_) &&
+          SetUpObjectPtrs(&region_modality_ptrs_);
+  #else
+    return SetUpObjectPtrs(&camera_ptrs_) && 
          SetUpObjectPtrs(&model_ptrs_) &&
-         SetUpObjectPtrs(&occlusion_renderer_ptrs_) &&
          SetUpObjectPtrs(&region_modality_ptrs_);
+
+  #endif // !defined(__DISABLE_OPENGL_)
 }
 
 }  // namespace srt3d

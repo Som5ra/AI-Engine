@@ -83,12 +83,13 @@ bool RegionModality::SetUp() {
               << std::endl;
     return false;
   }
+  #if !defined(__DISABLE_OPENGL__)
   if (use_occlusion_handling_ && !occlusion_renderer_ptr_->set_up()) {
     std::cerr << "Occlusion renderer " << occlusion_renderer_ptr_->name()
               << " was not set up" << std::endl;
     return false;
   }
-
+  #endif // !defined(__DISABLE_OPENGL__)
   PrecalculateFunctionLookup();
   PrecalculateDistributionVariables();
   PrecalculateHistogramBinVariables();
@@ -198,7 +199,8 @@ void RegionModality::set_tikhonov_parameter_translation(
   tikhonov_matrix_.diagonal().tail<3>().array() =
       tikhonov_parameter_translation_;
 }
-
+#if !defined(__DISABLE_OPENGL__)
+// [Sombra] -> Disable occlusionhandling if OpenGL is disabled for now
 void RegionModality::UseOcclusionHandling(
     std::shared_ptr<OcclusionRenderer> occlusion_renderer_ptr) {
   occlusion_renderer_ptr_ = std::move(occlusion_renderer_ptr);
@@ -211,6 +213,8 @@ void RegionModality::DoNotUseOcclusionHandling() {
   use_occlusion_handling_ = false;
   set_up_ = false;
 }
+#endif // !defined(__DISABLE_OPENGL__)
+
 
 void RegionModality::set_display_visualization(bool display_visualization) {
   display_visualization_ = display_visualization;
@@ -336,9 +340,11 @@ bool RegionModality::VisualizeCorrespondences(int save_idx) {
 
   if (visualize_lines_correspondence_)
     VisualizeLines("lines_correspondence", save_idx);
+  #if !defined(__DISABLE_OPENGL__)
   if (visualize_points_occlusion_mask_correspondence_ &&
       use_occlusion_handling_)
     VisualizePointsOcclusionMask("occlusion_mask_correspondence", save_idx);
+  #endif // !defined(__DISABLE_OPENGL__)
   return true;
 }
 
@@ -461,11 +467,12 @@ std::shared_ptr<Model> RegionModality::model_ptr() const { return model_ptr_; }
 std::shared_ptr<Camera> RegionModality::camera_ptr() const {
   return camera_ptr_;
 }
-
+#if !defined(__DISABLE_OPENGL__)
 std::shared_ptr<OcclusionRenderer> RegionModality::occlusion_renderer_ptr()
     const {
   return occlusion_renderer_ptr_;
 }
+#endif // !defined(__DISABLE_OPENGL__)
 
 bool RegionModality::imshow_correspondence() const {
   return imshow_correspondence_;
@@ -690,10 +697,13 @@ bool RegionModality::IsLineValid(float u, float v,
       i_v > image_height_minus_1_)
     return false;
 
+  #if !defined(__DISABLE_OPENGL__)
   // Check if line center is on mask
   if (use_occlusion_handling_) {
     return occlusion_renderer_ptr_->GetValue(i_v, i_u) & encoded_occlusion_id_;
   }
+  #endif // !defined(__DISABLE_OPENGL__)
+
   if (!occlusion_mask_.empty()) {
     return occlusion_mask_.at<uchar>(i_v, i_u) == 0;
   } 
@@ -965,6 +975,7 @@ void RegionModality::VisualizePointsHistogramImage(const std::string &title,
   ShowAndSaveImage(name_ + "_" + title, save_index, visualization_image);
 }
 
+#if !defined(__DISABLE_OPENGL__)
 void RegionModality::VisualizePointsOcclusionMask(const std::string &title,
                                                   int save_index) const {
   cv::Mat visualization_image;
@@ -982,6 +993,7 @@ void RegionModality::VisualizePointsOcclusionMask(const std::string &title,
   DrawPoints(cv::Vec3b{24, 184, 234}, &visualization_image);
   ShowAndSaveImage(name_ + "_" + title, save_index, visualization_image);
 }
+#endif // !defined(__DISABLE_OPENGL__)
 
 void RegionModality::VisualizeLines(const std::string &title,
                                     int save_index) const {

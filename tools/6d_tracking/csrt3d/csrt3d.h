@@ -2,11 +2,14 @@
 
 #include <srt3d/body.h>
 #include <srt3d/common.h>
+#if !defined(__DISABLE_OPENGL__)
 #include <srt3d/normal_viewer.h>
 #include <srt3d/occlusion_renderer.h>
-#include <srt3d/region_modality.h>
 #include <srt3d/renderer_geometry.h>
+#endif // __DISABLE_OPENGL__
+#include <srt3d/region_modality.h>
 #include <srt3d/tracker.h>
+
 
 #include "virtual_camera.hpp"
 
@@ -106,7 +109,7 @@ public:
 
 }; // class tracker
 
-
+#if !defined(__DISABLE_OPENGL__)
 class RegionRenderer{
 public:
     RegionRenderer(const std::shared_ptr<RegionTracker>& region_tracker_ptr);
@@ -118,7 +121,7 @@ public:
     std::shared_ptr<srt3d::NormalViewer> viewer_ptr_;
     std::shared_ptr<srt3d::VirtualCamera> camera_ptr_;
 }; // class renderer
-
+#endif // __DISABLE_OPENGL__
 
 class GustoModelTarget{
 public:

@@ -7,9 +7,10 @@
 #include <omp.h>
 #include <srt3d/body.h>
 #include <srt3d/common.h>
+# if !defined(__DISABLE_OPENGL__)
 #include <srt3d/normal_renderer.h>
 #include <srt3d/renderer_geometry.h>
-
+# endif  // !defined(__DISABLE_OPENGL__)
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <array>
@@ -92,14 +93,19 @@ class Model {
 
  private:
   // Helper methods for model set up
+  #if !defined(__DISABLE_OPENGL__)
+  // [Sombra] -> Generate .meta file here, but we don't have OpenGL for now 
   bool GenerateModel();
+  #endif  // !defined(__DISABLE_OPENGL__)
   bool LoadModel();
   bool SaveModel() const;
 
   // Helper methods for point data
+  #if !defined(__DISABLE_OPENGL__)
   bool GeneratePointData(const NormalRenderer &renderer,
                          const Transform3fA &camera2body_pose,
                          std::vector<PointData> *data_points) const;
+  #endif  // !defined(__DISABLE_OPENGL__)
   bool GenerateValidContours(const cv::Mat &silhouette_image,
                              std::vector<std::vector<cv::Point2i>> *contours,
                              int *total_contour_length_in_pixel) const;
@@ -122,9 +128,11 @@ class Model {
       int *u_contour, int *v_contour);
 
   // Halper methods for view data
+  #if !defined(__DISABLE_OPENGL__)
   bool SetUpRenderer(
       const std::shared_ptr<RendererGeometry> &renderer_geometry_ptr,
       std::shared_ptr<NormalRenderer> *renderer) const;
+  #endif  // !defined(__DISABLE_OPENGL__)
   void GenerateGeodesicPoses(
       std::vector<Transform3fA> *camera2body_poses) const;
   void GenerateGeodesicPoints(

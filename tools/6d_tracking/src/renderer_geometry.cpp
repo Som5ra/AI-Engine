@@ -3,7 +3,8 @@
 
 #include <srt3d/renderer_geometry.h>
 
-#define TINYOBJLOADER_IMPLEMENTATION
+// #define TINYOBJLOADER_IMPLEMENTATION
+// [Sombra] -> TINYOBJLOADER_IMPLEMENTATION is originally defined here, I moved it to body.cpp because we don't need renderer in unity
 #include <tiny_obj_loader/tiny_obj_loader.h>
 
 namespace srt3d {

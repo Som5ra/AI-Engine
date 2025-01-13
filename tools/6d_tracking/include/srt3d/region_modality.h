@@ -8,8 +8,9 @@
 #include <srt3d/camera.h>
 #include <srt3d/common.h>
 #include <srt3d/model.h>
+# if !defined(__DISABLE_OPENGL__)
 #include <srt3d/occlusion_renderer.h>
-
+# endif  // !defined(__DISABLE_OPENGL__)
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <filesystem>
@@ -77,11 +78,13 @@ class RegionModality {
   void set_tikhonov_parameter_rotation(float tikhonov_parameter_rotation);
   void set_tikhonov_parameter_translation(float tikhonov_parameter_translation);
 
+  #if !defined(__DISABLE_OPENGL__)
+  // [Sombra] -> Disable occlusionhandling if OpenGL is disabled for now
   // Setters for occlusion handling
   void UseOcclusionHandling(
       std::shared_ptr<OcclusionRenderer> occlusion_renderer_ptr);
   void DoNotUseOcclusionHandling();
-
+  #endif // !defined(__DISABLE_OPENGL__)
   // Setters for general visualization settings
   void set_display_visualization(bool display_visualization);
   void StartSavingVisualizations(const std::filesystem::path &save_directory);
@@ -112,7 +115,9 @@ class RegionModality {
   std::shared_ptr<Body> body_ptr() const;
   std::shared_ptr<Model> model_ptr() const;
   std::shared_ptr<Camera> camera_ptr() const;
+  #if !defined(__DISABLE_OPENGL__)
   std::shared_ptr<OcclusionRenderer> occlusion_renderer_ptr() const;
+  #endif // !defined(__DISABLE_OPENGL__)
 
   // Getters visualization and state
   bool imshow_correspondence() const;
@@ -180,8 +185,10 @@ class RegionModality {
                                   int save_index) const;
   void VisualizePointsHistogramImage(const std::string &title,
                                      int save_index) const;
+  #if !defined(__DISABLE_OPENGL__)
   void VisualizePointsOcclusionMask(const std::string &title,
                                     int save_index) const;
+  #endif // !defined(__DISABLE_OPENGL__)
   void VisualizeLines(const std::string &title, int save_index) const;
   void DrawPoints(const cv::Vec3b &color_point, cv::Mat *image) const;
   void DrawLines(const cv::Vec3b &color_line,
@@ -206,8 +213,9 @@ class RegionModality {
   std::shared_ptr<Body> body_ptr_ = nullptr;
   std::shared_ptr<Model> model_ptr_ = nullptr;
   std::shared_ptr<Camera> camera_ptr_ = nullptr;
+  #if !defined(__DISABLE_OPENGL__)
   std::shared_ptr<OcclusionRenderer> occlusion_renderer_ptr_ = nullptr;
-
+  #endif // !defined(__DISABLE_OPENGL__)
   // Parameters for general distribution
   int n_lines_ = 200;
   float function_amplitude_ = 0.36f;

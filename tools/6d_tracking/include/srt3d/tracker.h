@@ -7,10 +7,12 @@
 #include <srt3d/body.h>
 #include <srt3d/camera.h>
 #include <srt3d/common.h>
+# if !defined(__DISABLE_OPENGL__)
 #include <srt3d/occlusion_renderer.h>
-#include <srt3d/region_modality.h>
 #include <srt3d/renderer_geometry.h>
 #include <srt3d/viewer.h>
+#endif  // !defined(__DISABLE_OPENGL__)
+#include <srt3d/region_modality.h>
 
 #include <memory>
 #include <vector>
@@ -45,7 +47,9 @@ class Tracker {
   bool StartRegionModalities();
   bool CalculateBeforeCameraUpdate();
   bool UpdateCameras();
+  #if !defined(__DISABLE_OPENGL__)
   bool StartOcclusionRendering();
+  #endif  // !defined(__DISABLE_OPENGL__)
   bool CalculateCorrespondences(int corr_iteration);
   // bool VisualizeCorrespondences(int save_idx);
   bool CalculatePoseUpdate(int corr_iteration, int update_iteration);
@@ -56,7 +60,9 @@ class Tracker {
   // Getters
   const std::string &name() const;
   std::vector<std::shared_ptr<RegionModality>> region_modality_ptrs() const;
+  #if !defined(__DISABLE_OPENGL__)
   std::vector<std::shared_ptr<Viewer>> viewer_ptrs() const;
+  #endif  // !defined(__DISABLE_OPENGL__)
   int n_corr_iterations() const;
   int n_update_iterations() const;
   // int visualization_time() const;
@@ -76,11 +82,14 @@ class Tracker {
   bool SetUpAllObjects();
 
   // Objects
+  #if !defined(__DISABLE_OPENGL__)
   std::vector<std::shared_ptr<RendererGeometry>> renderer_geometry_ptrs_;
+  std::vector<std::shared_ptr<OcclusionRenderer>> occlusion_renderer_ptrs_;
+  #endif  // !defined(__DISABLE_OPENGL__)
   std::vector<std::shared_ptr<Camera>> camera_ptrs_;
   // std::vector<std::shared_ptr<Viewer>> viewer_ptrs_;
   std::vector<std::shared_ptr<Model>> model_ptrs_;
-  std::vector<std::shared_ptr<OcclusionRenderer>> occlusion_renderer_ptrs_;
+
   std::vector<std::shared_ptr<RegionModality>> region_modality_ptrs_;
 
   // Parameters

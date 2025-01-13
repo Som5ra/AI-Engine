@@ -21,7 +21,14 @@ Model::Model(const std::string &name, std::shared_ptr<Body> body_ptr,
 bool Model::SetUp() {
   set_up_ = false;
   if (!LoadModel()) {
+
+    #if !defined(__DISABLE_OPENGL__)
     if (!GenerateModel()) return false;
+    #else
+      std::cout << "Please generate model file using desktop first" << std::endl;
+      throw std::runtime_error("Please generate model file using desktop first");
+    #endif // !defined(__DISABLE_OPENGL__)
+
     if (!SaveModel()) return false;
   }
   set_up_ = true;
@@ -106,6 +113,8 @@ int Model::image_size() const { return image_size_; }
 
 bool Model::set_up() const { return set_up_; }
 
+
+#if !defined(__DISABLE_OPENGL__)
 bool Model::GenerateModel() {
   // Generate camera poses
   std::vector<Transform3fA> camera2body_poses;
@@ -158,6 +167,7 @@ bool Model::GenerateModel() {
   std::cout << "Finish generating model " << name_ << std::endl;
   return true;
 }
+#endif // !defined(__DISABLE_OPENGL__)
 
 bool Model::LoadModel() {
   std::filesystem::path data_path{meta_file_};
@@ -288,6 +298,7 @@ bool Model::SaveModel() const {
   return true;
 }
 
+#if !defined(__DISABLE_OPENGL__)
 bool Model::GeneratePointData(const NormalRenderer &renderer,
                               const Transform3fA &camera2body_pose,
                               std::vector<PointData> *data_points) const {
@@ -333,6 +344,7 @@ bool Model::GeneratePointData(const NormalRenderer &renderer,
   }
   return true;
 }
+#endif // !defined(__DISABLE_OPENGL__)
 
 bool Model::GenerateValidContours(
     const cv::Mat &silhouette_image,
@@ -516,7 +528,7 @@ void Model::FindClosestContourPoint(
     }
   }
 }
-
+#if !defined(__DISABLE_OPENGL__)
 bool Model::SetUpRenderer(
     const std::shared_ptr<RendererGeometry> &renderer_geometry_ptr,
     std::shared_ptr<NormalRenderer> *renderer_ptr) const {
@@ -540,7 +552,7 @@ bool Model::SetUpRenderer(
       z_min, z_max);
   return (*renderer_ptr)->SetUp();
 }
-
+#endif // !defined(__DISABLE_OPENGL__)
 void Model::GenerateGeodesicPoses(
     std::vector<Transform3fA> *camera2body_poses) const {
   // Generate geodesic points

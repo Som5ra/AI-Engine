@@ -227,7 +227,7 @@ void RegionTracker::terminate() {
 }
 
 
-
+#if !defined(__DISABLE_OPENGL__)
 RegionRenderer::RegionRenderer(const std::shared_ptr<RegionTracker>& region_tracker) {
     region_tracker_ = region_tracker;
     camera_ptr_ = region_tracker_->camera_ptr_;
@@ -260,61 +260,4 @@ std::optional<cv::Mat> RegionRenderer::render() {
     // );
     return normal_image;
 }
-
-
-
-// PYBIND11_MODULE(pysrt3d, m) {
-//     m.doc() = "Python binding for SRT3D";
-//     m.attr("__version__") = "dev";
-
-//     py::class_<RegionModel, std::shared_ptr<RegionModel>>(m, "Model")
-//         .def(py::init<const std::string&, const std::string&, const std::string&,
-//             const float, const float, const bool, const Eigen::Matrix4f,
-//             const float, const float, const float, const bool>(), 
-//             py::arg("name"),
-//             py::arg("model_path"), 
-//             py::arg("meta_path") = "",
-//             py::arg("unit_in_meter") = 1.0, 
-//             py::arg("shpere_radius") = 0.8,
-//             py::arg("from_opengl") = false,
-//             py::arg("transform") = Eigen::Matrix4f::Identity(),
-//             py::arg("threshold_init") = 0.0,
-//             py::arg("threshold_track") = 0.0,
-//             py::arg("kl_threshold") = 1.0,
-//             py::arg("debug_visualize") = false)
-//         .def("reset_pose", &RegionModel::reset_pose, py::arg("pose") = Eigen::Matrix4f::Identity(), "reset pose from 4x4 matrix")
-//         .def("set_kl_threshold", &RegionModel::set_kl_threshold, py::arg("kl_threshold") = 1.0, "set kl threshold")
-//         .def("setup", &RegionModel::Setup)
-//         .def_property_readonly("name", [](const RegionModel& m) { return m.name_; }, "model name")
-//         .def_property_readonly("conf", [](const RegionModel& m) { return m.conf_; }, "tracking confidence")
-//         // .def_property_readonly("state", [](const RegionModel& m) { return m.state_; }, "tracking state of the model")
-//         .def_property_readonly("pose", &RegionModel::pose, "4x4 pose matrix under opencv coordinate")
-//         .def_property_readonly("pose_gl", &RegionModel::pose_gl, "4x4 pose matrix under opengl coordinate")
-//         .def_property_readonly("pose_uv", 
-//             [](const RegionModel& m) { return py::make_tuple(m.uv_.x, m.uv_.y);}, "2d uv pose"
-//         )
-//         .def_property_readonly("valid_line_prop", &RegionModel::valid_percentage);
-
-//     py::class_<RegionTracker, std::shared_ptr<RegionTracker>>(m, "Tracker")
-//         .def(py::init<const int, const int, 
-//             const Eigen::Matrix3f,
-//             const float, const float, 
-//             const float, const float, 
-//             const int, const int>(),
-//             py::arg("imwidth"), py::arg("imheight"), 
-//             py::arg("K") = Eigen::Matrix3f::Zero(),
-//             py::arg("fx") = 0.0f, py::arg("fy") = 0.0f,
-//             py::arg("cx") = 0.0f, py::arg("cy") = 0.0f,
-//             py::arg("corr_iter") = 7, py::arg("pose_iter") = 2)
-//         .def("add_model", &RegionTracker::add_model)
-//         .def("update", &RegionTracker::track, py::arg("image"), py::arg("mask") = py::none())
-//         .def("setup", &RegionTracker::setup)
-//         .def("terminate", &RegionTracker::terminate)
-//         .def_property_readonly("K_", [](const RegionTracker& m) { return m.K_; }, "camera intrinsics")
-//         .def_property_readonly("models", [](const RegionTracker& m) {
-//             return m.models_;
-//         }, "list of models");
-
-//     py::class_<RegionRenderer, std::shared_ptr<RegionRenderer>>(m, "Renderer")
-//         .def(py::init<std::shared_ptr<RegionTracker>>())
-//         .def("render", &RegionRenderer::render);
+#endif // __DISABLE_OPENGL__
