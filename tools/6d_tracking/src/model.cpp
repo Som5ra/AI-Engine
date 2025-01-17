@@ -3,6 +3,16 @@
 
 #include <srt3d/model.h>
 
+#if defined(BUILD_PLATFORM_ANDROID)
+#include <android/log.h>
+
+#define LOGV(TAG, ...) __android_log_print(ANDROID_LOG_VERBOSE, TAG,__VA_ARGS__)
+#define LOGD(TAG, ...) __android_log_print(ANDROID_LOG_DEBUG  , TAG,__VA_ARGS__)
+#define LOGI(TAG, ...) __android_log_print(ANDROID_LOG_INFO   , TAG,__VA_ARGS__)
+#define LOGW(TAG, ...) __android_log_print(ANDROID_LOG_WARN   , TAG,__VA_ARGS__)
+#define LOGE(TAG, ...) __android_log_print(ANDROID_LOG_ERROR  , TAG,__VA_ARGS__)
+#endif
+
 namespace srt3d {
 
 Model::Model(const std::string &name, std::shared_ptr<Body> body_ptr,
@@ -26,7 +36,8 @@ bool Model::SetUp() {
     if (!GenerateModel()) return false;
     #else
       std::cout << "Please generate model file using desktop first" << std::endl;
-      throw std::runtime_error("Please generate model file using desktop first");
+      // throw std::runtime_error("Trying to load Please generate model file using desktop first");
+      throw std::runtime_error("Trying to load model file " + meta_file_ + " failed, Please generate model file using desktop first");
     #endif // !defined(__DISABLE_OPENGL__)
 
     if (!SaveModel()) return false;
@@ -170,6 +181,7 @@ bool Model::GenerateModel() {
 #endif // !defined(__DISABLE_OPENGL__)
 
 bool Model::LoadModel() {
+  std::cout << "using metafile: " << meta_file_ << std::endl;
   std::filesystem::path data_path{meta_file_};
   std::ifstream data_ifs{data_path, std::ios::in | std::ios::binary};
   if (!data_ifs.is_open() || data_ifs.fail()) {
@@ -191,6 +203,21 @@ bool Model::LoadModel() {
   data_ifs.read((char *)(&n_points_file), sizeof(n_points_file));
   data_ifs.read((char *)(&use_random_seed_file), sizeof(use_random_seed_file));
   data_ifs.read((char *)(&image_size_file), sizeof(image_size_file));
+  std::cout << "version_id_file: " << version_id_file << std::endl;
+  std::cout << "sphere_radius_file: " << sphere_radius_file << std::endl;
+  std::cout << "n_divides_file: " << n_divides_file << std::endl;
+  std::cout << "n_points_file: " << n_points_file << std::endl;
+  std::cout << "use_random_seed_file: " << use_random_seed_file << std::endl;
+  std::cout << "image_size_file: " << image_size_file << std::endl;
+  #if defined(BUILD_PLATFORM_ANDROID)
+  LOGI("GUSTO_DETECTION", "version_id_file: %d", version_id_file);
+  LOGI("GUSTO_DETECTION", "sphere_radius_file: %f", sphere_radius_file);
+  LOGI("GUSTO_DETECTION", "n_divides_file: %d", n_divides_file);
+  LOGI("GUSTO_DETECTION", "n_points_file: %d", n_points_file);
+  LOGI("GUSTO_DETECTION", "use_random_seeed_file: %d", use_random_seed_file);
+  LOGI("GUSTO_DETECTION", "image_size_file: %d", image_size_file);
+  #endif
+
   if (version_id_file != kVersionID || sphere_radius_file != sphere_radius_ ||
       n_divides_file != n_divides_ || n_points_file < n_points_ ||
       use_random_seed_file != use_random_seed_ ||
@@ -221,6 +248,24 @@ bool Model::LoadModel() {
                 sizeof(maximum_body_diameter));
   data_ifs.read((char *)(geometry2body_pose.data()),
                 sizeof(geometry2body_pose));
+  std::cout << "geometry_path_length: " << geometry_path_length << std::endl;
+  std::cout << "geometry_path_string size: " << geometry_path_string.size() << std::endl;
+  std::cout << "geometry_path_string: " << geometry_path_string.c_str() << std::endl;
+  std::cout << "geometry_unit_in_meter: " << geometry_unit_in_meter << std::endl;
+  std::cout << "geometry_counterclockwise: " << geometry_counterclockwise << std::endl;
+  std::cout << "geometry_enable_culling: " << geometry_enable_culling << std::endl;
+  std::cout << "maximum_body_diameter: " << maximum_body_diameter << std::endl;
+  // std::cout << "geometry2body_pose: " << geometry2body_pose.matrix() << std::endl;
+  #if defined(BUILD_PLATFORM_ANDROID)
+  LOGI("GUSTO_DETECTION", "geometry_path_length: %d", geometry_path_length);
+  LOGI("GUSTO_DETECTION", "geometry_path_string size: %d", geometry_path_string.size());
+  LOGI("GUSTO_DETECTION", "geometry_path_string: %s", geometry_path_string.c_str());
+  LOGI("GUSTO_DETECTION", "geometry_unit_in_meter: %f", geometry_unit_in_meter);
+  LOGI("GUSTO_DETECTION", "geometry_counterclockwise: %d", geometry_counterclockwise);
+  LOGI("GUSTO_DETECTION", "geometry_enable_culling: %d", geometry_enable_culling);
+  LOGI("GUSTO_DETECTION", "maximum_body_diameter: %f", maximum_body_diameter);
+  // LOGI("GUSTO_DETECTION", "geometry2body_pose: %f", geometry2body_pose.matrix());
+  #endif
   if (geometry_path_string != body_ptr_->geometry_path() ||
       geometry_unit_in_meter != body_ptr_->geometry_unit_in_meter() ||
       geometry_counterclockwise != body_ptr_->geometry_counterclockwise() ||

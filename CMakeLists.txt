@@ -58,7 +58,8 @@ elseif(BUILD_PLATFORM STREQUAL "android")
     # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.19.2/headers")
     # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.19.2/${ANDROID_ABI}/libonnxruntime_static_lib.a")
 
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android-ndk26/${ANDROID_ABI}/install/sdk/native/jni)
+    # set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android-ndk26/${ANDROID_ABI}/install/sdk/native/jni)
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-android/sdk/native/jni/abi-${ANDROID_ABI}) 
 
     # set(OpenMP_Base_DIR "${CMAKE_SOURCE_DIR}/android-ndk-r26d-linux/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux")
     # set(OpenMP_Base_DIR "${CMAKE_SOURCE_DIR}/android-ndk-r27c-linux/android-ndk-r27c/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux")

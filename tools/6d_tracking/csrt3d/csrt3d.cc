@@ -60,7 +60,7 @@ RegionModel::RegionModel(const std::string& name,
     // set model
     auto meta_path = meta_path_;
     if (meta_path.empty()) {
-        meta_path = geometry_path + ".meta";
+        meta_path = geometry_path + ".gustometa";
     }
     model_ptr_ = std::make_shared<srt3d::Model>(name, body_ptr_, meta_path, shpere_radius);
 }

@@ -12,7 +12,6 @@ extern "C"{
         GustoModelTarget* model_target = new GustoModelTarget(height, width);
         *model_target_ptr = model_target;
 
-
         return 0;
     }
 
@@ -79,7 +78,7 @@ extern "C"{
         model_target_ptr->tracker_ptr_->add_model(model_target_ptr->model_ptr_);
         model_target_ptr->tracker_ptr_->setup();
 
-        #if !defined(__DISABLE_OPENGL__)
+        #if !defined(__DISABLE_OPENGL__) && defined(__OPENCV_DEBUG__)
         model_target_ptr->renderer_ptr_ = std::make_shared<RegionRenderer>(model_target_ptr->tracker_ptr_);
         #endif
 
@@ -95,11 +94,13 @@ extern "C"{
     int track(GustoModelTarget* model_target_ptr,
         // unsigned char* bitmap,
         const char* bitmap,
+        int bitmap_height,
+        int bitmap_width,
         float* pose_ret_ptr,
         float* conf_ret_ptr,
         bool debug_opengl = false
     ){
-        cv::Mat frame = cv::Mat(model_target_ptr->height, model_target_ptr->width, CV_8UC4);
+        cv::Mat frame = cv::Mat(bitmap_height, bitmap_width, CV_8UC4);
         memcpy(frame.data, bitmap, model_target_ptr->height * model_target_ptr->width * 4);
         // cv::Mat frame = cv::Mat(model_target_ptr->height, model_target_ptr->width, CV_8UC4, bitmap);
         cv::cvtColor(frame, frame, cv::COLOR_RGBA2RGB);
@@ -112,10 +113,9 @@ extern "C"{
         for(size_t i = 0; i < 16; i++){
             pose_ret_ptr[i] = model_target_ptr->model_ptr_->pose().data()[i];
         }
-
-        #if !defined(__DISABLE_OPENGL__)
+        #if !defined(__DISABLE_OPENGL__) && defined(__OPENCV_DEBUG__)
         if (debug_opengl){
-            auto res = model_target_ptr->renderer_ptr_->render(); // this cause RawImage's black screen 
+            auto res = model_target_ptr->renderer_ptr_->render(); 
             auto rendered_image = std::move(*res);
 
             cv::Point2i pose_uv = model_target_ptr->model_ptr_->uv_;

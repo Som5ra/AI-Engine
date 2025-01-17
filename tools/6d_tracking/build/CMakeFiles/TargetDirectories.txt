@@ -1,0 +1,9 @@
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/CMakeFiles/csrt3d_module.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/CMakeFiles/run_on_webcam.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/CMakeFiles/model_target.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/CMakeFiles/edit_cache.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/CMakeFiles/rebuild_cache.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/CMakeFiles/list_install_components.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/CMakeFiles/install.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/CMakeFiles/install/local.dir
+/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/CMakeFiles/install/strip.dir

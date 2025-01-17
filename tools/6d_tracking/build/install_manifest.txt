@@ -1,0 +1,1 @@
+/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux/libmodel_target.so
