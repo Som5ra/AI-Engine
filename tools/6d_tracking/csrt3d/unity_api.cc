@@ -3,12 +3,16 @@
 #include <chrono>
 #include <opencv2/opencv.hpp>
 
+
+
 extern "C"{
 
     int GustoModelTargetInit(GustoModelTarget** model_target_ptr, const int height, const int width)
     {
         GustoModelTarget* model_target = new GustoModelTarget(height, width);
         *model_target_ptr = model_target;
+
+
         return 0;
     }
 
@@ -74,6 +78,11 @@ extern "C"{
         model_target_ptr->tracker_ptr_ = std::make_shared<RegionTracker>(model_target_ptr->width, model_target_ptr->height, K, fx, fy, cx, cy, corr_iter, pose_iter);
         model_target_ptr->tracker_ptr_->add_model(model_target_ptr->model_ptr_);
         model_target_ptr->tracker_ptr_->setup();
+
+        #if !defined(__DISABLE_OPENGL__)
+        model_target_ptr->renderer_ptr_ = std::make_shared<RegionRenderer>(model_target_ptr->tracker_ptr_);
+        #endif
+
         return 0;
     }
 
@@ -85,24 +94,37 @@ extern "C"{
 
     int track(GustoModelTarget* model_target_ptr,
         // unsigned char* bitmap,
-        char* bitmap,
+        const char* bitmap,
         float* pose_ret_ptr,
-        float* conf_ret_ptr
+        float* conf_ret_ptr,
+        bool debug_opengl = false
     ){
-  
-        cv::Mat frame = cv::Mat(model_target_ptr->height, model_target_ptr->width, CV_8UC4, bitmap);
+        cv::Mat frame = cv::Mat(model_target_ptr->height, model_target_ptr->width, CV_8UC4);
+        memcpy(frame.data, bitmap, model_target_ptr->height * model_target_ptr->width * 4);
+        // cv::Mat frame = cv::Mat(model_target_ptr->height, model_target_ptr->width, CV_8UC4, bitmap);
         cv::cvtColor(frame, frame, cv::COLOR_RGBA2RGB);
         cv::flip(frame, frame, 0);
         cv::resize(frame, frame, cv::Size(model_target_ptr->width, model_target_ptr->height));
+        
 
         model_target_ptr->tracker_ptr_->track(frame, std::nullopt);
         conf_ret_ptr[0] = model_target_ptr->model_ptr_->conf_;
         for(size_t i = 0; i < 16; i++){
             pose_ret_ptr[i] = model_target_ptr->model_ptr_->pose().data()[i];
         }
+
+        #if !defined(__DISABLE_OPENGL__)
+        if (debug_opengl){
+            auto res = model_target_ptr->renderer_ptr_->render(); // this cause RawImage's black screen 
+            auto rendered_image = std::move(*res);
+
+            cv::Point2i pose_uv = model_target_ptr->model_ptr_->uv_;
+            cv::putText(rendered_image, "confidence: " + std::to_string(conf_ret_ptr[0]), pose_uv, cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2);
+            cv::imshow("rendered_image", rendered_image);
+        }
+        #endif
+
         return 0;
     }
-
-
 
 }

@@ -247,11 +247,13 @@ RegionRenderer::RegionRenderer(const std::shared_ptr<RegionTracker>& region_trac
 
 // py::array_t<uint8_t> RegionRenderer::render() {
 std::optional<cv::Mat> RegionRenderer::render() {
-    std::error_code errorCode;
+    // std::error_code errorCode;
     if(!camera_ptr_->UpdateImage()) return std::nullopt;
     if(!viewer_ptr_->UpdateViewer(0)) return std::nullopt;
-    // render
+    // // render
     cv::Mat normal_image = viewer_ptr_->viewer_image();
+    // cv::Mat normal_image = cv::Mat(100, 100, CV_8UC3, cv::Scalar(0, 0, 0));
+
     // convert cv::Mat to numpy array
     // py::array_t<uint8_t> normal_image_np = py::array_t<uint8_t>(
     //     {normal_image.rows, normal_image.cols, normal_image.channels()},

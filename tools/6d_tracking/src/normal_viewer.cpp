@@ -50,7 +50,7 @@ bool NormalViewer::UpdateViewer(int save_index) {
 
   // Calculate viewer image
   cv::Mat viewer_image{camera_ptr_->image().size(), CV_8UC3};
-  renderer_.StartRendering();
+  renderer_.StartRendering(); // black screen of RawImage from unity
   renderer_.FetchNormalImage();
   CalculateAlphaBlend(camera_ptr_->image(), renderer_.normal_image(),
                       &viewer_image);

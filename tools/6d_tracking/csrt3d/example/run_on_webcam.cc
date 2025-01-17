@@ -24,12 +24,29 @@ cam_intrinsics = {
 */
 int main()
 {
+    /*
+    
+    height: 1080
+    width: 1920
+    fov: 70.0
+    unit_in_meter: 1
+    sphere_radius: 0.5
+    */
+
+   /*
+    height: 448
+    width: 800
+    fov: 70.0
+    unit_in_meter: 2
+    sphere_radius: 0.8
+   */
+
     // setup camera
-    // const int height = 480;
     const int height = 448;
-    // const int width = 640;
+    // const int height = 1080;
     const int width = 800;
-    const float fov = 50.0;
+    // const int width = 1920;
+    const float fov = 70.0;
 
     // const float fx = (width / 2) / np.tan(np.deg2rad(fov)/2)
     const float fx = (width / 2) / std::tan(3.1415 * fov / 360.0);
@@ -47,12 +64,12 @@ int main()
     const std::string model_path = "/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/StreamingAssets/Bruni-woband/Bruni-woband.obj";
     const std::string meta_path = "/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/6d_tracking/build/123.meta";
 
-    const float unit_in_meter = 2.0;
-    const float sphere_radius = 0.8;
+    const float unit_in_meter = 1;
+    const float sphere_radius = 0.5;
     const bool from_opengl = false;
     const Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
     const float threshold_on_init = 0.8;
-    const float threshold_on_track = 0.8;
+    const float threshold_on_track = 0.5;
     const float kl_threshold = 1.0;
     const bool debug_visualize = false;
 
@@ -107,7 +124,7 @@ int main()
         
         cv::Mat image_rgb;
         cv::cvtColor(frame, image_rgb, cv::COLOR_BGR2RGB);
-        // cv::resize(image_rgb, image_rgb, cv::Size(width, height));
+        cv::resize(image_rgb, image_rgb, cv::Size(width, height));
         std::cout << "image_rgb: " << image_rgb.size() << std::endl;
         auto st = std::chrono::steady_clock::now();
 
@@ -126,7 +143,11 @@ int main()
         cv::putText(rendered_image, "confidence: " + std::to_string(conf), pose_uv, cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2);
 
         cv::imshow("rendered_image", rendered_image);
-        cv::waitKey(1);
+        char c = cv::waitKey(1);    
+        if (c == 27)
+        {
+            model->reset_pose(init_pose);
+        }
     }
     
 

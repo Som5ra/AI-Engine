@@ -128,7 +128,9 @@ public:
     GustoModelTarget(const int height, const int width);
     std::shared_ptr<RegionModel> model_ptr_;
     std::shared_ptr<RegionTracker> tracker_ptr_;
-
+    #if !defined(__DISABLE_OPENGL__)
+    std::shared_ptr<RegionRenderer> renderer_ptr_;
+    #endif // !defined(__DISABLE_OPENGL__)
     Eigen::Matrix4f init_pose = (Eigen::Matrix4f() << 
         -1, 0, 0, 0,
         0, 0, -1, 0,

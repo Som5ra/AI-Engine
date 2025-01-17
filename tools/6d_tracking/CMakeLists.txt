@@ -184,16 +184,17 @@ target_link_libraries(run_on_webcam
 # =============================================================================
 
 
-set(FILES_CPP_WO_OPENGL src/body.cpp src/camera.cpp src/common.cpp src/model.cpp src/region_modality.cpp src/tracker.cpp)
+# set(FILES_CPP_WO_OPENGL src/body.cpp src/camera.cpp src/common.cpp src/model.cpp src/region_modality.cpp src/tracker.cpp)
 
 
 add_library(model_target SHARED
-    ${FILES_CPP_WO_OPENGL}
+    # ${FILES_CPP_WO_OPENGL}
+    ${FILES_CPP}
     "${PROJECT_SOURCE_DIR}/csrt3d/csrt3d.cc"
     "${PROJECT_SOURCE_DIR}/csrt3d/unity_api.cc"
 )
 
-target_compile_definitions(model_target PRIVATE __DISABLE_OPENGL__)
+# target_compile_definitions(model_target PRIVATE __DISABLE_OPENGL__)
 
 
 ## include
@@ -210,9 +211,9 @@ target_link_libraries(model_target
         Eigen3::Eigen
     PRIVATE
         ${OpenCV_LIBS}
-        # OpenGL::GL
-        # GLEW::GLEW
-        # glfw
+        OpenGL::GL
+        GLEW::GLEW
+        glfw
 )
 
 install(FILES $<TARGET_FILE:model_target> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
