@@ -33,10 +33,10 @@ if(BUILD_PLATFORM STREQUAL "linux")
     set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-static-full) # for debug build
     
     # onnxruntime
-    # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/include")
-    # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/lib/libonnxruntime.a")
-    set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.18.1/headers")
-    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/build/static_lib_xnn/libonnxruntime_static_lib.a")
+    set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/static_lib/include")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/static_lib/lib/libonnxruntime.a")
+    # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.18.1/headers")
+    # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/build/static_lib_xnn/libonnxruntime_static_lib.a")
 
 elseif(BUILD_PLATFORM STREQUAL "android")
     
@@ -84,8 +84,10 @@ elseif(BUILD_PLATFORM STREQUAL "macos")
     set(CMAKE_CXX_STANDARD 17)
 
     find_package(OpenMP REQUIRED)
-
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-macos/lib/cmake/opencv4)
+    include_directories(${OpenMP_CXX_INCLUDE_DIRS})
+    
+    # set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-macos/lib/cmake/opencv4)
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-4.10.0/build) # for debug build
 
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/include")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-osx-arm64-static_lib-1.19.2/lib/libonnxruntime.a")
@@ -221,6 +223,8 @@ message(STATUS "    OpenCV_DIR:" "${OpenCV_DIR}"  )
 message("")
 message(STATUS "  OpenMP: ")
 message(STATUS "    OpenMP_FOUND:" "${OpenMP_FOUND}"  )
+message(STATUS "    OpenMP_CXX_INCLUDE_DIRS:" "${OpenMP_CXX_INCLUDE_DIRS}"  )
+message(STATUS "    ENV{OpenMP_ROOT}: $ENV{OpenMP_ROOT}")
 
 message("")
 message(STATUS "  SOURCE: ")

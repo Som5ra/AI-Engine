@@ -34,17 +34,17 @@ message(STATUS "Python includes: ${PYTHON_INCLUDE_DIRS}")
 
 # Libraries
 # =============================================================================
-find_package(Eigen3 REQUIRED)
+# find_package(Eigen3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 3 REQUIRED)
-find_package(OpenCV 4 REQUIRED)
-find_package(OpenMP REQUIRED)
-if(OpenMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
+# find_package(OpenCV 4 REQUIRED)
+# find_package(OpenMP REQUIRED)
+# if(OpenMP_FOUND)
+#     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+# endif()
 
 
 # Compiler Settings
@@ -112,6 +112,8 @@ target_link_libraries(${PROJECT_NAME}
         OpenGL::GL
         GLEW::GLEW
         glfw
+        OpenMP::OpenMP_CXX
+        
 )
 
 ## output
@@ -144,6 +146,7 @@ target_link_libraries(csrt3d_module
         OpenGL::GL
         GLEW::GLEW
         glfw
+        OpenMP::OpenMP_CXX
 )
 
 # example
@@ -152,6 +155,7 @@ target_link_libraries(csrt3d_module
 ## example
 add_executable(run_on_webcam
     ${FILES_CPP}
+    "${PROJECT_SOURCE_DIR}/csrt3d/csrt3d.cc"
     "${PROJECT_SOURCE_DIR}/csrt3d/example/run_on_webcam.cc"
 )
 
@@ -167,15 +171,15 @@ target_include_directories(run_on_webcam
 
 ## linking
 target_link_libraries(run_on_webcam
-
     PUBLIC
-        csrt3d_module
+        # csrt3d_module
         Eigen3::Eigen
     PRIVATE
         ${OpenCV_LIBS}
         OpenGL::GL
         GLEW::GLEW
         glfw
+        OpenMP::OpenMP_CXX
 )
 
 
@@ -214,6 +218,7 @@ target_link_libraries(model_target
         OpenGL::GL
         GLEW::GLEW
         glfw
+        OpenMP::OpenMP_CXX
 )
 
 install(FILES $<TARGET_FILE:model_target> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
