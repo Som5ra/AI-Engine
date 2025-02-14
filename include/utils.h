@@ -33,6 +33,16 @@ namespace GustoStatus {
 //         // nlohmann::json load_json(const std::string& filename);
 // };
 
+struct GustoRect {
+    float x1, y1, x2, y2;
+    float conf;
+    int label;
+    GustoRect(float x1, float y1, float x2, float y2) :  x1(x1), y1(y1), x2(x2), y2(y2) {}
+    GustoRect(float x1, float y1, float x2, float y2, float conf, int label) :  x1(x1), y1(y1), x2(x2), y2(y2), conf(conf), label(label) {}
+    float area() const { return (y2 - y1 + 1) * (x2 - x1 + 1); } 
+};
+
+
 
 class Net_config
 {

@@ -13,6 +13,9 @@ set(Engine_Required_Modules
     # tools(post-processing):
     ${FACE_GEOMETRY_LIBS} 
     ${NMS_LIBS}
+
+    # project needed modules:
+    
 )
 
 set(Engine_Required_Link_Modules

@@ -28,10 +28,10 @@ extern "C"
                 *model_ptr = new gusto_humanseg::Segmenter(std::move(parsed_config));
                 break;
             }
-            case ResultType::KeyPointResultType: {
-                *model_ptr = new gusto_humanpose::PoseDetector(std::move(parsed_config));
-                break;
-            }
+            // case ResultType::KeyPointResultType: {
+            //     *model_ptr = new gusto_humanpose::RTMPose(std::move(parsed_config));
+            //     break;
+            // }
             default:
                 std::cerr << "Unknown ResultType" << std::endl;
                 break;
@@ -59,10 +59,10 @@ extern "C"
                 auto* result = dynamic_cast<gusto_humanseg::SegmentationResult*>(output.get());
                 break;
             }
-            case ResultType::KeyPointResultType: {
-                auto* result = dynamic_cast<gusto_humanpose::KeyPointResult*>(output.get());
-                break;
-            }
+            // case ResultType::KeyPointResultType: {
+            //     auto* result = dynamic_cast<gusto_humanpose::KeyPoint2DResult*>(output.get());
+            //     break;
+            // }
             default:
                 std::cerr << "Unknown ResultType" << std::endl;
                 return GustoStatus::ERR_GENERAL_NOT_SUPPORT;                
@@ -90,5 +90,48 @@ extern "C"
         auto ResultType = model_ptr->_config->result_type; 
         return GUSTO_POST_PROCESS_RESULT(std::move(output), ResultType);
     }
+
+
+
+    GUSTO_RET Gusto_Human_Pose_Pipeline_Compile(
+        HumanPoseExtractor2D** model_ptr,
+        const char* detector_path, 
+        const char* detector_config_path, 
+        const char* pose_model_path, 
+        const char* pose_model_config_path, 
+        int detect_interval
+    )
+    {
+        std::string _detector_path = std::string(detector_path);
+        std::string _config_path = std::string(detector_config_path);
+        std::string _pose_path = std::string(pose_model_path);
+        std::string _pose_config_path = std::string(pose_model_config_path);
+        // std::unique_ptr<HumanPoseExtractor2D> extractor(new HumanPoseExtractor2D(detector_path, detector_config_path, pose_model_path, pose_model_config_path, 3));
+        *model_ptr = new HumanPoseExtractor2D(_detector_path, _config_path, _pose_path, _pose_config_path, detect_interval);
+        return GustoStatus::ERR_OK;
+    }
+
+    GUSTO_RET Gusto_Human_Pose_Pipeline_Inference(HumanPoseExtractor2D* model_ptr, char* bitmap, int height, int width, bool display_box, bool display_kpts)
+    {
+        
+        cv::Mat frame = cv::Mat(height, width, CV_8UC4, bitmap);
+        cv::cvtColor(frame, frame, cv::COLOR_RGBA2RGB);
+        cv::flip(frame, frame, 0);
+
+        auto output = model_ptr->DetectPose(frame);
+        if (display_box || display_kpts){ 
+            model_ptr->Display(frame, display_box, display_kpts);
+            cv::cvtColor(frame, frame, cv::COLOR_RGB2RGBA);
+            cv::flip(frame, frame, 0);
+            memcpy(bitmap, frame.data, height * width * 4);
+        }
+        // auto ResultType = model_ptr->_config->result_type; 
+        // return GUSTO_POST_PROCESS_RESULT(std::move(output), ResultType);
+        return true;
+    }
+
+
+
+
 
 }

@@ -10,7 +10,7 @@
 namespace gusto_mp_face{
 class MediaPipeDetectorResult : public PostProcessResult {
 public:
-    std::vector<gusto_nms::Rect> boxes;
+    std::vector<GustoRect> boxes;
     std::vector<std::vector<float>> scores;
 };
 
@@ -34,7 +34,7 @@ class FaceDetector : public BaseONNX {
         std::unique_ptr<PostProcessResult> forward(const cv::Mat& raw) override;
 
 
-        cv::Mat draw_boxes(cv::Mat raw, const std::vector<gusto_nms::Rect>& boxes, const std::vector<std::vector<float>>& scores, const std::vector<int>& indices, const std::vector<int>& indices_cls);
+        cv::Mat draw_boxes(cv::Mat raw, const std::vector<GustoRect>& boxes, const std::vector<std::vector<float>>& scores, const std::vector<int>& indices, const std::vector<int>& indices_cls);
 
     private:
         int anchor_rows, anchor_cols;
@@ -42,7 +42,7 @@ class FaceDetector : public BaseONNX {
         int INPUT_SIZE;
         std::map<int, std::string> class_mapper;
 
-        std::vector<gusto_nms::Rect> decode_boxes(const float* raw_boxes, const std::vector<std::vector<float>>& anchors);
+        std::vector<GustoRect> decode_boxes(const float* raw_boxes, const std::vector<std::vector<float>>& anchors);
         std::vector<std::vector<float>> LoadBinaryFile2D(const std::string& filePath, int rows, int cols);
 };
 

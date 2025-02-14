@@ -28,7 +28,7 @@ FaceDetector::FaceDetector(std::unique_ptr<basic_model_config> config)
 
 std::unique_ptr<PostProcessResult> FaceDetector::postprocess(const std::vector<Ort::Value>& net_out, const cv::Mat& frame) {
     const float* raw_boxes = net_out[0].GetTensorData<float>();
-    std::vector<gusto_nms::Rect> boxes = decode_boxes(raw_boxes, anchors);
+    std::vector<GustoRect> boxes = decode_boxes(raw_boxes, anchors);
     std::vector<std::vector<float>> scores;
     std::vector<float> _scores(net_out[1].GetTensorData<float>(), net_out[1].GetTensorData<float>() + net_out[1].GetTensorTypeAndShapeInfo().GetElementCount());
     // auto _scores_with_sigmoid = sigmoid(_scores);
@@ -38,7 +38,7 @@ std::unique_ptr<PostProcessResult> FaceDetector::postprocess(const std::vector<O
         scores.push_back(box_score);
     }
 
-    std::pair<std::vector<int>, std::vector<int>> res = multiclass_nms_class_unaware_cpu(boxes, scores, 0.8, 0.5);
+    std::pair<std::vector<int>, std::vector<int>> res = gusto_nms::multiclass_nms_class_unaware_cpu(boxes, scores, 0.8, 0.5);
     std::vector<int> indices = res.first;
     std::vector<int> indices_cls = res.second;
 
@@ -76,7 +76,7 @@ std::unique_ptr<PostProcessResult> FaceDetector::forward(const cv::Mat& raw) {
 
 
 
-cv::Mat FaceDetector::draw_boxes(cv::Mat raw, const std::vector<gusto_nms::Rect>& boxes, const std::vector<std::vector<float>>& scores, const std::vector<int>& indices, const std::vector<int>& indices_cls) {
+cv::Mat FaceDetector::draw_boxes(cv::Mat raw, const std::vector<GustoRect>& boxes, const std::vector<std::vector<float>>& scores, const std::vector<int>& indices, const std::vector<int>& indices_cls) {
     for (size_t i = 0; i < indices.size(); ++i) {
         int idx = indices[i];
         cv::Point p1(boxes[idx].x1 * raw.size[1], boxes[idx].y1 * raw.size[0]);
@@ -89,15 +89,15 @@ cv::Mat FaceDetector::draw_boxes(cv::Mat raw, const std::vector<gusto_nms::Rect>
 }
 
 
-std::vector<gusto_nms::Rect> FaceDetector::decode_boxes(const float* raw_boxes, const std::vector<std::vector<float>>& anchors) {
-    std::vector<gusto_nms::Rect> boxes;
+std::vector<GustoRect> FaceDetector::decode_boxes(const float* raw_boxes, const std::vector<std::vector<float>>& anchors) {
+    std::vector<GustoRect> boxes;
     for (int i = 0; i < anchor_rows; ++i) {
         float x_center = raw_boxes[i * 16 + 0] / 128.0 * anchors[i][2] + anchors[i][0];
         float y_center = raw_boxes[i * 16 + 1] / 128.0 * anchors[i][3] + anchors[i][1];
         float w = raw_boxes[i * 16 + 2] / 128.0 * anchors[i][2];
         float h = raw_boxes[i * 16 + 3] / 128.0 * anchors[i][3];
 
-        boxes.push_back(gusto_nms::Rect(x_center - w / 2, y_center - h / 2, x_center + w / 2, y_center + h / 2));
+        boxes.push_back(GustoRect(x_center - w / 2, y_center - h / 2, x_center + w / 2, y_center + h / 2));
     }
 
     return boxes;
