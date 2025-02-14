@@ -197,8 +197,8 @@ std::vector<float> BaseONNX::preprocess(const cv::Mat& image) {
     // int h = rgbsplit[0].size[0];
     // int w = rgbsplit[0].size[1];
 
-    std::cout << "mean: " << _config->mean[0] << " " << _config->mean[1] << " " << _config->mean[2] << std::endl;
-    std::cout << "std: " << _config->std[0] << " " << _config->std[1] << " " << _config->std[2] << std::endl;
+    // std::cout << "mean: " << _config->mean[0] << " " << _config->mean[1] << " " << _config->mean[2] << std::endl;
+    // std::cout << "std: " << _config->std[0] << " " << _config->std[1] << " " << _config->std[2] << std::endl;
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
     omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
     #pragma omp parallel for
