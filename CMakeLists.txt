@@ -30,7 +30,7 @@ if(BUILD_PLATFORM STREQUAL "linux")
 
     # opencv
     # set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-ubuntu-2204/lib/cmake/opencv4)
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-static-full) # for debug build
+    # set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-static-full) # for debug build
     
     # onnxruntime
     set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/static_lib/include")
@@ -183,6 +183,7 @@ set(HUMAN_SEG_LIBS
 
 set(HUMAN_POSE_LIBS
     ${CMAKE_SOURCE_DIR}/src/human_pose_family.cc
+    ${CMAKE_SOURCE_DIR}/src/two_stage_human_pose_extractor_2d.cc
 )
 
 set(NMS_LIBS
