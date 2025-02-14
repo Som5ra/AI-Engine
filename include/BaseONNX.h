@@ -79,7 +79,11 @@ struct basic_model_config{
     std::string model_path;
     std::pair<int, int> input_size;
     int channels;
+    std::vector<float> mean;
+    std::vector<float> std;
+
     std::map<int, std::string> class_mapper;
+    int class_exact_num;
 
     ResultType result_type;
     DimOrder dim_order = DimOrder::NCHW;
@@ -121,6 +125,7 @@ protected:
     Ort::Env ort_env;
     Ort::Session ort_session;
     Ort::AllocatorWithDefaultOptions ort_allocator;
+    
     std::vector<const char*> input_names;
     std::vector<const char*> output_names;
     std::vector<std::vector<int64_t>> input_shape;

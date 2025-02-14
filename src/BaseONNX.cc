@@ -14,15 +14,25 @@ std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& mod
     {
         _config->model_path = model_path;
         _config->model_name = data["model_name"].get<std::string>();
-        _config->input_size = std::make_pair(data["input_size"]["width"].get<int>(), data["input_size"]["height"].get<int>());
+        _config->input_size = std::make_pair(data["input_size"]["height"].get<int>(), data["input_size"]["width"].get<int>());
         _config->result_type = data["result_type"].get<ResultType>();
         size_t cls_id = 0;
         for(auto& it : data["classes"]) {
             _config->class_mapper[cls_id++] = it.get<std::string>();
         }
+        if (data.contains("classes_num")) {
+            _config->class_exact_num = data["classes_num"].get<int>();
+        }else{
+            _config->class_exact_num = _config->class_mapper.size();
+        }
         _config->dim_order = data["Preprocessing"]["DIM_ORDER"].template get<DimOrder>();
         _config->channel_order = data["Preprocessing"]["CHANNEL_ORDER"].template get<ChannelOrder>();
-
+        for(auto& it: data["Preprocessing"]["MEAN"]) {
+            _config->mean.push_back(it.get<float>());
+        }
+        for(auto& it: data["Preprocessing"]["STD"]) {
+            _config->std.push_back(it.get<float>());
+        }
 
         _config->channels = data["input_size"]["channels"].get<int>();
 
@@ -65,6 +75,12 @@ std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& mod
     std::cout << "Result Type: " << _config->result_type << std::endl;
     std::cout << "Dim Order: " << _config->dim_order << std::endl;
     std::cout << "Channel Order: " << _config->channel_order << std::endl;
+    for(int i = 0; i < _config->mean.size(); i++) {
+        std::cout << "Mean: " << _config->mean[i] << std::endl;
+    }
+    for(int i = 0; i < _config->std.size(); i++) {
+        std::cout << "STD: " << _config->std[i] << std::endl;
+    }
     std::cout << "==================== CONFIG ====================" << std::endl;
     return std::move(_config);
 }
@@ -165,28 +181,37 @@ std::vector<float> BaseONNX::preprocess(const cv::Mat& image) {
     } else {
         frame = image.clone();
     }
-    cv::resize(frame, frame, cv::Size(_config->input_size.first, _config->input_size.second), 0, 0, cv::INTER_LINEAR);
-    frame.convertTo(frame, CV_32FC3, 1.0 / 127.5, -1);
-    
-    std::vector<cv::Mat> rgbsplit;
-    cv::split(frame, rgbsplit);
+    cv::resize(frame, frame, cv::Size(_config->input_size.second, _config->input_size.first), 0, 0, cv::INTER_LINEAR);
+    // frame.convertTo(frame, CV_32FC3, 1.0 / 127.5, -1);
+    // frame.convertTo(frame, CV_32FC3, 1.0, 0.0);
+    // std::vector<cv::Mat> rgbsplit;
+    // cv::split(frame, rgbsplit);
+	int image_height = frame.rows;
+	int image_width = frame.cols;
+	int image_channels = frame.channels();
+
+    assert(inputTensorSize == 1 * image_height * image_width * image_channels);
     std::vector<float> input_tensor_values(inputTensorSize);
 
 
-    int h = rgbsplit[0].size[0];
-    int w = rgbsplit[0].size[1];
+    // int h = rgbsplit[0].size[0];
+    // int w = rgbsplit[0].size[1];
 
+    std::cout << "mean: " << _config->mean[0] << " " << _config->mean[1] << " " << _config->mean[2] << std::endl;
+    std::cout << "std: " << _config->std[0] << " " << _config->std[1] << " " << _config->std[2] << std::endl;
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
     omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
     #pragma omp parallel for
     #endif
-    for (int i = 0; i < h; i++) {
-        for (int j = 0; j < w; j++) {
-            for (int k = 0; k < rgbsplit.size(); k++) {
+    for (int i = 0; i < image_height; i++) {
+        for (int j = 0; j < image_width; j++) {
+            for (int k = 0; k < image_channels; k++) {
+                float normalized_value = (frame.ptr<uchar>(i)[j * image_channels + k] - _config->mean[k]) / _config->std[k];
+                // float normalized_value = static_cast<float>((rgbsplit[k].at<float>(i, j) - _config->mean[k]) / _config->std[k]);
                 if (_config->dim_order == DimOrder::NHWC) {
-                    input_tensor_values[i * w * rgbsplit.size() + j * rgbsplit.size() + k] = static_cast<float>(rgbsplit[k].at<float>(i, j)); // NHWC
+                    input_tensor_values[i * image_width * image_channels + j * image_channels + k] = normalized_value; // NHWC
                 } else {
-                    input_tensor_values[k * h * w + i * w + j] = static_cast<float>(rgbsplit[k].at<float>(i, j)); // NCHW
+                    input_tensor_values[k * image_height * image_width + i * image_width + j] = normalized_value; // NCHW
                 }
             }
         }
