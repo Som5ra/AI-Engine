@@ -20,12 +20,12 @@ Strongly depending on module: onnxruntime.
     2. VIT Pose `Pending`
 
 ### Supported ONNXRuntime Execution Providers:
-|         | Linux | Android (exclude x86) | MacOS     | IOS       | Windows |
-|---------|-------|-----------------------|-----------|-----------|---------|
-| CPU     | ✅     | ✅                     | ✅         | ✅         | ✅       |
-| GPU     | -     | -                     | ✅(CoreML) | ✅(CoreML) | -       |
-| XNNPACK | ✅     | ✅                     | -         | -         | ✅       |
-| NNAPI   | -     | ✅                     | -         | -         | -       |
+|         | Linux | Android (exclude x86) | MacOS     | IOS       | Windows | WebAssembly |
+|---------|-------|-----------------------|-----------|-----------|---------|---------|
+| CPU     | ✅     | ✅                     | ✅         | ✅         | ✅       | ✅       |
+| GPU     | -     | -                     | ✅(CoreML) | ✅(CoreML) | -       | -       |
+| XNNPACK | ✅     | ✅                     | -         | -         | ✅       | -       |
+| NNAPI   | -     | ✅                     | -         | -         | -       | -       |
 
 ## Other Supported Modules:
 
@@ -41,13 +41,13 @@ Strongly depending on module: onnxruntime.
 
 
 ### Supported 3rd parties:
-|                             | Linux |     Android    | MacOS | IOS | Windows |
-|:---------------------------:|:-----:|:--------------:|:-----:|:---:|:-------:|
-|       OpenCV - Mobile       | ✅     | ✅              | ✅     | ✅   | ✅       |
-|         ONNXRuntime         | ✅     | ✅ excluding x86 | ✅     | ✅   | ✅       |
-| nlohmann json (header only) | ✅     | ✅              | ✅     | ✅   | ✅       |
-|     Eigen (header only)     | ✅     | ✅              | ✅     | ✅   | ✅       |
-|            OpenMP           | ✅     | ✅              | ✅     | -   | -       |
+|                             | Linux |     Android    | MacOS | IOS | Windows | WebAssembly |
+|:---------------------------:|:-----:|:--------------:|:-----:|:---:|:-------:|:-------:|
+|       OpenCV - Mobile       | ✅     | ✅              | ✅     | ✅   | ✅       | ✅       |
+|         ONNXRuntime         | ✅     | ✅ excluding x86 | ✅     | ✅   | ✅       | ✅       |
+| nlohmann json (header only) | ✅     | ✅              | ✅     | ✅   | ✅       | ✅       |
+|     Eigen (header only)     | ✅     | ✅              | ✅     | ✅   | ✅       | ✅       |
+|            OpenMP           | ✅     | ✅              | ✅     | ✅   | ✅       | ✅       |
 
 ### Build
 
