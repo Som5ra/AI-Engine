@@ -10,7 +10,8 @@ message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_EXPORT_COMPILE_COMMANDS: ${CMAKE_EXPORT_COMPILE_COMMANDS}")
 
 
-set(CMAKE_BUILD_TYPE Release)
+# [Sombra] -> if add Release when building wasm, it would lack of symbols, I don't know why
+# set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
@@ -37,6 +38,25 @@ if(BUILD_PLATFORM STREQUAL "linux")
     set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/static_lib/lib/libonnxruntime.a")
     # set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-android-static_lib-1.18.1/headers")
     # set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-build/build/static_lib_xnn/libonnxruntime_static_lib.a")
+
+elseif(BUILD_PLATFORM STREQUAL "wasm")
+
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS ON) #Set this to ON if you want to use GNU++
+    set(CMAKE_CXX_STANDARD 17)
+
+
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-mobile-4.10.0-webassembly/simd/lib/cmake/opencv4)
+    
+    set(onnxruntime_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-wasm-static_lib-simd-1.17.1/include")
+    set(onnxruntime_LIBS "${CMAKE_SOURCE_DIR}/3rdparty/onnxruntime/onnxruntime-wasm-static_lib-simd-1.17.1/lib/libonnxruntime.a")
+
+    # add_definitions( -fopenmp -pthread)
+    # add_definitions(-fopenmp)
+
+    add_definitions(-DNCNN_SIMPLEOMP)
+    set(SOURCES ${CMAKE_SOURCE_DIR}/3rdparty/simpleomp/simpleomp.cc)
+    include_directories(${CMAKE_SOURCE_DIR}/3rdparty/simpleomp)
 
 elseif(BUILD_PLATFORM STREQUAL "android")
     
@@ -165,6 +185,8 @@ include_directories(
 )
 
 set(SOURCES 
+    ${SOURCES}
+    # ${CMAKE_SOURCE_DIR}/test.cc
     ${CMAKE_SOURCE_DIR}/src/utils.cc
     ${CMAKE_SOURCE_DIR}/src/BaseONNX.cc
 )
@@ -200,10 +222,16 @@ set(FACE_GEOMETRY_LIBS
 
 
 
-add_subdirectory(tools)
-add_subdirectory(examples)
-add_subdirectory(src)
-add_subdirectory(src_unity_api)
+
+
+if(BUILD_PLATFORM STREQUAL "wasm")
+    add_subdirectory(src_wasm_api)
+else()
+    add_subdirectory(tools)
+    add_subdirectory(examples)
+    add_subdirectory(src)
+    add_subdirectory(src_unity_api)
+endif()
 
 message("")
 message("Compile Summary:")
