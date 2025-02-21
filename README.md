@@ -16,9 +16,9 @@ Strongly depending on module: onnxruntime.
 3. [Human Segmentation Model](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/human_segmentation_demo.gif)
     1. Selfie (Close to camera)
 4. **Human Pose Model**
-    1. RTMO `Far Scenario`   `Single Stage`
-    2. VIT Pose `Pending`
-
+    <!-- 1. RTMO `Far Scenario`   `Single Stage` -->
+    <!-- 2. VIT Pose `Pending` -->
+    1. RTMPOSE
 ### Supported ONNXRuntime Execution Providers:
 |         | Linux | Android (exclude x86) | MacOS     | IOS       | Windows | WebAssembly |
 |---------|-------|-----------------------|-----------|-----------|---------|---------|
