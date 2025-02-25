@@ -205,7 +205,7 @@ std::pair<cv::Mat, cv::Mat> RTMPose::CropImageByDetectBox(const cv::Mat& input_i
 //     int h = rgbsplit[0].size[0];
 //     int w = rgbsplit[0].size[1];
 //     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-//     omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
+//     #pragma omp parallel for num_threads(2)
 //     #pragma omp parallel for
 //     #endif
 //     for (int i = 0; i < h; i++) {

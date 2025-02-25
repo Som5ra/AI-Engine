@@ -10,6 +10,7 @@ set(Engine_Required_Modules
     ${FACE_MODEL_LIBS}
     ${HUMAN_SEG_LIBS}
     ${HUMAN_POSE_LIBS}
+    ${DETECTION_2D_LIBS}
     # tools(post-processing):
     ${FACE_GEOMETRY_LIBS} 
     ${NMS_LIBS}
@@ -33,6 +34,11 @@ elseif(BUILD_PLATFORM STREQUAL "linux")
     add_library( ${PROJECT_NAME} SHARED ${Engine_Required_Modules})
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})
     target_link_libraries(${PROJECT_NAME} ${Engine_Required_Link_Modules} OpenMP::OpenMP_CXX )
+elseif(BUILD_PLATFORM STREQUAL "wasm")
+    add_executable(${PROJECT_NAME} ${Engine_Required_Modules} )
+    target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
+    # target_link_libraries(${PROJECT_NAME} ${Engine_Required_Link_Modules} OpenMP::OpenMP_CXX)
+    target_link_libraries(${PROJECT_NAME} ${Engine_Required_Link_Modules})
 elseif(BUILD_PLATFORM STREQUAL "macos")
     add_library(${PROJECT_NAME} SHARED ${Engine_Required_Modules} )
     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS} ${OPENMP_INCLUDES})

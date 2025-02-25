@@ -120,8 +120,8 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
     std::vector<cv::Mat> channel_mats(channels);
 
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-    #pragma omp parallel for
+    #pragma omp parallel for num_threads(2)
+    // #pragma omp parallel for
     #endif
     for (int c = 0; c < channels; ++c) {
         channel_mats[c] = cv::Mat(height, width, CV_32F);
@@ -138,8 +138,8 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
 
     if (channels == 1){
         #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-        omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(2)
+        // #pragma omp parallel for
         #endif
         for (int h = 0; h < target_size.first; ++h) {
             for (int w = 0; w < target_size.second; ++w) {
@@ -150,8 +150,8 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
         }
     }else{
         #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-        omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(2)
+        // #pragma omp parallel for
         #endif
         for (int h = 0; h < target_size.first; ++h) {
             for (int w = 0; w < target_size.second; ++w) {
@@ -174,8 +174,8 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
     cv::Mat colorized_output(target_size.first, target_size.second, CV_8UC3);
     // Create a colorized output image
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-    #pragma omp parallel for
+    #pragma omp parallel for num_threads(2)
+    // #pragma omp parallel for
     #endif
     for (int h = 0; h < target_size.first; ++h) {
         for (int w = 0; w < target_size.second; ++w) {

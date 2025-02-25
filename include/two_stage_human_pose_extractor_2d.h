@@ -28,6 +28,7 @@ public:
 
     GUSTO_RET DetectPose(const cv::Mat& image);
     GUSTO_RET Display(cv::Mat& image, bool display_box = true, bool display_keypoints = true);
+    GUSTO_RET Debug();
 private:
     std::unique_ptr<gusto_detector2d::Detector> human_detector;
     std::unique_ptr<gusto_humanpose::RTMPose> pose_detector;

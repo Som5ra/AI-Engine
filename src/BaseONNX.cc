@@ -200,8 +200,8 @@ std::vector<float> BaseONNX::preprocess(const cv::Mat& image) {
     // std::cout << "mean: " << _config->mean[0] << " " << _config->mean[1] << " " << _config->mean[2] << std::endl;
     // std::cout << "std: " << _config->std[0] << " " << _config->std[1] << " " << _config->std[2] << std::endl;
     #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-    omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-    #pragma omp parallel for
+    // omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
+    #pragma omp parallel for num_threads(2)
     #endif
     for (int i = 0; i < image_height; i++) {
         for (int j = 0; j < image_width; j++) {

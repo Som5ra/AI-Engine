@@ -79,7 +79,9 @@ GUSTO_RET HumanPoseExtractor2D::DetectPose(const cv::Mat& image)
 
         cv::Mat detector_input_copy = frame_resize.clone();
         // this->detection_result->boxes.clear();
+        auto start_time = std::chrono::steady_clock::now();
         auto output = human_detector->forward(detector_input_copy);
+        auto end_time = std::chrono::steady_clock::now();
         this->detection_result->boxes = static_cast<gusto_detector2d::DetectionResult*>(output.get())->boxes;
     }
     // auto output = human_detector->forward(detector_input_copy);
@@ -87,7 +89,6 @@ GUSTO_RET HumanPoseExtractor2D::DetectPose(const cv::Mat& image)
     // gusto_detector2d::DetectionResult* result = static_cast<gusto_detector2d::DetectionResult*>(output.get());
     auto dets_out = this->detection_result->boxes;
     for(size_t i = 0; i < dets_out.size(); i++){
-        
         // RTMPose
         auto tmp_res = pose_detector->CropImageByDetectBox(pose_input_copy, dets_out[i]);
         auto pose_out = pose_detector->forward(tmp_res.first);
@@ -107,6 +108,8 @@ GUSTO_RET HumanPoseExtractor2D::DetectPose(const cv::Mat& image)
 GUSTO_RET HumanPoseExtractor2D::Display(cv::Mat& image, bool display_box, bool display_keypoints)
 {
     auto dets_out = this->detection_result->boxes;
+
+
     for(size_t i = 0; i < dets_out.size(); i++){
         if(display_box){
             cv::rectangle(image, cv::Point(dets_out[i].x1 * scale, dets_out[i].y1 * scale), cv::Point(dets_out[i].x2 * scale, dets_out[i].y2 * scale), cv::Scalar(0, 255, 0), 2);
@@ -121,5 +124,12 @@ GUSTO_RET HumanPoseExtractor2D::Display(cv::Mat& image, bool display_box, bool d
 
         break; //debug for one person
     }
+    return GustoStatus::ERR_OK;
+}
+
+
+GUSTO_RET HumanPoseExtractor2D::Debug()
+{
+    std::cout << human_detector->_config->model_path << std::endl;
     return GustoStatus::ERR_OK;
 }

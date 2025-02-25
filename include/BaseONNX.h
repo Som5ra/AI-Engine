@@ -137,10 +137,10 @@ protected:
 
     static std::vector<float> sigmoid(const std::vector<float>& x) {
         std::vector<float> result(x.size());
-        #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
-        omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
-        #pragma omp parallel for
-        #endif
+        // #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
+        // omp_set_num_threads(std::max(1, omp_get_max_threads() / 2));
+        #pragma omp parallel for num_threads(2)
+        // #endif
         for (int i = 0; i < x.size(); i++) {
             result[i] = 1 / (1 + exp(-x[i]));
         }

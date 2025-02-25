@@ -10,7 +10,13 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
-#if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
+// #if !defined(BUILD_PLATFORM_WINDOWS) && !defined(BUILD_PLATFORM_IOS)
+// #include <omp.h>
+// #endif
+
+#if defined(BUILD_PLATFORM_WASM)
+#include "simpleomp.h"
+#else
 #include <omp.h>
 #endif
 
