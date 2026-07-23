@@ -11,9 +11,7 @@
 
 #include <nlohmann/json.hpp>
 
-#if defined(BUILD_PLATFORM_WASM)
-#include "simpleomp.h"
-#else
+#if defined(AI_ENGINE_HAS_OPENMP)
 #include <omp.h>
 #endif
 

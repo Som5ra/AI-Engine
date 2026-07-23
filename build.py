@@ -1,197 +1,116 @@
+#!/usr/bin/env python3
+"""Configure, build, and optionally install AI-Engine."""
+
+from __future__ import annotations
+
+import argparse
 import os
 import subprocess
-import argparse
-import shutil
-import logging
-
-logging.basicConfig(level=logging.INFO)
+from pathlib import Path
 
 
-def execute(cmd, shell=False):
-    try:
-        logging.debug("Executing: %s" % cmd)
-        logging.info('Executing: ' + ' '.join(cmd))
-        retcode = subprocess.call(cmd, shell=shell)
-        if retcode < 0:
-            raise Exception("Child was terminated by signal: %s" % -retcode)
-        elif retcode > 0:
-            raise Exception("Child returned: %s" % retcode)
-    except OSError as e:
-        raise Exception("Execution failed: %d / %s" % (e.errno, e.strerror))
-    
-def build_macos(toolchain = 'osx.toolchain.cmake', install = True):
-    binary_dir = 'build/build-macos'
-
-    compile_cmd = ['cmake']
-    compile_cmd.append('-DBUILD_PLATFORM=macos')
-    compile_cmd.append(f'-DCMAKE_TOOLCHAIN_FILE={toolchain}')
-    compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')
-    compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
-
-    compile_cmd.append('-S .')
-    compile_cmd.append(f'-B {binary_dir}')
-    execute(compile_cmd)
-    
-    build_cmd = [f'cmake --build {binary_dir}']
-    build_cmd.append('-j8')
-    execute(build_cmd, shell=True)
-
-    if install:
-        install_cmd = [f'cmake --install {binary_dir}']
-        execute(install_cmd, shell=True)
-
-def build_linux(install = True):
-    binary_dir = 'build/build-linux'
-
-    compile_cmd = ['cmake']
-    compile_cmd.append('-DBUILD_PLATFORM=linux')
-    compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')
-    compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
-    # compile_cmd.append('-DCMAKE_CXX_STANDARD=14')
-
-    compile_cmd.append('-S .')
-    compile_cmd.append(f'-B {binary_dir}')
-    execute(compile_cmd)
-    
-    build_cmd = [f'cmake --build {binary_dir}']
-    build_cmd.append('-j8')
-    execute(build_cmd, shell=True)
-
-    if install:
-        install_cmd = [f'cmake --install {binary_dir}']
-        execute(install_cmd, shell=True)
+SUPPORTED_PLATFORMS = ("linux", "android", "macos", "ios", "windows", "wasm")
+ANDROID_ABIS = ("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 
-def build_windows(toolchain = 'win.toolchain.cmake', install = True):
-    binary_dir = 'build/build-windows'
-    # Ensure the build directory exists
-    if not os.path.exists(binary_dir):
-        os.makedirs(binary_dir)
-
-    compile_cmd = ['cmake']
-    compile_cmd.append('-DBUILD_PLATFORM=windows')
-    compile_cmd.append(f'-DCMAKE_TOOLCHAIN_FILE={toolchain}')
-    compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')
-    compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
-    compile_cmd.append('-DBUILD_SHARED_LIBS=OFF')
-    compile_cmd.append('-DOpenCV_STATIC=ON')
-    
-    # compile_cmd.append('-DCMAKE_TOOLCHAIN_FILE=~/mingw-w64-x86_64.cmake')
-    # compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
-    # compile_cmd.append('-DCMAKE_MAKE_PROGRAM=mingw32-make')
-    # compile_cmd.append('-G MinGW Makefiles')
-    
-    compile_cmd.append('-S .')
-    compile_cmd.append(f'-B {binary_dir}')
-    execute(compile_cmd)
-    
-    # windows_make_path = binary_dir.replace("/", "\\")
-    build_cmd = ['cmake', '--build', binary_dir, '-j8', '--config', 'Release']
-    execute(build_cmd)
+def run(command: list[str]) -> None:
+    print("+", subprocess.list2cmdline(command), flush=True)
+    subprocess.run(command, check=True)
 
 
-    if install:
-        install_cmd = [f'cmake --install {binary_dir}']
-        execute(install_cmd, shell=True)
-
-def build_android(
-        toolchain = "android-ndk-r26d-linux/android-ndk-r26d/build/cmake/android.toolchain.cmake",
-        ANDROID_ABI = 'arm64-v8a', 
-        ANDROID_PLATFORM = 'android-26',
-        install = True):
-    
-    android_abi_enum = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
-    binary_dir = f'build/build-android/{ANDROID_ABI}'
-
-    if ANDROID_ABI not in android_abi_enum:
-        raise Exception('Invalid ANDROID_ABI')
-
-    compile_cmd = ['cmake']
-    compile_cmd.append('-DBUILD_PLATFORM=android')
-    compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')        
-    compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
-
-
-    compile_cmd.append(f'-DCMAKE_TOOLCHAIN_FILE={toolchain}')
-    compile_cmd.append(f'-DANDROID_ABI={ANDROID_ABI}')
-    compile_cmd.append(f'-DANDROID_PLATFORM={ANDROID_PLATFORM}')
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("platform", choices=SUPPORTED_PLATFORMS)
+    parser.add_argument("--build-type", default="Release")
+    parser.add_argument("--build-dir", type=Path)
+    parser.add_argument("--toolchain", type=Path)
+    parser.add_argument("--generator")
+    parser.add_argument("--android-abi", choices=ANDROID_ABIS, default="arm64-v8a")
+    parser.add_argument("--android-platform", default="android-26")
+    parser.add_argument("--jobs", type=int, default=max(1, os.cpu_count() or 1))
+    parser.add_argument("--install", action="store_true")
+    parser.add_argument("--install-prefix", type=Path)
+    parser.add_argument(
+        "--cmake-arg",
+        action="append",
+        default=[],
+        help="Additional configure argument; may be supplied more than once",
+    )
+    return parser.parse_args()
 
 
-    compile_cmd.append('-S .')
-    compile_cmd.append(f'-B {binary_dir}')
-    execute(compile_cmd)
-    
-    build_cmd = [f'cmake --build {binary_dir}']
-    build_cmd.append('-j8')
-    execute(build_cmd, shell=True)
+def main() -> None:
+    args = parse_args()
+    if args.jobs < 1:
+        raise SystemExit("--jobs must be greater than zero")
 
-    if install:
-        install_cmd = [f'cmake --install {binary_dir}']
-        execute(install_cmd, shell=True)
+    suffix = args.android_abi if args.platform == "android" else None
+    default_build_dir = Path("build") / args.platform
+    if suffix:
+        default_build_dir /= suffix
+    build_dir = args.build_dir or default_build_dir
 
-def build_ios(toolchain = 'ios.toolchain.cmake', install = True):
-    # cmake -B build -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios-cmake/ios.toolchain.cmake -DPLATFORM=OS64 -DBUILD_PLATFORM=ios -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-    # cmake --build build --config Release
+    configure = [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        str(build_dir),
+        f"-DBUILD_PLATFORM={args.platform}",
+        f"-DCMAKE_BUILD_TYPE={args.build_type}",
+    ]
 
-    binary_dir = f'build/build-ios/'
+    if args.generator:
+        configure.extend(["-G", args.generator])
+    if args.toolchain:
+        configure.append(f"-DCMAKE_TOOLCHAIN_FILE={args.toolchain}")
+    if args.install_prefix:
+        configure.append(f"-DCMAKE_INSTALL_PREFIX={args.install_prefix}")
 
-    compile_cmd = ['cmake']
-    compile_cmd.append('-DBUILD_PLATFORM=ios')
-    compile_cmd.append('-DCMAKE_BUILD_TYPE=Release')        
-    compile_cmd.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
+    if args.platform == "android":
+        if not args.toolchain:
+            raise SystemExit("Android builds require --toolchain <android.toolchain.cmake>")
+        configure.extend(
+            [
+                f"-DANDROID_ABI={args.android_abi}",
+                f"-DANDROID_PLATFORM={args.android_platform}",
+            ]
+        )
+    elif args.platform == "ios":
+        if not args.toolchain:
+            raise SystemExit("iOS builds require --toolchain <ios.toolchain.cmake>")
+        configure.extend(["-DPLATFORM=OS64", "-DENABLE_ARC=1"])
+    elif args.platform == "wasm" and not args.toolchain:
+        raise SystemExit(
+            "WASM builds require --toolchain <Emscripten.cmake> "
+            "or invocation through emcmake"
+        )
 
-    compile_cmd.append(f'-G Xcode')
-    compile_cmd.append(f'-DCMAKE_TOOLCHAIN_FILE={toolchain}')
-    compile_cmd.append(f'-DPLATFORM=OS64')
-    compile_cmd.append(f'-DENABLE_ARC=1')
-    compile_cmd.append(f'-DENABLE_VISIBILITY=0')
-    compile_cmd.append(f'-DCMAKE_INSTALL_PREFIX=./install')
-    compile_cmd.append(f'-DBUILD_SHARED_LIBS=OFF')
-    
+    configure.extend(args.cmake_arg)
+    run(configure)
 
+    build = [
+        "cmake",
+        "--build",
+        str(build_dir),
+        "--config",
+        args.build_type,
+        "--parallel",
+        str(args.jobs),
+    ]
+    run(build)
 
-    compile_cmd.append('-S .')
-    compile_cmd.append(f'-B {binary_dir}')
-    execute(compile_cmd)
-    
-    build_cmd = [f'cmake --build {binary_dir} --config Release']
-    build_cmd.append('-j8')
-    execute(build_cmd, shell=True)
-
-    if install:
-        install_cmd = [f'cmake --install {binary_dir}']
-        execute(install_cmd, shell=True)
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(description='Build the project')
-    parser.add_argument('--android', action='store_true')
-    parser.add_argument('--macos', action='store_true')
-    parser.add_argument('--linux', action='store_true')
-    parser.add_argument('--windows', action='store_true')
-    parser.add_argument('--ios', action='store_true')
-    parser.add_argument('--noinstall', action='store_true')
-
-    args = parser.parse_args()
-
-    _install = False if args.noinstall else True
-
-    if args.linux: 
-        build_linux(install = _install)
-
-    if args.android:
-        abis = ['armeabi-v7a', 'arm64-v8a', 'x86_64']
-        # abis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
-        for abi in abis:
-            build_android(ANDROID_ABI=abi, install = _install)
-        # build_android(install = _install)
-    
-    if args.macos:
-        build_macos(install = _install)
+    if args.install:
+        run(
+            [
+                "cmake",
+                "--install",
+                str(build_dir),
+                "--config",
+                args.build_type,
+            ]
+        )
 
 
-    if args.windows:
-        build_windows(install = _install)
-
-    if args.ios:
-        build_ios(install = _install)
+if __name__ == "__main__":
+    main()
