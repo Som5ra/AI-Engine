@@ -47,9 +47,9 @@ target_link_libraries(ai_engine_6d_objects PUBLIC
 )
 
 if(BUILD_PLATFORM STREQUAL "android")
-    target_compile_definitions(ai_engine_6d_objects PRIVATE __DISABLE_OPENGL__)
+    target_compile_definitions(ai_engine_6d_objects PUBLIC __DISABLE_OPENGL__)
 else()
-    target_compile_definitions(ai_engine_6d_objects PRIVATE __OPENCV_DEBUG__)
+    target_compile_definitions(ai_engine_6d_objects PUBLIC __OPENCV_DEBUG__)
 endif()
 
 foreach(target_name IN ITEMS csrt3d_module model_target)
