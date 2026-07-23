@@ -144,8 +144,8 @@ GUSTO_RET FaceGeometryTracker3D::Detect(
 
         auto [face_geometries, process_status] =
             face_mesh_calculator_->Process(
-                std::make_pair(frame.rows, frame.cols),
-                std::move(multi_face_landmarks));
+                std::make_pair(frame.cols, frame.rows),
+                multi_face_landmarks);
         if (process_status != GustoStatus::ERR_OK) {
             return process_status;
         }
