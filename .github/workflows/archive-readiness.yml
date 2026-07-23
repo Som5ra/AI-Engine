@@ -1,0 +1,47 @@
+name: Archive readiness
+
+on:
+  pull_request:
+  push:
+    branches:
+      - agent/p0-archive-readiness
+
+permissions:
+  contents: read
+
+concurrency:
+  group: archive-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-smoke:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate archive structure
+        run: |
+          python3 -m py_compile build.py scripts/check_archive_readiness.py
+          python3 -m json.tool CMakePresets.json >/dev/null
+          python3 scripts/check_archive_readiness.py
+
+      - name: Configure core libraries
+        run: cmake --preset linux-release
+
+      - name: Build core libraries
+        run: cmake --build --preset linux-release --parallel 2
+
+      - name: Configure examples
+        run: >-
+          cmake -S . -B build/linux-examples
+          -DBUILD_PLATFORM=linux
+          -DCMAKE_BUILD_TYPE=Release
+          -DAI_ENGINE_BUILD_EXAMPLES=ON
+          -DAI_ENGINE_BUILD_STANDALONE_TOOLS=OFF
+          -DAI_ENGINE_BUILD_6D_TRACKING=OFF
+
+      - name: Build examples
+        run: cmake --build build/linux-examples --parallel 2
