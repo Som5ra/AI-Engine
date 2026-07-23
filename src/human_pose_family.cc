@@ -1,5 +1,8 @@
 #include "human_pose_family.h"
 
+#include <limits>
+#include <stdexcept>
+
 namespace custom_humanpose{
 
 // std::map<std::string, model_lib> MODEL_NAME_LIB_MAPPER = {
@@ -245,15 +248,42 @@ std::unique_ptr<PostProcessResult> RTMPose::forward(const cv::Mat& image){
 
 std::vector<std::tuple<int, int, int>> RTMPose::postprocess(const std::vector<Ort::Value>& output_tensors, float threshold){ 
 
-    std::vector<int64_t> simcc_x_dims = output_tensors[0].GetTensorTypeAndShapeInfo().GetShape();
-	std::vector<int64_t> simcc_y_dims = output_tensors[1].GetTensorTypeAndShapeInfo().GetShape();
+    if (output_tensors.size() < 2) {
+        throw std::runtime_error(
+            "RTMPose output must contain SimCC X and Y tensors");
+    }
 
-	assert(simcc_x_dims.size() == 3 && simcc_y_dims.size() == 3);
+    const auto simcc_x_info =
+        output_tensors[0].GetTensorTypeAndShapeInfo();
+    const auto simcc_y_info =
+        output_tensors[1].GetTensorTypeAndShapeInfo();
+    const std::vector<int64_t> simcc_x_dims = simcc_x_info.GetShape();
+    const std::vector<int64_t> simcc_y_dims = simcc_y_info.GetShape();
 
-	int batch_size = simcc_x_dims[0] == simcc_y_dims[0] ? simcc_x_dims[0] : 0;
-	int joint_num = simcc_x_dims[1] == simcc_y_dims[1] ? simcc_x_dims[1] : 0;
-	int extend_width = simcc_x_dims[2];
-	int extend_height = simcc_y_dims[2];
+    if (simcc_x_dims.size() != 3 || simcc_y_dims.size() != 3 ||
+        simcc_x_dims[0] != 1 || simcc_y_dims[0] != 1 ||
+        simcc_x_dims[1] <= 0 ||
+        simcc_x_dims[1] != simcc_y_dims[1] ||
+        simcc_x_dims[2] <= 0 || simcc_y_dims[2] <= 0 ||
+        simcc_x_dims[1] > std::numeric_limits<int>::max() ||
+        simcc_x_dims[2] > std::numeric_limits<int>::max() ||
+        simcc_y_dims[2] > std::numeric_limits<int>::max()) {
+        throw std::runtime_error(
+            "RTMPose output shapes must be [1, joints, bins]");
+    }
+
+    const int joint_num = static_cast<int>(simcc_x_dims[1]);
+    const int extend_width = static_cast<int>(simcc_x_dims[2]);
+    const int extend_height = static_cast<int>(simcc_y_dims[2]);
+    const std::size_t expected_x_count =
+        static_cast<std::size_t>(joint_num) * extend_width;
+    const std::size_t expected_y_count =
+        static_cast<std::size_t>(joint_num) * extend_height;
+    if (simcc_x_info.GetElementCount() != expected_x_count ||
+        simcc_y_info.GetElementCount() != expected_y_count) {
+        throw std::runtime_error(
+            "RTMPose tensor sizes do not match their declared shapes");
+    }
 	// std::cout << "batch_size: " << batch_size << std::endl;
 	// std::cout << "joint_num: " << joint_num << std::endl;
 	// std::cout << "extend_width: " << extend_width << std::endl;
@@ -349,25 +379,41 @@ std::vector<std::tuple<int, int, int>> RTMPose::postprocess(const std::vector<Or
 }
 
 
-cv::Mat RTMPose::draw_single_person_keypoints(cv::Mat image, const std::vector<std::tuple<int, int, int>>& keypoints, float scale){
-    for(size_t i = 0; i < keypoints.size(); i++){
-        auto [x, y, exist] = keypoints[i];
-        if (exist == 0){
-            continue;
+cv::Mat RTMPose::draw_single_person_keypoints(
+    cv::Mat image,
+    const std::vector<std::tuple<int, int, int>>& keypoints,
+    float scale) {
+    const std::size_t point_count =
+        std::min(keypoints.size(), coco17_mapper.size());
+    for (std::size_t index = 0; index < point_count; ++index) {
+        const auto [x, y, exists] = keypoints[index];
+        if (exists != 0) {
+            cv::circle(
+                image,
+                cv::Point(x * scale, y * scale),
+                5,
+                coco17_mapper[index].second,
+                1);
         }
-        cv::circle(image, cv::Point(x * scale, y * scale), 5, coco17_mapper[i].second, 1);
-        // std::cout << "keypoint: " << i << std::endl;
-        // std::cout << coco17_mapper[i].first << std::endl;
-        // cv::putText(image, coco17[i].first, cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
     }
-    for(size_t i = 0; i < coco17_skeleton.size(); i++){
-        auto [start, end] = coco17_skeleton[i];
-        auto [x1, y1, exist1] = keypoints[start];
-        auto [x2, y2, exist2] = keypoints[end];
-        if (exist1 == 0 || exist2 == 0){
+
+    for (const auto& [start, end] : coco17_skeleton) {
+        if (start < 0 || end < 0 ||
+            static_cast<std::size_t>(start) >= point_count ||
+            static_cast<std::size_t>(end) >= point_count) {
             continue;
         }
-        cv::line(image, cv::Point(x1 * scale, y1 * scale), cv::Point(x2 * scale, y2 * scale), coco17_mapper[i].second, 2);
+        const auto [x1, y1, exists1] = keypoints[start];
+        const auto [x2, y2, exists2] = keypoints[end];
+        if (exists1 == 0 || exists2 == 0) {
+            continue;
+        }
+        cv::line(
+            image,
+            cv::Point(x1 * scale, y1 * scale),
+            cv::Point(x2 * scale, y2 * scale),
+            coco17_mapper[start].second,
+            2);
     }
     return image;
 }
