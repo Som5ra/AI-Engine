@@ -1,5 +1,5 @@
 
-#include "BaseONNX.h"
+#include "BaseONNX.h"\n\n#include <stdexcept>
 
 std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& model_path, const std::string& config_path){
     std::unique_ptr<basic_model_config> _config = std::make_unique<basic_model_config>();
@@ -175,6 +175,10 @@ BaseONNX::BaseONNX(std::unique_ptr<basic_model_config> _config)
 
 
 std::vector<float> BaseONNX::preprocess(const cv::Mat& image) {
+    if (image.empty()) {
+        throw std::invalid_argument("Cannot preprocess an empty image");
+    }
+
     cv::Mat frame;
     if (_config->channel_order == ChannelOrder::BGR) {
         cv::cvtColor(image, frame, cv::COLOR_RGB2BGR);
@@ -190,7 +194,22 @@ std::vector<float> BaseONNX::preprocess(const cv::Mat& image) {
 	int image_width = frame.cols;
 	int image_channels = frame.channels();
 
-    assert(inputTensorSize == 1 * image_height * image_width * image_channels);
+    const std::size_t actual_tensor_size =
+        static_cast<std::size_t>(image_height) * image_width * image_channels;
+    if (frame.depth() != CV_8U || inputTensorSize != actual_tensor_size ||
+        _config->mean.size() < static_cast<std::size_t>(image_channels) ||
+        _config->std.size() < static_cast<std::size_t>(image_channels)) {
+        throw std::invalid_argument(
+            "Model preprocessing configuration does not match the input tensor");
+    }
+    for (int channel = 0; channel < image_channels; ++channel) {
+        if (!std::isfinite(_config->mean[channel]) ||
+            !std::isfinite(_config->std[channel]) ||
+            std::abs(_config->std[channel]) <= 1e-12F) {
+            throw std::invalid_argument(
+                "Model normalization values must be finite with non-zero std");
+        }
+    }
     std::vector<float> input_tensor_values(inputTensorSize);
 
 
