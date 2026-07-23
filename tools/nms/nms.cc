@@ -15,7 +15,7 @@
 namespace custom_nms{
 using namespace std;
 
-vector<int> nms_cpu(const vector<Rect>& _boxes, const vector<float>& _scores, float _score_thr, float _nms_thr) {
+vector<int> nms_cpu(const vector<CustomRect>& _boxes, const vector<float>& _scores, float _score_thr, float _nms_thr) {
     /*
     Single class NMS
     
@@ -27,7 +27,7 @@ vector<int> nms_cpu(const vector<Rect>& _boxes, const vector<float>& _scores, fl
         NDArray of indices to keep
     */
     vector<int> _raw_indices(_scores.size()), raw_indices;
-    vector<Rect> boxes;
+    vector<CustomRect> boxes;
     vector<float> scores;
     vector<float> areas; 
 
@@ -71,7 +71,7 @@ vector<int> nms_cpu(const vector<Rect>& _boxes, const vector<float>& _scores, fl
     return keep;
 }
 
-pair<vector<int>, vector<int>> multiclass_nms_class_unaware_cpu(const vector<Rect>& boxes, const vector<vector<float>>& scores, float score_thr, float nms_thr) {
+pair<vector<int>, vector<int>> multiclass_nms_class_unaware_cpu(const vector<CustomRect>& boxes, const vector<vector<float>>& scores, float score_thr, float nms_thr) {
     /*
     Mutli class NMS (class-unaware)
 
@@ -144,10 +144,10 @@ extern "C" {
         for (size_t batch = 0; batch < boxes_shape[0]; batch++) {
             int box_batch_offset = batch * boxarr_size_per_batch;
             int score_batch_offset = batch * scorearr_size_per_batch;
-            vector<Rect> boxes_vec;
+            vector<CustomRect> boxes_vec;
             vector<vector<float>> scores_vec;
             for (int i = 0; i < boxes_shape[1]; i++) {
-                boxes_vec.push_back(Rect(boxes[box_batch_offset + i * 4], boxes[box_batch_offset + i * 4 + 1], boxes[box_batch_offset + i * 4 + 2], boxes[box_batch_offset + i * 4 + 3]));
+                boxes_vec.push_back(CustomRect(boxes[box_batch_offset + i * 4], boxes[box_batch_offset + i * 4 + 1], boxes[box_batch_offset + i * 4 + 2], boxes[box_batch_offset + i * 4 + 3]));
             }
             for (int i = 0; i < scores_shape[2]; i++) {
                 vector<float> scores_vec_tmp;
@@ -187,10 +187,10 @@ extern "C" {
         for (size_t batch = 0; batch < boxes_shape[0]; batch++) {
             int box_batch_offset = batch * boxarr_size_per_batch;
             int score_batch_offset = batch * scorearr_size_per_batch;
-            vector<Rect> boxes_vec;
+            vector<CustomRect> boxes_vec;
             vector<vector<float>> scores_vec;
             for (int i = 0; i < boxes_shape[1]; i++) {
-                boxes_vec.push_back(Rect(boxes[box_batch_offset + i * 4], boxes[box_batch_offset + i * 4 + 1], boxes[box_batch_offset + i * 4 + 2], boxes[box_batch_offset + i * 4 + 3]));
+                boxes_vec.push_back(CustomRect(boxes[box_batch_offset + i * 4], boxes[box_batch_offset + i * 4 + 1], boxes[box_batch_offset + i * 4 + 2], boxes[box_batch_offset + i * 4 + 3]));
             }
             for (int i = 0; i < scores_shape[2]; i++) {
                 vector<float> scores_vec_tmp;
@@ -216,11 +216,11 @@ extern "C" {
 //     num_threads = std::max(1, omp_get_max_threads() / 2);
 //    ;
 
-//     vector<Rect> boxes = {Rect(0, 0, 10, 10), Rect(1, 1, 10, 10), Rect(2, 2, 10, 10),
-//     Rect(0, 0, 10, 10), Rect(1, 1, 10, 10), Rect(2, 2, 10, 10),
-//     Rect(0, 0, 10, 10), Rect(1, 1, 10, 10), Rect(2, 2, 10, 10),
-//     Rect(0, 0, 10, 10), Rect(1, 1, 10, 10), Rect(2, 2, 10, 10),
-//     Rect(0, 0, 10, 10), Rect(1, 1, 10, 10)};
+//     vector<CustomRect> boxes = {CustomRect(0, 0, 10, 10), CustomRect(1, 1, 10, 10), CustomRect(2, 2, 10, 10),
+//     CustomRect(0, 0, 10, 10), CustomRect(1, 1, 10, 10), CustomRect(2, 2, 10, 10),
+//     CustomRect(0, 0, 10, 10), CustomRect(1, 1, 10, 10), CustomRect(2, 2, 10, 10),
+//     CustomRect(0, 0, 10, 10), CustomRect(1, 1, 10, 10), CustomRect(2, 2, 10, 10),
+//     CustomRect(0, 0, 10, 10), CustomRect(1, 1, 10, 10)};
 //     vector<float> test1_scores = {
 //         0.56884766, 0.7861328, 0.8598633, 0.5605469, 0.796875, 0.4099121,
 //         0.80859375, 0.7529297, 0.6801758, 0.81591797, 0.7993164, 0.7807617,
