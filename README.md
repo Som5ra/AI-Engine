@@ -93,6 +93,21 @@ The maintained public surface uses neutral `Custom` naming:
 This is an intentional breaking rename. Consumers must update their native
 library names and exported-function declarations together.
 
+## ABI and ownership contracts
+
+- Factory-created native and WebAssembly model pointers are owned by the caller.
+  Call the matching `*_Destroy` function exactly once; WebAssembly constructors
+  are not exposed as a second ownership path.
+- WebAssembly bitmap inference requires a writable RGBA buffer of exactly
+  `height * width * 4` bytes.
+- `face_mesh_calculator_process` reads `num_faces * 478 * 3` floats and
+  writes `num_faces * 16` floats. On `ERR_PARTIAL_FAIL`, every face retains
+  its output slot and failed pose matrices contain the sentinel value `-9999`.
+- Unity P/Invoke declarations must marshal C++ `bool` parameters as one-byte
+  booleans, for example `[MarshalAs(UnmanagedType.I1)]`.
+- Model instances retain inference state and are not thread-safe. Serialize calls
+  per instance or use one instance per worker.
+
 ## Dependencies
 
 The default build requires:
