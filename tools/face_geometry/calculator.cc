@@ -91,14 +91,7 @@ FaceMeshCalculator::ProcessInternal(
             image_size.first,
             image_size.second);
 
-    if (estimate_status != CustomStatus::ERR_OK) {
-        return {
-            std::move(estimated_geometries),
-            CustomStatus::ERR_GENERAL_ERROR,
-        };
-    }
-
-    return {std::move(estimated_geometries), CustomStatus::ERR_OK};
+    return {std::move(estimated_geometries), estimate_status};
 }
 
 }  // namespace custom_face_geometry
@@ -192,7 +185,8 @@ CUSTOM_API CUSTOM_RET face_mesh_calculator_process(
             face_mesh_calculator->Process(
                 std::make_pair(image_width, image_height),
                 landmark_batches);
-        if (process_status != CustomStatus::ERR_OK) {
+        if (process_status != CustomStatus::ERR_OK &&
+            process_status != CustomStatus::ERR_PARTIAL_FAIL) {
             return process_status;
         }
         if (face_geometries.size() !=
@@ -215,7 +209,7 @@ CUSTOM_API CUSTOM_RET face_mesh_calculator_process(
             }
         }
 
-        return CustomStatus::ERR_OK;
+        return process_status;
     });
 }
 
