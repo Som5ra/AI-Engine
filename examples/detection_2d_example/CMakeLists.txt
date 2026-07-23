@@ -3,6 +3,17 @@ if(NOT BUILD_PLATFORM MATCHES "^(linux|macos)$")
     return()
 endif()
 
+foreach(required_module IN ITEMS
+        opencv_highgui
+        opencv_imgcodecs
+        opencv_videoio)
+    if(NOT required_module IN_LIST OpenCV_LIBS)
+        message(STATUS
+            "Skipping detection_example: ${required_module} is unavailable")
+        return()
+    endif()
+endforeach()
+
 add_executable(detection_example
     detection_example.cc
     ${SOURCES}
