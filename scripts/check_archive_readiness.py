@@ -84,7 +84,7 @@ def main() -> int:
     )
     require_text(
         "src/multi_stage_face_geometry_3d.cc",
-        "multi_face_landmarks.reserve(detector_result->boxes.size());",
+        "multi_face_landmarks.reserve(cached_face_boxes_.size());",
     )
     require_text(
         "tools/face_geometry/calculator.cc",
