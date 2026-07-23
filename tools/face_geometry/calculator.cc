@@ -68,14 +68,14 @@ FaceMeshCalculator::Process(
     const std::pair<int, int>& image_size,
     const std::vector<NormalizedLandmarkList>& multi_face_landmarks) {
     if (!geometry_pipeline_) {
-        return {{}, CustomStatus::ERR_GENERAL_ERROR};
+        return std::make_tuple(std::vector<FaceGeometry>{}, CustomStatus::ERR_GENERAL_ERROR);
     }
     if (ValidateFrameDimensions(image_size.first, image_size.second) !=
         CustomStatus::ERR_OK) {
-        return {{}, CustomStatus::ERR_GENERAL_INVALID_PARAMETER};
+        return std::make_tuple(std::vector<FaceGeometry>{}, CustomStatus::ERR_GENERAL_INVALID_PARAMETER);
     }
     if (multi_face_landmarks.empty()) {
-        return {{}, CustomStatus::ERR_OK};
+        return std::make_tuple(std::vector<FaceGeometry>{}, CustomStatus::ERR_OK);
     }
 
     return ProcessInternal(image_size, multi_face_landmarks);
