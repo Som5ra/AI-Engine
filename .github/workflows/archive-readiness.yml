@@ -28,11 +28,8 @@ jobs:
           python3 -m json.tool CMakePresets.json >/dev/null
           python3 scripts/check_archive_readiness.py
 
-      - name: Configure core libraries
-        run: cmake --preset linux-release
-
-      - name: Build core libraries
-        run: cmake --build --preset linux-release --parallel 2
+      - name: Bootstrap and build core libraries
+        run: ./build_linux.sh
 
       - name: Configure examples
         run: >-
