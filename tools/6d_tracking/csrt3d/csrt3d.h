@@ -123,9 +123,9 @@ public:
 }; // class renderer
 #endif // __DISABLE_OPENGL__
 
-class GustoModelTarget{
+class CustomModelTarget{
 public:
-    GustoModelTarget(const int height, const int width);
+    CustomModelTarget(const int height, const int width);
     std::shared_ptr<RegionModel> model_ptr_;
     std::shared_ptr<RegionTracker> tracker_ptr_;
     #if !defined(__DISABLE_OPENGL__)

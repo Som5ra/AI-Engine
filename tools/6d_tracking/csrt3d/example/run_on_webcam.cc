@@ -22,7 +22,7 @@ cam_intrinsics = {
 }
 
 */
-int main()
+int main(int argc, char* argv[])
 {
     /*
     
@@ -61,8 +61,12 @@ int main()
 
     //setup CAD model
     const std::string model_name = "Bruni-woband";
-    const std::string model_path = "/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/StreamingAssets/Bruni-woband/Bruni-woband.obj";
-    const std::string meta_path = "/media/sombrali/HDD1/opencv-unity/custom_dnn/tools/6d_tracking/build/123.meta";
+    if (argc < 3) {
+        std::cerr << "Usage: run_on_webcam <model.obj> <model.meta>\n";
+        return 2;
+    }
+    const std::string model_path = argv[1];
+    const std::string meta_path = argv[2];
 
     const float unit_in_meter = 1;
     const float sphere_radius = 0.5;

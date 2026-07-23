@@ -1,5 +1,5 @@
-#ifndef GUSTO_WASM_API_H
-#define GUSTO_WASM_API_H
+#ifndef CUSTOM_WASM_API_H
+#define CUSTOM_WASM_API_H
 
 #include "multi_stage_face_geometry_3d.h"
 #include "two_stage_human_pose_extractor_2d.h"
@@ -12,4 +12,4 @@
 #include <onnxruntime_cxx_api.h>
 #include <opencv2/opencv.hpp>
 
-#endif  // GUSTO_WASM_API_H
+#endif  // CUSTOM_WASM_API_H

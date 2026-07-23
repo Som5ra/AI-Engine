@@ -17,33 +17,20 @@ int main(int argc, char *argv[])
 
 
 
-    // const std::string _model_path = "/media/sombrali/HDD1/weights_lib/human-pose/mediapipe/pose_detector.onnx";
-    // const std::string _model_name = "pose_detector";
-
-    // const std::string _model_path = "/media/sombrali/HDD1/mmlib/mmdetection/work_dirs/mbnv3_20241203/epoch_120/end2end_nonms_fp16.onnx";
-    // const std::string _model_name = "mbnv3_20241203";
-    // const std::pair<int, int> _input_size = std::make_pair(300, 300);
-
-    // const std::string _model_path = "/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/yolov5_nano_v7_default_optim_20241204/epoch_110/epoch_110_nonms_fp16.onnx";
-    // const std::string _model_name = "yolov5_nano";
-    // const std::pair<int, int> _input_size = std::make_pair(320, 320);
-
-
-    // std::string _model_path = "/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_20241027/best_coco_bbox_mAP_epoch_150/best_coco_bbox_mAP_epoch_150_nonms_fp16.onnx";
-    std::string _model_path = "/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Weights/rtmdet_t_v7_20241028.onnx";
-    std::string _config_path = "/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/StreamingAssets/custom_engine_test/base_model_config.json";
-
-    bool DISPLAY = true;
-    if (argc >= 2) {
-        if (argv[argc - 1] == std::string("no_display")){
-            DISPLAY = false;
-        }
-        if (argc >= 5){
-            _model_path.assign(argv[1]);
-            _config_path.assign(argv[2]);
-        }
+    if (argc < 3) {
+        std::cerr << "Usage: detection_example <model.onnx> <config.json> [--no-display]\n";
+        return 2;
     }
 
+    std::string _model_path = argv[1];
+    std::string _config_path = argv[2];
+    bool DISPLAY = true;
+    for (int index = 3; index < argc; ++index) {
+        if (std::string(argv[index]) == "--no-display" ||
+            std::string(argv[index]) == "no_display") {
+            DISPLAY = false;
+        }
+    }
 
     // std::unique_ptr<basic_model_config> config = custom_detector2d::fetch_model_config(_model_name, _model_path, _input_size);
     std::unique_ptr<custom_detector2d::Detector> human_detector(new custom_detector2d::Detector(_model_path, _config_path));

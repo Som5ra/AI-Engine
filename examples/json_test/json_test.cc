@@ -46,7 +46,7 @@ class landmark_metadata
 
 void landmark_metadata::serialize_json(const std::string& filename)
 {
-    // GustoSerializer serializer;
+    // CustomSerializer serializer;
     // json data = serializer.load_json(filename.c_str());
     json data = json::parse(std::ifstream(filename.c_str()));
     this->input_source = data.template get<InputSource>();
@@ -66,8 +66,10 @@ void landmark_metadata::serialize_json(const std::string& filename)
 }
 
 
-int main() {
-    const std::string filename = "/media/sombrali/HDD1/opencv-unity/gusto_dnn/tools/face_geometry/geometry_pipeline_metadata_including_iris_landmarks.json";
+int main(int argc, char* argv[]) {
+    const std::string filename = argc > 1
+        ? argv[1]
+        : "tools/face_geometry/geometry_pipeline_metadata_including_iris_landmarks.json";
     landmark_metadata metadata;
     metadata.serialize_json(filename);
     std::cout << metadata.input_source << std::endl;

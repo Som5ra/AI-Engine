@@ -66,12 +66,3 @@ endif()
 #     target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
 #     target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${onnxruntime_LIBS}  ${GLOBAL_LINK_3RD_PARTY_LIBS})
 # endif()
-
-
-# if(BUILD_PLATFORM STREQUAL "linux")
-#     # file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/Linux/)
-#     add_custom_command(TARGET detection_csharp_example  POST_BUILD
-#         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:detection_csharp_example> ${CMAKE_BINARY_DIR}/lib/Linux/
-#     )
-#     install(FILES $<TARGET_FILE:detection_csharp_example> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
-# endif()

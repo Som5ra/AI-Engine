@@ -7,15 +7,15 @@
 
 extern "C"{
 
-    int GustoModelTargetInit(GustoModelTarget** model_target_ptr, const int height, const int width)
+    int CustomModelTargetInit(CustomModelTarget** model_target_ptr, const int height, const int width)
     {
-        GustoModelTarget* model_target = new GustoModelTarget(height, width);
+        CustomModelTarget* model_target = new CustomModelTarget(height, width);
         *model_target_ptr = model_target;
 
         return 0;
     }
 
-    int CADModelInit(GustoModelTarget* model_target_ptr, // ptr
+    int CADModelInit(CustomModelTarget* model_target_ptr, // ptr
         const char* model_name, const char* model_path, const char* model_metadata_path, // model_info,
         float start_threshold,
         float track_threshold,
@@ -62,7 +62,7 @@ extern "C"{
         return 0;
     }
 
-    int TrackerInit(GustoModelTarget* model_target_ptr, const float fov
+    int TrackerInit(CustomModelTarget* model_target_ptr, const float fov
     ){
         const float fx = (model_target_ptr->width / 2) / std::tan(3.1415 * fov / 360.0);
         // const float fx = 500.0;
@@ -85,13 +85,13 @@ extern "C"{
         return 0;
     }
 
-    int reinit(GustoModelTarget* model_target_ptr
+    int reinit(CustomModelTarget* model_target_ptr
     ){
         model_target_ptr->model_ptr_->reset_pose(model_target_ptr->init_pose);
         return 0;
     }
 
-    int track(GustoModelTarget* model_target_ptr,
+    int track(CustomModelTarget* model_target_ptr,
         // unsigned char* bitmap,
         const char* bitmap,
         int bitmap_height,

@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <chrono>
 
-GustoModelTarget::GustoModelTarget(const int height, const int width): height(height), width(width) {}
+CustomModelTarget::CustomModelTarget(const int height, const int width): height(height), width(width) {}
 
 
 const Eigen::Matrix4f TRANSFORM_OPENCV_OPENGL = 
@@ -60,7 +60,7 @@ RegionModel::RegionModel(const std::string& name,
     // set model
     auto meta_path = meta_path_;
     if (meta_path.empty()) {
-        meta_path = geometry_path + ".gustometa";
+        meta_path = geometry_path + ".custommeta";
     }
     model_ptr_ = std::make_shared<srt3d::Model>(name, body_ptr_, meta_path, shpere_radius);
 }
