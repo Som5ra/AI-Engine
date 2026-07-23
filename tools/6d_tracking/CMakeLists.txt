@@ -54,28 +54,16 @@ endif()
 
 foreach(target_name IN ITEMS csrt3d_module model_target)
     add_library(${target_name} SHARED
-        $<TARGET_OBJECTS:ai_engine_6d_objects>
         "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/unity_api.cc"
     )
-    target_link_libraries(${target_name} PRIVATE
-        Eigen3::Eigen
-        ${OpenCV_LIBS}
-        ${AI_ENGINE_OPENMP_TARGET}
-        ${AI_ENGINE_6D_GRAPHICS_LIBRARIES}
-    )
+    target_link_libraries(${target_name} PRIVATE ai_engine_6d_objects)
 endforeach()
 
 if(NOT BUILD_PLATFORM STREQUAL "android")
     add_executable(run_on_webcam
-        $<TARGET_OBJECTS:ai_engine_6d_objects>
         "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/example/run_on_webcam.cc"
     )
-    target_link_libraries(run_on_webcam PRIVATE
-        Eigen3::Eigen
-        ${OpenCV_LIBS}
-        ${AI_ENGINE_OPENMP_TARGET}
-        ${AI_ENGINE_6D_GRAPHICS_LIBRARIES}
-    )
+    target_link_libraries(run_on_webcam PRIVATE ai_engine_6d_objects)
 endif()
 
 install(TARGETS csrt3d_module model_target
