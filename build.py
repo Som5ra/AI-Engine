@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 SUPPORTED_PLATFORMS = ("linux", "android", "macos", "ios", "windows", "wasm")
-ANDROID_ABIS = ("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+ANDROID_ABIS = ("armeabi-v7a", "arm64-v8a", "x86_64")
 
 
 def run(command: list[str]) -> None:
