@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
                 // cv::imshow("cropped_face", cropped_face);
             }
         }
-        auto [multi_pose_mat, process_status] = face_mesh_calculator.Process(std::make_pair(frame.size[0], frame.size[1]), multi_face_landmarks);
+        auto [multi_pose_mat, process_status] = face_mesh_calculator.Process(std::make_pair(frame.cols, frame.rows), multi_face_landmarks);
 
         cv::Mat K = cv::Mat::eye(3, 3, CV_32F);
 
