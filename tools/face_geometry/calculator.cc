@@ -109,7 +109,7 @@ using gusto_face_geometry::FaceMeshCalculator;
 using gusto_face_geometry::NormalizedLandmark;
 using gusto_face_geometry::NormalizedLandmarkList;
 
-GUSTO_RET face_mesh_calculator_new(
+GUSTO_API GUSTO_RET face_mesh_calculator_new(
     FaceMeshCalculator** face_mesh_calculator) {
     if (face_mesh_calculator == nullptr) {
         return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
@@ -122,7 +122,7 @@ GUSTO_RET face_mesh_calculator_new(
     });
 }
 
-GUSTO_RET face_mesh_calculator_open(
+GUSTO_API GUSTO_RET face_mesh_calculator_open(
     FaceMeshCalculator* face_mesh_calculator,
     const char* face_geometry_pipeline_metadata,
     int buffer_size) {
@@ -140,7 +140,7 @@ GUSTO_RET face_mesh_calculator_open(
     });
 }
 
-GUSTO_RET face_mesh_calculator_process(
+GUSTO_API GUSTO_RET face_mesh_calculator_process(
     FaceMeshCalculator* face_mesh_calculator,
     int image_width,
     int image_height,
@@ -219,7 +219,7 @@ GUSTO_RET face_mesh_calculator_process(
     });
 }
 
-GUSTO_RET face_mesh_calculator_destroy(
+GUSTO_API GUSTO_RET face_mesh_calculator_destroy(
     FaceMeshCalculator* face_mesh_calculator) {
     delete face_mesh_calculator;
     return GustoStatus::ERR_OK;

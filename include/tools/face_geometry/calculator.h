@@ -37,20 +37,20 @@ private:
 
 extern "C" {
 
-GUSTO_RET face_mesh_calculator_new(
+GUSTO_API GUSTO_RET face_mesh_calculator_new(
     gusto_face_geometry::FaceMeshCalculator** face_mesh_calculator);
-GUSTO_RET face_mesh_calculator_open(
+GUSTO_API GUSTO_RET face_mesh_calculator_open(
     gusto_face_geometry::FaceMeshCalculator* face_mesh_calculator,
     const char* face_geometry_pipeline_metadata,
     int buffer_size);
-GUSTO_RET face_mesh_calculator_process(
+GUSTO_API GUSTO_RET face_mesh_calculator_process(
     gusto_face_geometry::FaceMeshCalculator* face_mesh_calculator,
     int image_width,
     int image_height,
     const float* multi_face_landmarks,
     int num_faces,
     float* face_geometry_pose_mat);
-GUSTO_RET face_mesh_calculator_destroy(
+GUSTO_API GUSTO_RET face_mesh_calculator_destroy(
     gusto_face_geometry::FaceMeshCalculator* face_mesh_calculator);
 
 }  // extern "C"
