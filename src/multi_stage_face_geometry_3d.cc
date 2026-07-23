@@ -146,12 +146,8 @@ CUSTOM_RET FaceGeometryTracker3D::Detect(
             face_mesh_calculator_->Process(
                 std::make_pair(frame.cols, frame.rows),
                 multi_face_landmarks);
-        if (process_status != CustomStatus::ERR_OK) {
-            return process_status;
-        }
-
         face_geometries_ = std::move(face_geometries);
-        return CustomStatus::ERR_OK;
+        return process_status;
     } catch (const cv::Exception& exception) {
         std::cerr << "Face geometry OpenCV error: " << exception.what()
                   << std::endl;
