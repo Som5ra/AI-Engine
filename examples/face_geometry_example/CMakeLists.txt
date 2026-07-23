@@ -3,6 +3,18 @@ if(NOT BUILD_PLATFORM MATCHES "^(linux|macos|windows)$")
     return()
 endif()
 
+foreach(required_module IN ITEMS
+        opencv_calib3d
+        opencv_highgui
+        opencv_imgcodecs
+        opencv_videoio)
+    if(NOT required_module IN_LIST OpenCV_LIBS)
+        message(STATUS
+            "Skipping face_geometry_example: ${required_module} is unavailable")
+        return()
+    endif()
+endforeach()
+
 add_executable(face_geometry_example
     face_geometry_example.cc
     ${SOURCES}
