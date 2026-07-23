@@ -12,6 +12,13 @@ elseif(BUILD_PLATFORM STREQUAL "android")
     if(NOT ANDROID_ABI)
         message(FATAL_ERROR "ANDROID_ABI is required for an Android build")
     endif()
+    set(AI_ENGINE_ANDROID_ABIS armeabi-v7a arm64-v8a x86_64)
+    list(FIND AI_ENGINE_ANDROID_ABIS "${ANDROID_ABI}" AI_ENGINE_ANDROID_ABI_INDEX)
+    if(AI_ENGINE_ANDROID_ABI_INDEX EQUAL -1)
+        message(FATAL_ERROR
+            "Unsupported Android ABI='${ANDROID_ABI}'. "
+            "Choose one of: ${AI_ENGINE_ANDROID_ABIS}")
+    endif()
     set(_opencv_default
         "${AI_ENGINE_3RDPARTY_DIR}/opencv/opencv-mobile-4.10.0-android/sdk/native/jni/abi-${ANDROID_ABI}")
     set(_ort_include_default
