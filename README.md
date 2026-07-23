@@ -17,13 +17,13 @@ archive checklist.
 
 | Capability | Supported models / pipeline | Status |
 |---|---|---|
-| 2D object detection | RTMDet series, YOLO series | Maintained |
-| Face detection | MediaPipe face detector | Maintained |
-| Face landmarks | MediaPipe face landmarker, including iris landmarks | Maintained |
-| 3D face geometry | Multi-face metric geometry and pose matrices | Maintained |
-| Human segmentation | Selfie segmentation for close-camera scenarios | Maintained |
-| Human pose | RTMPose with multi-person detection | Maintained |
-| 6D object tracking | Region-based CAD model tracker | Experimental; opt-in |
+| 2D object detection | RTMDet series, YOLO series | ✅ Maintained |
+| Face detection | MediaPipe face detector | ✅ Maintained |
+| Face landmarks | MediaPipe face landmarker, including iris landmarks | ✅ Maintained |
+| 3D face geometry | Multi-face metric geometry and pose matrices | ✅ Maintained |
+| Human segmentation | Selfie segmentation for close-camera scenarios | ✅ Maintained |
+| Human pose | RTMPose with multi-person detection | ✅ Maintained |
+| 6D object tracking | Region-based CAD model tracker | ⚠️ Experimental; opt-in |
 
 Demo assets are retained for
 [face geometry](media/demo/face_geometry_demo.gif) and
@@ -35,10 +35,10 @@ Demo assets are retained for
 
 | Execution provider | Linux | Android | macOS | iOS | Windows | WebAssembly |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| CPU | Yes | Yes | Yes | Yes | Yes | Yes |
-| CoreML | — | — | — | Yes | — | — |
-| XNNPACK | Yes | Yes | — | — | Yes | — |
-| NNAPI | — | Yes | — | — | — | — |
+| CPU | ✅ | Yes | ✅ | Yes | ✅ | Yes |
+| CoreML | ❌ | — | ❌ | ✅ | ❌ | — |
+| XNNPACK | ✅ | Yes | ❌ | — | ✅ | ❌ |
+| NNAPI | ❌ | ✅ | ❌ | — | ❌ | — |
 
 Android support excludes the legacy x86 ONNX Runtime target; `armeabi-v7a`,
 `arm64-v8a`, and `x86_64` remain available in the build driver.
@@ -62,18 +62,18 @@ ONNX Runtime builds explicitly.
 
 | Module | Linux | Android | macOS | iOS | Windows | WebAssembly |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Non-maximum suppression | Yes | Yes | Yes | Yes | Yes | Yes |
-| Multi-face geometry | Yes | Yes | Yes | Yes | Yes | Yes |
+| Non-maximum suppression | ✅ | Yes | ✅ | Yes | ✅ | Yes |
+| Multi-face geometry | ✅ | Yes | ✅ | Yes | ✅ | Yes |
 
 ### Third-party architecture matrix
 
 | Dependency | Linux | Android | macOS | iOS | Windows | WebAssembly |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| OpenCV Mobile 4.10.0 | Yes | Yes | Yes | Yes | Yes | Yes |
-| ONNX Runtime | Yes | Yes, except x86 | Yes | Yes | Yes | Yes |
-| nlohmann/json 3.11 | Yes | Yes | Yes | Yes | Yes | Yes |
-| Eigen 3.4 | Yes | Yes | Yes | Yes | Yes | Yes |
-| OpenMP acceleration | Yes | Toolchain-dependent | Yes | — | — | — |
+| OpenCV Mobile 4.10.0 | ✅ | Yes | ✅ | Yes | ✅ | Yes |
+| ONNX Runtime | ✅ | ✅, except x86 | ✅ | Yes | ✅ | Yes |
+| nlohmann/json 3.11 | ✅ | Yes | ✅ | Yes | ✅ | Yes |
+| Eigen 3.4 | ✅ | Yes | ✅ | Yes | ✅ | Yes |
+| OpenMP acceleration | ✅ | ⚠️ Toolchain-dependent | ✅ | ❌ | — | ❌ |
 
 These tables describe the retained target configuration. The archive checklist
 still requires native smoke builds for every platform that must remain
