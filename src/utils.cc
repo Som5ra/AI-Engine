@@ -21,7 +21,7 @@ Net_config::Net_config(int inpHeight, int inpWidth,
     this->inpWidth = inpWidth;
 }
 
-// nlohmann::json GustoSerializer::load_json(const char* filename){
+// nlohmann::json CustomSerializer::load_json(const char* filename){
 //     std::ifstream ifs(filename);
 //     if (!ifs.is_open()) {
 //         std::cerr << "Error opening JSON file: " << filename << std::endl;
@@ -30,7 +30,7 @@ Net_config::Net_config(int inpHeight, int inpWidth,
 //     return nlohmann::json::parse(ifs);
 //     // return nlohmann::json();
 // }
-// nlohmann::json GustoSerializer::load_json(const std::string& filename){
+// nlohmann::json CustomSerializer::load_json(const std::string& filename){
 //     std::ifstream ifs(filename.c_str());
 //     if (!ifs.is_open()) {
 //         std::cerr << "Error opening JSON file: " << filename << std::endl;

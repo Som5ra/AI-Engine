@@ -1,0 +1,49 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "archive-defaults",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "AI_ENGINE_BUILD_EXAMPLES": "OFF",
+        "AI_ENGINE_BUILD_STANDALONE_TOOLS": "OFF",
+        "AI_ENGINE_BUILD_6D_TRACKING": "OFF"
+      }
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux Release",
+      "inherits": "archive-defaults",
+      "cacheVariables": {
+        "BUILD_PLATFORM": "linux"
+      }
+    },
+    {
+      "name": "macos-release",
+      "displayName": "macOS Release",
+      "inherits": "archive-defaults",
+      "cacheVariables": {
+        "BUILD_PLATFORM": "macos",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/osx.toolchain.cmake"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "linux-release",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "macos-release",
+      "configurePreset": "macos-release"
+    }
+  ]
+}

@@ -1,28 +1,19 @@
-cmake_minimum_required(VERSION 3.20.0)
+set(JSON_TEST_SOURCES
+    json_test.cc
+    "${CMAKE_SOURCE_DIR}/src/utils.cc"
+)
 
-project(json_test)
-
-
-include_directories(${CMAKE_SOURCE_DIR}/include)
-
-if(BUILD_PLATFORM STREQUAL "windows")
-
-    add_executable( ${PROJECT_NAME} json_test.cc ${CMAKE_SOURCE_DIR}/src/utils.cc)
-    
-    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".dll")
-    target_include_directories(${PROJECT_NAME} PRIVATE)
-    target_link_libraries( ${PROJECT_NAME} ${GLOBAL_LINK_3RD_PARTY_LIBS})
-elseif(BUILD_PLATFORM STREQUAL "ios")
-    add_library( ${PROJECT_NAME} STATIC json_test.cc ${CMAKE_SOURCE_DIR}/src/utils.cc)
-    target_include_directories(${PROJECT_NAME} PRIVATE)
-    target_link_libraries( ${PROJECT_NAME} ${GLOBAL_LINK_3RD_PARTY_LIBS})
+if(BUILD_PLATFORM STREQUAL "ios")
+    add_library(json_test STATIC ${JSON_TEST_SOURCES})
 else()
-    # enable omp.h
-    include_directories(${OPENMP_INCLUDES})
-
-    add_executable( ${PROJECT_NAME} json_test.cc ${CMAKE_SOURCE_DIR}/src/utils.cc)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${OPENMP_INCLUDES} )
-    target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX ${GLOBAL_LINK_3RD_PARTY_LIBS})
+    add_executable(json_test ${JSON_TEST_SOURCES})
 endif()
 
+target_include_directories(json_test PRIVATE
+    "${CMAKE_SOURCE_DIR}/include"
+)
 
+target_link_libraries(json_test PRIVATE
+    ${GLOBAL_LINK_3RD_PARTY_LIBS}
+    ${AI_ENGINE_OPENMP_TARGET}
+)

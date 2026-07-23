@@ -1,149 +1,241 @@
 #include "multi_stage_face_geometry_3d.h"
 
+#include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <utility>
 
-// cv::Mat draw_axis(cv::Mat img, cv::Mat R, cv::Mat t, cv::Mat K, cv::Point2f origin) {
-//     // unit is mm
-//     cv::Mat rotV;
-//     cv::Rodrigues(R, rotV);
-//     std::vector<cv::Point3f> points = { {10, 0, 0}, {0, 10, 0}, {0, 0, 10}, {0, 0, 0} };
-//     std::vector<cv::Point2f> axisPoints;
-//     cv::projectPoints(points, rotV, t, K, cv::Mat(), axisPoints);
+namespace {
 
-//     for (auto& point : axisPoints) {
-//         point.x = img.cols - point.x;
-//     }
+constexpr float kMinimumLandmarkScore = 0.49F;
+constexpr float kMinimumAxisLength = 20.0F;
+constexpr float kAxisLengthRatio = 0.08F;
+constexpr float kInvalidPoseValueThreshold = -9000.0F;
 
-//     // Compute direction vectors
-//     cv::Point2f x_axis = axisPoints[0] - axisPoints[3];
-//     cv::Point2f y_axis = axisPoints[1] - axisPoints[3];
-//     cv::Point2f z_axis = axisPoints[2] - axisPoints[3];
+void DrawCoordinateAxes(
+    cv::Mat& frame,
+    const custom_face_geometry::FaceGeometry& geometry,
+    const cv::Point2f& origin) {
+    const auto& matrix = geometry.pose_transform_matrix;
+    if (matrix.rows != 4 || matrix.cols != 4) {
+        return;
+    }
 
-//     // draw
-//     // cv::line(img, axisPoints[3], axisPoints[0], cv::Scalar(255, 0, 0), 3); // X-axis in red
-//     // cv::line(img, axisPoints[3], axisPoints[1], cv::Scalar(0, 255, 0), 3); // Y-axis in green
-//     // cv::line(img, axisPoints[3], axisPoints[2], cv::Scalar(0, 0, 255), 3); // Z-axis in blue
+    for (std::size_t row = 0; row < 3; ++row) {
+        for (std::size_t column = 0; column < 3; ++column) {
+            const float value = matrix.at(row, column);
+            if (!std::isfinite(value) ||
+                value < kInvalidPoseValueThreshold) {
+                return;
+            }
+        }
+    }
 
-//     // Use origin to draw the axes
-//     // std::cout << "Origin: " << origin << std::endl;
-//     cv::circle(img, origin, 5, cv::Scalar(255, 255, 255), -1);
-//     cv::line(img, origin, origin + x_axis, cv::Scalar(255, 0, 0), 3); // X-axis in red
-//     cv::line(img, origin, origin + y_axis, cv::Scalar(0, 255, 0), 3); // Y-axis in green
-//     cv::line(img, origin, origin + z_axis, cv::Scalar(0, 0, 255), 3); // Z-axis in blue
+    const float axis_length = std::max(
+        kMinimumAxisLength,
+        std::min(frame.cols, frame.rows) * kAxisLengthRatio);
 
-//     return img;
-// }
+    const auto endpoint = [&](std::size_t column) {
+        const float x = matrix.at(0, column);
+        const float y = -matrix.at(1, column);
+        const float norm = std::hypot(x, y);
+        if (norm <= 1e-6F) {
+            return origin;
+        }
+        return cv::Point2f(
+            origin.x + axis_length * x / norm,
+            origin.y + axis_length * y / norm);
+    };
 
+    cv::circle(frame, origin, 3, cv::Scalar(255, 255, 255), -1);
+    cv::line(frame, origin, endpoint(0), cv::Scalar(0, 0, 255), 2);
+    cv::line(frame, origin, endpoint(1), cv::Scalar(0, 255, 0), 2);
+    cv::line(frame, origin, endpoint(2), cv::Scalar(255, 0, 0), 2);
+}
 
-
+}  // namespace
 
 FaceGeometryTracker3D::FaceGeometryTracker3D(
     const std::string& face_detector_path,
     const std::string& face_detector_config_path,
     const std::string& face_landmarker_path,
     const std::string& face_landmarker_config_path,
-    const std::string face_GeometryPipelineMetadata,
-    int detect_interval) : detect_interval(detect_interval), num_frames(0) {
-
-    face_detector = std::make_unique<gusto_mp_face::FaceDetector>(face_detector_path, face_detector_config_path);
-    face_landmarker = std::make_unique<gusto_mp_face::FaceLandmarker>(face_landmarker_path, face_landmarker_config_path);
-    face_mesh_calculator = std::make_unique<gusto_face_geometry::FaceMeshCalculator>();
-    face_mesh_calculator->Open(face_GeometryPipelineMetadata);
-    
+    const std::string& face_geometry_pipeline_metadata,
+    int detect_interval)
+    : face_detector_(std::make_unique<custom_mp_face::FaceDetector>(
+          face_detector_path, face_detector_config_path)),
+      face_landmarker_(std::make_unique<custom_mp_face::FaceLandmarker>(
+          face_landmarker_path, face_landmarker_config_path)),
+      face_mesh_calculator_(
+          std::make_unique<custom_face_geometry::FaceMeshCalculator>()),
+      detect_interval_(std::max(1, detect_interval)) {
+    initialization_status_ =
+        face_mesh_calculator_->Open(face_geometry_pipeline_metadata);
 }
-FaceGeometryTracker3D::~FaceGeometryTracker3D() {}
 
-GUSTO_RET FaceGeometryTracker3D::Detect(const cv::Mat& frame, bool display_keypoints, bool display_coord){
-    
-    // cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
-    // auto [boxes, scores, indices, indices_cls] = face_detector.forward(frame);
-    // this->rendered_frame = frame.clone();
-    auto ret = face_detector->forward(frame);
-    auto* face_detector_result = dynamic_cast<gusto_mp_face::MediaPipeDetectorResult*>(ret.get());
-    // std::vector<gusto_face_geometry::NormalizedLandmarkList> multi_face_landmarks;
-    for (size_t i = 0; i < face_detector_result->boxes.size(); i++){
-    // for(size_t idx = 0; idx < indices.size(); idx++) {
-        // std::vector<int> box_to_crop = {
-        //     static_cast<int>(boxes[indices[idx]].y1 * frame.size[0]),
-        //     static_cast<int>(boxes[indices[idx]].x1 * frame.size[1]),
-        //     static_cast<int>(boxes[indices[idx]].y2 * frame.size[0]),
-        //     static_cast<int>(boxes[indices[idx]].x2 * frame.size[1]), 
-        // }; 
-        std::vector<int> box_to_crop = {
-            static_cast<int>(face_detector_result->boxes[i].y1 * frame.size[0]),
-            static_cast<int>(face_detector_result->boxes[i].x1 * frame.size[1]),
-            static_cast<int>(face_detector_result->boxes[i].y2 * frame.size[0]),
-            static_cast<int>(face_detector_result->boxes[i].x2 * frame.size[1]), 
-        };
-        // cv::Mat cropped_face = face_landmarker.crop_face(frame, box_to_crop);
-        auto [cropped_face, box_to_crop_with_margin] = face_landmarker->crop_face(frame, box_to_crop);
-        auto ret = face_landmarker->forward(cropped_face);
-        auto* face_landmarker_result = dynamic_cast<gusto_mp_face::MediapipeFaceLandmarkResult*>(ret.get());
-        auto points = face_landmarker_result->points;
-        auto score = face_landmarker_result->score;
+CUSTOM_RET FaceGeometryTracker3D::Detect(
+    const cv::Mat& frame,
+    bool display_keypoints,
+    bool display_coord) {
+    face_geometries_.clear();
+    rendered_frame_.release();
 
-        if (score < 0.49) {
-            continue;
-        }
-        gusto_face_geometry::NormalizedLandmarkList thislandmark;
-        for (auto pt : points) {
-            gusto_face_geometry::NormalizedLandmark landmark;
-            landmark.x = (pt.x + box_to_crop_with_margin[1]) / frame.size[1];
-            landmark.y = (pt.y + box_to_crop_with_margin[0])/ frame.size[0];
-            // landmark.x = (pt.x + box_to_crop_with_margin[0]) / frame.size[0];
-            // landmark.y = (pt.y + box_to_crop_with_margin[1])/ frame.size[1];
-            // landmark.z = pt.z / 500;
-            landmark.z = pt.z / frame.size[1];
-            thislandmark.landmark.push_back(landmark);
-        }
-        if (display_keypoints){
-            this->rendered_frame = face_landmarker->draw_points(frame, points, cv::Point(box_to_crop_with_margin[1], box_to_crop_with_margin[0]));
-        }
+    if (frame.empty()) {
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
-    auto [multi_pose_mat, process_status] = face_mesh_calculator->Process(std::make_pair(frame.size[0], frame.size[1]), multi_face_landmarks);
-    cv::Mat K = cv::Mat::eye(3, 3, CV_32F);
+    rendered_frame_ = frame.clone();
 
-    const float fov = 70.0;
-    const float width = frame.size[1];
-    const float height = frame.size[0];
-    // const float fx = (width / 2) / np.tan(np.deg2rad(fov)/2)
-    const float fx = (width / 2) / std::tan(3.1415 * fov / 360.0);
-    // const float fx = 500.0;
-    const float fy = fx;
-    // const float cx = height / 2;
-    // const float cy = width / 2;
-    const float cx = width / 2;
-    const float cy = height / 2;
-    
-    K.at<float>(0, 0) = fx; // Focal length in x direction
-    K.at<float>(1, 1) = fy; // Focal length in y direction
-    K.at<float>(0, 2) = cx; // Principal point x-coordinate
-    K.at<float>(1, 2) = cy; // Principal point y-coordinate
-    if (process_status == GustoStatus::ERR_OK) {
-        // std::cout << "Face Geometry Processed!" << std::endl;
-        // for (auto fg : multi_pose_mat){
-        for (size_t idx = 0; idx < multi_pose_mat.size(); idx++){
-            cv::Mat R = cv::Mat(3, 3, CV_32F);
-            cv::Mat t = cv::Mat(3, 1, CV_32F);
-            for (int i = 0; i < 4; ++i) {
-                std::cout << std::endl;
-                for (int j = 0; j < 4; ++j) {
-                    std::cout << multi_pose_mat[idx].pose_transform_matrix.at(i, j) << " ";
-                    if (i < 3 && j < 3){
-                        R.at<float>(i, j) = multi_pose_mat[idx].pose_transform_matrix.at(i, j);
-                    }
-                    if (i < 3 && j == 3){
-                        t.at<float>(i, 0) = multi_pose_mat[idx].pose_transform_matrix.at(i, j);
-                    }
+    if (initialization_status_ != CustomStatus::ERR_OK) {
+        return initialization_status_;
+    }
+
+    if (!face_detector_ || !face_landmarker_ || !face_mesh_calculator_) {
+        return CustomStatus::ERR_GENERAL_ERROR;
+    }
+
+    try {
+        const bool run_detector =
+            cached_face_boxes_.empty() || frame_index_ == 0;
+        if (run_detector) {
+            auto detector_output = face_detector_->forward(frame);
+            auto* detector_result =
+                dynamic_cast<custom_mp_face::MediaPipeDetectorResult*>(
+                    detector_output.get());
+            if (detector_result == nullptr) {
+                return CustomStatus::ERR_GENERAL_ERROR;
+            }
+
+            cached_face_boxes_.clear();
+            cached_face_boxes_.reserve(detector_result->boxes.size());
+            for (const auto& box : detector_result->boxes) {
+                if (std::isfinite(box.x1) && std::isfinite(box.y1) &&
+                    std::isfinite(box.x2) && std::isfinite(box.y2) &&
+                    box.x2 > box.x1 && box.y2 > box.y1) {
+                    cached_face_boxes_.push_back(box);
                 }
-                std::cout << std::endl;
             }
         }
+        frame_index_ = (frame_index_ + 1) % detect_interval_;
+
+        std::vector<custom_face_geometry::NormalizedLandmarkList>
+            multi_face_landmarks;
+        multi_face_landmarks.reserve(cached_face_boxes_.size());
+        std::vector<cv::Point2f> face_origins;
+        face_origins.reserve(cached_face_boxes_.size());
+
+        for (const auto& box : cached_face_boxes_) {
+            const int top = std::clamp(
+                static_cast<int>(box.y1 * frame.rows), 0, frame.rows);
+            const int left = std::clamp(
+                static_cast<int>(box.x1 * frame.cols), 0, frame.cols);
+            const int bottom = std::clamp(
+                static_cast<int>(box.y2 * frame.rows), 0, frame.rows);
+            const int right = std::clamp(
+                static_cast<int>(box.x2 * frame.cols), 0, frame.cols);
+
+            if (bottom <= top || right <= left) {
+                continue;
+            }
+
+            const std::vector<int> crop_box = {
+                top,
+                left,
+                bottom,
+                right,
+            };
+
+            auto [cropped_face, crop_box_with_margin] =
+                face_landmarker_->crop_face(frame, crop_box);
+            if (cropped_face.empty() || crop_box_with_margin.size() < 4) {
+                continue;
+            }
+
+            auto landmarker_output = face_landmarker_->forward(cropped_face);
+            auto* landmarker_result =
+                dynamic_cast<custom_mp_face::MediapipeFaceLandmarkResult*>(
+                    landmarker_output.get());
+            if (landmarker_result == nullptr) {
+                return CustomStatus::ERR_GENERAL_ERROR;
+            }
+
+            if (landmarker_result->score < kMinimumLandmarkScore ||
+                landmarker_result->points.empty()) {
+                continue;
+            }
+
+            custom_face_geometry::NormalizedLandmarkList face_landmarks;
+            face_landmarks.landmark.reserve(landmarker_result->points.size());
+
+            for (const auto& point : landmarker_result->points) {
+                custom_face_geometry::NormalizedLandmark landmark{};
+                landmark.x =
+                    (point.x + crop_box_with_margin[1]) / frame.cols;
+                landmark.y =
+                    (point.y + crop_box_with_margin[0]) / frame.rows;
+                landmark.z = point.z / frame.cols;
+                face_landmarks.landmark.push_back(landmark);
+            }
+
+            multi_face_landmarks.push_back(std::move(face_landmarks));
+            face_origins.emplace_back(
+                0.5F * (crop_box_with_margin[1] +
+                        crop_box_with_margin[3]),
+                0.5F * (crop_box_with_margin[0] +
+                        crop_box_with_margin[2]));
+
+            if (display_keypoints) {
+                rendered_frame_ = face_landmarker_->draw_points(
+                    rendered_frame_,
+                    landmarker_result->points,
+                    cv::Point(
+                        crop_box_with_margin[1],
+                        crop_box_with_margin[0]));
+            }
+        }
+
+        // No face is a valid inference result, not a pipeline failure.
+        if (multi_face_landmarks.empty()) {
+            return CustomStatus::ERR_OK;
+        }
+
+        auto [face_geometries, process_status] =
+            face_mesh_calculator_->Process(
+                std::make_pair(frame.cols, frame.rows),
+                multi_face_landmarks);
+        face_geometries_ = std::move(face_geometries);
+
+        if (display_coord &&
+            (process_status == CustomStatus::ERR_OK ||
+             process_status == CustomStatus::ERR_PARTIAL_FAIL) &&
+            face_geometries_.size() == face_origins.size()) {
+            for (std::size_t index = 0; index < face_geometries_.size();
+                 ++index) {
+                DrawCoordinateAxes(
+                    rendered_frame_, face_geometries_[index],
+                    face_origins[index]);
+            }
+        }
+
+        return process_status;
+    } catch (const cv::Exception& exception) {
+        std::cerr << "Face geometry OpenCV error: " << exception.what()
+                  << std::endl;
+    } catch (const std::exception& exception) {
+        std::cerr << "Face geometry inference error: " << exception.what()
+                  << std::endl;
     }
-    return GustoStatus::ERR_OK;
+
+    face_geometries_.clear();
+    rendered_frame_ = frame.clone();
+    return CustomStatus::ERR_GENERAL_ERROR;
 }
 
-cv::Mat FaceGeometryTracker3D::GetRenderedFrame(){
-    return this->rendered_frame;
+cv::Mat FaceGeometryTracker3D::GetRenderedFrame() const {
+    return rendered_frame_;
 }
 
+const std::vector<custom_face_geometry::FaceGeometry>&
+FaceGeometryTracker3D::GetFaceGeometries() const noexcept {
+    return face_geometries_;
+}

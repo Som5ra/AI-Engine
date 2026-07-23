@@ -19,26 +19,26 @@
 
 #include "Eigen/Dense"
 
-namespace gusto_face_geometry {
+namespace custom_face_geometry {
 namespace {
 
 class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
  public:
   FloatPrecisionProcrustesSolver() = default;
 
-  GUSTO_RET SolveWeightedOrthogonalProblem(
+  CUSTOM_RET SolveWeightedOrthogonalProblem(
       const Eigen::Matrix3Xf& source_points,  //
       const Eigen::Matrix3Xf& target_points,  //
       const Eigen::VectorXf& point_weights,
       Eigen::Matrix4f& transform_mat) const override {
     // Validate inputs.
-    if (ValidateInputPoints(source_points, target_points) != GustoStatus::ERR_OK) {
+    if (ValidateInputPoints(source_points, target_points) != CustomStatus::ERR_OK) {
         std::cerr << "Failed to validate weighted orthogonal problem input points!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
-    if (ValidatePointWeights(source_points.cols(), point_weights) != GustoStatus::ERR_OK) {
+    if (ValidatePointWeights(source_points.cols(), point_weights) != CustomStatus::ERR_OK) {
         std::cerr << "Failed to validate weighted orthogonal problem point weights!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
 
     // Extract square root from the point weights.
@@ -46,48 +46,48 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
 
     // // Try to solve the WEOP problem.
     if (InternalSolveWeightedOrthogonalProblem(
-            source_points, target_points, sqrt_weights, transform_mat) != GustoStatus::ERR_OK) {
+            source_points, target_points, sqrt_weights, transform_mat) != CustomStatus::ERR_OK) {
         std::cerr << "Failed to solve the WEOP problem!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
   }
 
  private:
   static constexpr float kAbsoluteErrorEps = 1e-9f;
 
-  static GUSTO_RET ValidateInputPoints(
+  static CUSTOM_RET ValidateInputPoints(
       const Eigen::Matrix3Xf& source_points,
       const Eigen::Matrix3Xf& target_points) {
     
     if (source_points.cols() <= 0) {
         std::cerr << "The number of source points must be positive!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
     if (source_points.cols() != target_points.cols()) {
         std::cerr << "The number of source and target points must be equal!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
 
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
   }
 
-  static GUSTO_RET ValidatePointWeights(
+  static CUSTOM_RET ValidatePointWeights(
       int num_points, const Eigen::VectorXf& point_weights) {
     if (point_weights.size() <= 0) {
         std::cerr << "The number of point weights must be positive!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
     if (point_weights.size() != num_points) {
         std::cerr << "The number of points and point weights must be equal!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
 
     float total_weight = 0.f;
     for (int i = 0; i < num_points; ++i) {
       if (point_weights(i) < 0.f) {
           std::cerr << "Each point weight must be non-negative!" << std::endl;
-          return GustoStatus::ERR_GENERAL_ERROR;
+          return CustomStatus::ERR_GENERAL_ERROR;
       }
       total_weight += point_weights(i);
     }
@@ -95,7 +95,7 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
     // RET_CHECK_GT(total_weight, kAbsoluteErrorEps)
     //     << "The total point weight is too small!";
 
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
   }
 
   static Eigen::VectorXf ExtractSquareRoot(
@@ -145,7 +145,7 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
   // Note: the output `transform_mat` argument is used instead of `StatusOr<>`
   // return type in order to avoid Eigen memory alignment issues. Details:
   // https://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
-  static GUSTO_RET InternalSolveWeightedOrthogonalProblem(
+  static CUSTOM_RET InternalSolveWeightedOrthogonalProblem(
       const Eigen::Matrix3Xf& sources, const Eigen::Matrix3Xf& targets,
       const Eigen::VectorXf& sqrt_weights, Eigen::Matrix4f& transform_mat) {
     // tranposed(A_w).
@@ -175,12 +175,12 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
         weighted_sources - source_center_of_mass * sqrt_weights.transpose();
 
     Eigen::Matrix3f rotation;
-    if (ComputeOptimalRotation(weighted_targets * centered_weighted_sources.transpose(), rotation) != GustoStatus::ERR_OK) {
-        return GustoStatus::ERR_GENERAL_ERROR;
+    if (ComputeOptimalRotation(weighted_targets * centered_weighted_sources.transpose(), rotation) != CustomStatus::ERR_OK) {
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
     float scale;
-    if (ComputeOptimalScale(centered_weighted_sources, weighted_sources, weighted_targets, rotation, &scale) != GustoStatus::ERR_OK) {
-        return GustoStatus::ERR_GENERAL_ERROR;
+    if (ComputeOptimalScale(centered_weighted_sources, weighted_sources, weighted_targets, rotation, &scale) != CustomStatus::ERR_OK) {
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
 
     // R = c tranposed(T).
@@ -200,7 +200,7 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
 
     transform_mat = CombineTransformMatrix(rotation_and_scale, translation);
 
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
   }
 
   // `design_matrix` is a transposed LHS of (51) in the paper.
@@ -208,7 +208,7 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
   // Note: the output `rotation` argument is used instead of `StatusOr<>`
   // return type in order to avoid Eigen memory alignment issues. Details:
   // https://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
-  static GUSTO_RET ComputeOptimalRotation(
+  static CUSTOM_RET ComputeOptimalRotation(
       const Eigen::Matrix3f& design_matrix, Eigen::Matrix3f& rotation) {
     // RET_CHECK_GT(design_matrix.norm(), kAbsoluteErrorEps)
     //     << "Design matrix norm is too small!";
@@ -233,10 +233,10 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
 
     // Transposed (52) from the paper.
     rotation = postrotation * prerotation;
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
   }
 
-  static GUSTO_RET ComputeOptimalScale(
+  static CUSTOM_RET ComputeOptimalScale(
       const Eigen::Matrix3Xf& centered_weighted_sources,
       const Eigen::Matrix3Xf& weighted_sources,
       const Eigen::Matrix3Xf& weighted_targets,
@@ -255,14 +255,14 @@ class FloatPrecisionProcrustesSolver : public ProcrustesSolver {
 
     if (denominator <= kAbsoluteErrorEps) {
         std::cerr << "Scale expression denominator is too small!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
     if (numerator / denominator <= kAbsoluteErrorEps) {
         std::cerr << "Scale is too small!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
     *ret = numerator / denominator;
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
   }
 };
 

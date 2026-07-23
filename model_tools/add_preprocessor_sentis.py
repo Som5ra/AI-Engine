@@ -1,3 +1,4 @@
+import argparse
 import onnx_graphsurgeon as gs
 import onnxruntime as ort
 import onnx
@@ -11,13 +12,15 @@ def register_custom_op():
 # Register the custom operator
 so = register_custom_op()
 
-# in_path = '/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Weights/rtmdet_t_v7_20241028.onnx'
-# out_path = '/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Weights/rtmdet_t_v7_20241028_preprocessor.onnx'
-# first_node_name = "images"
+parser = argparse.ArgumentParser(description="Add preprocessing nodes to an ONNX model")
+parser.add_argument("input", help="Input ONNX model")
+parser.add_argument("output", help="Output ONNX model")
+parser.add_argument("--input-name", default="input", help="Model input tensor name")
+args = parser.parse_args()
 
-in_path = '/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Weights/end2end_nonms_fp16.onnx'
-out_path = '/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Weights/end2end_nonms_fp16_preprocessor.onnx'
-first_node_name = "input"
+in_path = args.input
+out_path = args.output
+first_node_name = args.input_name
 
 # Load the ONNX model
 model = gs.import_onnx(onnx.load(in_path))

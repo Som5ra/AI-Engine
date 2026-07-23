@@ -210,12 +210,12 @@ bool Model::LoadModel() {
   std::cout << "use_random_seed_file: " << use_random_seed_file << std::endl;
   std::cout << "image_size_file: " << image_size_file << std::endl;
   #if defined(BUILD_PLATFORM_ANDROID)
-  LOGI("GUSTO_DETECTION", "version_id_file: %d", version_id_file);
-  LOGI("GUSTO_DETECTION", "sphere_radius_file: %f", sphere_radius_file);
-  LOGI("GUSTO_DETECTION", "n_divides_file: %d", n_divides_file);
-  LOGI("GUSTO_DETECTION", "n_points_file: %d", n_points_file);
-  LOGI("GUSTO_DETECTION", "use_random_seeed_file: %d", use_random_seed_file);
-  LOGI("GUSTO_DETECTION", "image_size_file: %d", image_size_file);
+  LOGI("CUSTOM_DETECTION", "version_id_file: %d", version_id_file);
+  LOGI("CUSTOM_DETECTION", "sphere_radius_file: %f", sphere_radius_file);
+  LOGI("CUSTOM_DETECTION", "n_divides_file: %d", n_divides_file);
+  LOGI("CUSTOM_DETECTION", "n_points_file: %d", n_points_file);
+  LOGI("CUSTOM_DETECTION", "use_random_seeed_file: %d", use_random_seed_file);
+  LOGI("CUSTOM_DETECTION", "image_size_file: %d", image_size_file);
   #endif
 
   if (version_id_file != kVersionID || sphere_radius_file != sphere_radius_ ||
@@ -257,14 +257,14 @@ bool Model::LoadModel() {
   std::cout << "maximum_body_diameter: " << maximum_body_diameter << std::endl;
   // std::cout << "geometry2body_pose: " << geometry2body_pose.matrix() << std::endl;
   #if defined(BUILD_PLATFORM_ANDROID)
-  LOGI("GUSTO_DETECTION", "geometry_path_length: %d", geometry_path_length);
-  LOGI("GUSTO_DETECTION", "geometry_path_string size: %d", geometry_path_string.size());
-  LOGI("GUSTO_DETECTION", "geometry_path_string: %s", geometry_path_string.c_str());
-  LOGI("GUSTO_DETECTION", "geometry_unit_in_meter: %f", geometry_unit_in_meter);
-  LOGI("GUSTO_DETECTION", "geometry_counterclockwise: %d", geometry_counterclockwise);
-  LOGI("GUSTO_DETECTION", "geometry_enable_culling: %d", geometry_enable_culling);
-  LOGI("GUSTO_DETECTION", "maximum_body_diameter: %f", maximum_body_diameter);
-  // LOGI("GUSTO_DETECTION", "geometry2body_pose: %f", geometry2body_pose.matrix());
+  LOGI("CUSTOM_DETECTION", "geometry_path_length: %d", geometry_path_length);
+  LOGI("CUSTOM_DETECTION", "geometry_path_string size: %d", geometry_path_string.size());
+  LOGI("CUSTOM_DETECTION", "geometry_path_string: %s", geometry_path_string.c_str());
+  LOGI("CUSTOM_DETECTION", "geometry_unit_in_meter: %f", geometry_unit_in_meter);
+  LOGI("CUSTOM_DETECTION", "geometry_counterclockwise: %d", geometry_counterclockwise);
+  LOGI("CUSTOM_DETECTION", "geometry_enable_culling: %d", geometry_enable_culling);
+  LOGI("CUSTOM_DETECTION", "maximum_body_diameter: %f", maximum_body_diameter);
+  // LOGI("CUSTOM_DETECTION", "geometry2body_pose: %f", geometry2body_pose.matrix());
   #endif
   if (geometry_path_string != body_ptr_->geometry_path() ||
       geometry_unit_in_meter != body_ptr_->geometry_unit_in_meter() ||

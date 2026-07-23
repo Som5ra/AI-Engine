@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
 
     // const std::string segmenter_name = "selfie_segmenter_landscape";
     // const std::string segmenter_name = "deeplab_v3";
-    std::unique_ptr<gusto_humanseg::seg_config> config = gusto_humanseg::fetch_model_config(segmenter_name);
-    std::unique_ptr<gusto_humanseg::Segmenter> human_segmenter = std::make_unique<gusto_humanseg::Segmenter>(config);
+    std::unique_ptr<custom_humanseg::seg_config> config = custom_humanseg::fetch_model_config(segmenter_name);
+    std::unique_ptr<custom_humanseg::Segmenter> human_segmenter = std::make_unique<custom_humanseg::Segmenter>(config);
 
     float min_time = 1000000;
     float max_time = 0;

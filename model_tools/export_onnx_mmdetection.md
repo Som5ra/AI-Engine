@@ -1,12 +1,14 @@
 
 ## mmdetection models export:
 
+Set `ML_WORKSPACE` to the parent directory containing mmdeploy, mmdetection, and mmyolo.
+
 - IMPORTANT NOTES:
     - EXPORT_CFG determine the input batch: "detection_onnxruntime_static.py" and "detection_onnxruntime_dynamic.py"
 
 ### without nms
 ``` 
-EXPORT_CFG="/media/sombrali/HDD1/mmlib/mmdeploy/configs/mmdet/detection/detection_onnxruntime_dynamic.py" && \
+EXPORT_CFG="${ML_WORKSPACE}/mmdeploy/configs/mmdet/detection/detection_onnxruntime_dynamic.py" && \
 MODEL_CFG="mmdetection/work_dirs/mbnv3_20241203/mbnv3_20241203.py" && \
 CHECKPOINT="mmdetection/work_dirs/mbnv3_20241203/epoch_120.pth" && \
 WORKING_DIR=$(echo "$CHECKPOINT" | cut -f 1 -d '.') && \
@@ -35,9 +37,9 @@ python convert_to_fp16_int8.py \
 
 ### with nms
 ``` 
-EXPORT_CFG="/media/sombrali/HDD1/mmlib/mmdeploy/configs/mmdet/detection/detection_onnxruntime_dynamic.py" && \
-MODEL_CFG="/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/retinanet_mbnv2-1x_coco/retinanet_mbnv2-1x_coco.py" && \
-CHECKPOINT="/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/retinanet_mbnv2-1x_coco/epoch_12.pth" && \
+EXPORT_CFG="${ML_WORKSPACE}/mmdeploy/configs/mmdet/detection/detection_onnxruntime_dynamic.py" && \
+MODEL_CFG="${ML_WORKSPACE}/mmyolo/work_dirs/retinanet_mbnv2-1x_coco/retinanet_mbnv2-1x_coco.py" && \
+CHECKPOINT="${ML_WORKSPACE}/mmyolo/work_dirs/retinanet_mbnv2-1x_coco/epoch_12.pth" && \
 WORKING_DIR=$(echo "$CHECKPOINT" | cut -f 1 -d '.') && \
 python mmdeploy/tools/deploy.py \
     ${EXPORT_CFG} \
@@ -69,8 +71,8 @@ python add_preprocessor_sentis.py
 - IMPORTANT NOTES:
     - Use Opset 12 to support some operator in ort1.19.2
 ```YOLO EXPORT
-MODEL_CFG="/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_hsv_20241101/rtmdet_tiny_disney_headband_v7_largesyn_hsv_20241101.py" && \
-CHECKPOINT="/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_hsv_20241101/epoch_150.pth" && \
+MODEL_CFG="${ML_WORKSPACE}/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_hsv_20241101/rtmdet_tiny_disney_headband_v7_largesyn_hsv_20241101.py" && \
+CHECKPOINT="${ML_WORKSPACE}/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_hsv_20241101/epoch_150.pth" && \
 WORKING_DIR=$(echo "$CHECKPOINT" | cut -f 1 -d '.') && \
 
 python mmyolo/projects/easydeploy/tools/export_onnx.py  \

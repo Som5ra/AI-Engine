@@ -1,17 +1,19 @@
 
 #include "BaseONNX.h"
 
+#include <cmath>
+#include <stdexcept>
+
 std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& model_path, const std::string& config_path){
     std::unique_ptr<basic_model_config> _config = std::make_unique<basic_model_config>();
     nlohmann::json data;
 
-    try{
-        data = nlohmann::json::parse(std::ifstream(config_path.c_str()));
-    }catch (const std::exception& e) {
-        std::cerr << "Error parsing json file: " << config_path << std::endl;
-    }
-    try
-    {
+    try {
+        std::ifstream input(config_path);
+        if (!input.is_open()) {
+            throw std::runtime_error("Unable to open model configuration");
+        }
+        data = nlohmann::json::parse(input);
         _config->model_path = model_path;
         _config->model_name = data["model_name"].get<std::string>();
         _config->input_size = std::make_pair(data["input_size"]["height"].get<int>(), data["input_size"]["width"].get<int>());
@@ -35,6 +37,17 @@ std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& mod
         }
 
         _config->channels = data["input_size"]["channels"].get<int>();
+        if (_config->model_path.empty() ||
+            _config->input_size.first <= 0 ||
+            _config->input_size.second <= 0 ||
+            _config->channels <= 0 ||
+            _config->mean.size() !=
+                static_cast<std::size_t>(_config->channels) ||
+            _config->std.size() !=
+                static_cast<std::size_t>(_config->channels)) {
+            throw std::runtime_error(
+                "Model dimensions and normalization vectors are inconsistent");
+        }
 
         std::string _provider = data["execution_provider"].get<std::string>();
         
@@ -59,11 +72,10 @@ std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& mod
             _config->provider = ProviderType::CPU;
         }
 
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-        throw std::runtime_error("[Sombra] -> Error parsing json file: " + config_path);
+    } catch (const std::exception& exception) {
+        throw std::runtime_error(
+            "Error parsing model configuration '" + config_path +
+            "': " + exception.what());
     }
 
     std::cout << "==================== CONFIG ====================" << std::endl;
@@ -82,7 +94,7 @@ std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& mod
         std::cout << "STD: " << _config->std[i] << std::endl;
     }
     std::cout << "==================== CONFIG ====================" << std::endl;
-    return std::move(_config);
+    return _config;
 }
 
 
@@ -170,11 +182,18 @@ BaseONNX::BaseONNX(std::unique_ptr<basic_model_config> _config)
     : ort_env(ORT_LOGGING_LEVEL_WARNING, "ONNXRuntime"),
         ort_session(nullptr) {
     this->_config = std::move(_config);
+    if (!this->_config) {
+        throw std::invalid_argument("Model configuration cannot be null");
+    }
     this->Compile();
 }
 
 
 std::vector<float> BaseONNX::preprocess(const cv::Mat& image) {
+    if (image.empty()) {
+        throw std::invalid_argument("Cannot preprocess an empty image");
+    }
+
     cv::Mat frame;
     if (_config->channel_order == ChannelOrder::BGR) {
         cv::cvtColor(image, frame, cv::COLOR_RGB2BGR);
@@ -190,7 +209,22 @@ std::vector<float> BaseONNX::preprocess(const cv::Mat& image) {
 	int image_width = frame.cols;
 	int image_channels = frame.channels();
 
-    assert(inputTensorSize == 1 * image_height * image_width * image_channels);
+    const std::size_t actual_tensor_size =
+        static_cast<std::size_t>(image_height) * image_width * image_channels;
+    if (frame.depth() != CV_8U || inputTensorSize != actual_tensor_size ||
+        _config->mean.size() < static_cast<std::size_t>(image_channels) ||
+        _config->std.size() < static_cast<std::size_t>(image_channels)) {
+        throw std::invalid_argument(
+            "Model preprocessing configuration does not match the input tensor");
+    }
+    for (int channel = 0; channel < image_channels; ++channel) {
+        if (!std::isfinite(_config->mean[channel]) ||
+            !std::isfinite(_config->std[channel]) ||
+            std::abs(_config->std[channel]) <= 1e-12F) {
+            throw std::invalid_argument(
+                "Model normalization values must be finite with non-zero std");
+        }
+    }
     std::vector<float> input_tensor_values(inputTensorSize);
 
 

@@ -1,15 +1,15 @@
+#ifndef CUSTOM_WASM_API_H
+#define CUSTOM_WASM_API_H
 
-#include "utils.h"
-#include "two_stage_human_pose_extractor_2d.h"
 #include "multi_stage_face_geometry_3d.h"
+#include "two_stage_human_pose_extractor_2d.h"
+#include "utils.h"
+
+#include <cstdint>
+
+#include <emscripten/bind.h>
+#include <emscripten/emscripten.h>
 #include <onnxruntime_cxx_api.h>
 #include <opencv2/opencv.hpp>
-// #ifdef __EMSCRIPTEN__
-// #else
-// #define EMSCRIPTEN_KEEPALIVE
-// #endif
 
-#include <emscripten/emscripten.h>
-#include <emscripten/bind.h>
-
-using namespace emscripten;
+#endif  // CUSTOM_WASM_API_H

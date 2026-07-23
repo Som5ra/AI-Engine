@@ -8,7 +8,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-namespace gusto_humanpose{
+namespace custom_humanpose{
 
 // enum class model_lib {
     // RTMO_S, // single stage
@@ -36,7 +36,7 @@ class RTMPose : public BaseONNX {
         std::unique_ptr<PostProcessResult> forward(const cv::Mat& image);
         cv::Mat Debug_Preprocess(const cv::Mat& image);
         std::vector<std::tuple<int, int, int>>  postprocess(const std::vector<Ort::Value>& output_tensors, float threshold = 0.5);
-        std::pair<cv::Mat, cv::Mat> CropImageByDetectBox(const cv::Mat& input_image, const GustoRect& box);
+        std::pair<cv::Mat, cv::Mat> CropImageByDetectBox(const cv::Mat& input_image, const CustomRect& box);
         static cv::Mat GetAffineTransform(float center_x, float center_y, float scale_width, float scale_height, int output_image_width, int output_image_height, bool inverse = false);
         cv::Mat draw_single_person_keypoints(cv::Mat image, const std::vector<std::tuple<int, int, int>>& keypoints, float scale = 1.0);
 

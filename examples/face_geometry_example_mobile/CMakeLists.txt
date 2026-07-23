@@ -61,6 +61,6 @@ if(BUILD_PLATFORM STREQUAL "linux")
     add_custom_command(TARGET face_geometry_example_mobile  POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:face_geometry_example_mobile> ${CMAKE_BINARY_DIR}/lib/Linux/
     )
-    install(FILES $<TARGET_FILE:face_geometry_example_mobile> DESTINATION /media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Plugins/Linux)
+    install(TARGETS face_geometry_example_mobile LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endif()
 

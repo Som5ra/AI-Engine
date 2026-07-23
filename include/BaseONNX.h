@@ -1,7 +1,13 @@
 #ifndef BASE_ONNX_H
 #define BASE_ONNX_H
 #include "utils.h"
+
+#include <cmath>
+#include <cstdlib>
+#include <map>
+#include <memory>
 #include <thread>
+
 #include <onnxruntime_cxx_api.h>
 
 
@@ -132,7 +138,7 @@ protected:
     size_t inputTensorSize;
 
     static float sigmoid(float x) {
-        return 1 / (1 + exp(-x));
+        return 1 / (1 + std::exp(-x));
     }
 
     static std::vector<float> sigmoid(const std::vector<float>& x) {
@@ -142,7 +148,7 @@ protected:
         #pragma omp parallel for num_threads(2)
         // #endif
         for (int i = 0; i < x.size(); i++) {
-            result[i] = 1 / (1 + exp(-x[i]));
+            result[i] = 1 / (1 + std::exp(-x[i]));
         }
         return result;
     }

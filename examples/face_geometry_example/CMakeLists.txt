@@ -1,35 +1,36 @@
-cmake_minimum_required(VERSION 3.20.0)
+if(NOT BUILD_PLATFORM MATCHES "^(linux|macos|windows)$")
+    message(STATUS "Skipping face_geometry_example on ${BUILD_PLATFORM}")
+    return()
+endif()
 
-project(face_geometry_example)
+foreach(required_module IN ITEMS
+        opencv_calib3d
+        opencv_highgui
+        opencv_imgcodecs
+        opencv_videoio)
+    if(NOT required_module IN_LIST OpenCV_LIBS)
+        message(STATUS
+            "Skipping face_geometry_example: ${required_module} is unavailable")
+        return()
+    endif()
+endforeach()
 
-add_definitions("-DBUILD_PLATFORM_${BUILD_PLATFORM}")
+add_executable(face_geometry_example
+    face_geometry_example.cc
+    ${SOURCES}
+    ${FACE_MODEL_LIBS}
+    ${NMS_LIBS}
+    ${FACE_GEOMETRY_LIBS}
+)
 
+target_include_directories(face_geometry_example PRIVATE
+    "${CMAKE_SOURCE_DIR}/include"
+)
 
+target_link_libraries(face_geometry_example PRIVATE
+    ${AI_ENGINE_LINK_LIBRARIES}
+)
 
 if(BUILD_PLATFORM STREQUAL "linux")
-    add_definitions("-DDEBUG")
-    include_directories(${CMAKE_SOURCE_DIR}/include )
-    # add_executable( ${PROJECT_NAME} face_geometry_example.cc ${CMAKE_SOURCE_DIR}/src/utils.cpp ${CMAKE_SOURCE_DIR}/tools/nms/nms.cpp ${CMAKE_SOURCE_DIR}/src/BaseONNX.cpp ${CMAKE_SOURCE_DIR}/src/face_model_family.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/face_geometry.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/procrustes_solver.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/geometry_pipeline.cpp ${CMAKE_SOURCE_DIR}/tools/face_geometry/calculator.cpp)
-    add_executable( ${PROJECT_NAME} face_geometry_example.cc ${SOURCES} ${FACE_MODEL_LIBS} ${NMS_LIBS} ${FACE_GEOMETRY_LIBS})
-    target_include_directories(${PROJECT_NAME} PRIVATE ${OPENMP_INCLUDES} ${onnxruntime_INCLUDE_DIRS})
-    target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS})
-endif()
-
-if (BUILD_PLATFORM STREQUAL "macos")
-
-    include_directories(${CMAKE_SOURCE_DIR}/include ${OpenCV_INCLUDE_DIRS})
-    add_executable( ${PROJECT_NAME} face_geometry_example.cc ${SOURCES} ${FACE_MODEL_LIBS} ${NMS_LIBS} ${FACE_GEOMETRY_LIBS})
-
-    target_include_directories(${PROJECT_NAME} PRIVATE ${OPENMP_INCLUDES} ${onnxruntime_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
-    target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX ${AppleLink} ${onnxruntime_LIBS} ${OpenCV_LIBS} ${GLOBAL_LINK_3RD_PARTY_LIBS})
-
-endif()
-
-
-# [Sombra] -> need msvc compiler
-if(BUILD_PLATFORM STREQUAL "windows")
-    include_directories(${CMAKE_SOURCE_DIR}/include)
-    add_executable( ${PROJECT_NAME} face_geometry_example.cc ${SOURCES} ${FACE_MODEL_LIBS} ${NMS_LIBS} ${FACE_GEOMETRY_LIBS})
-    target_include_directories(${PROJECT_NAME} PRIVATE ${onnxruntime_INCLUDE_DIRS})
-    target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${onnxruntime_LIBS}  ${GLOBAL_LINK_3RD_PARTY_LIBS})
+    target_compile_definitions(face_geometry_example PRIVATE DEBUG)
 endif()
