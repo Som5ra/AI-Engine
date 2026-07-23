@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
     // std::string _model_path = "/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/rtmdet_tiny_disney_headband_v7_largesyn_20241027/best_coco_bbox_mAP_epoch_150/best_coco_bbox_mAP_epoch_150_nonms_fp16.onnx";
     std::string _model_path = "/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/Weights/rtmdet_t_v7_20241028.onnx";
-    std::string _config_path = "/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/StreamingAssets/gusto_engine_test/base_model_config.json";
+    std::string _config_path = "/media/sombrali/HDD1/opencv-unity/AI-Engine-Unity-Example/Assets/StreamingAssets/custom_engine_test/base_model_config.json";
 
     bool DISPLAY = true;
     if (argc >= 2) {
@@ -45,9 +45,9 @@ int main(int argc, char *argv[])
     }
 
 
-    // std::unique_ptr<basic_model_config> config = gusto_detector2d::fetch_model_config(_model_name, _model_path, _input_size);
-    std::unique_ptr<gusto_detector2d::Detector> human_detector(new gusto_detector2d::Detector(_model_path, _config_path));
-    // human_detector = std::move(std::make_unique<gusto_detector2d::Detector>(config));
+    // std::unique_ptr<basic_model_config> config = custom_detector2d::fetch_model_config(_model_name, _model_path, _input_size);
+    std::unique_ptr<custom_detector2d::Detector> human_detector(new custom_detector2d::Detector(_model_path, _config_path));
+    // human_detector = std::move(std::make_unique<custom_detector2d::Detector>(config));
     std::cout << "Successfully loaded model" << std::endl;
     float min_time = 1000000;
     float max_time = 0;
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         auto start = std::chrono::high_resolution_clock::now();
         cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
         auto output = human_detector->forward(frame);
-        gusto_detector2d::DetectionResult* result = dynamic_cast<gusto_detector2d::DetectionResult*>(output.get());
+        custom_detector2d::DetectionResult* result = dynamic_cast<custom_detector2d::DetectionResult*>(output.get());
         auto dets_out = result->boxes;
         for(size_t i = 0; i < dets_out.size(); i++){
             cv::rectangle(frame, cv::Point(dets_out[i].x1, dets_out[i].y1), cv::Point(dets_out[i].x2, dets_out[i].y2), cv::Scalar(0, 255, 0), 2);

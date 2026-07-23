@@ -12,7 +12,7 @@
 
 
 
-namespace gusto_nms{
+namespace custom_nms{
 using namespace std;
 
 vector<int> nms_cpu(const vector<Rect>& _boxes, const vector<float>& _scores, float _score_thr, float _nms_thr) {
@@ -118,10 +118,10 @@ void sigmoid(float* arr, int size) {
         arr[i] = 1 / (1 + exp(-arr[i]));
     }
 }
-} // namespace gusto_nms
+} // namespace custom_nms
 
 extern "C" {
-    using namespace gusto_nms;
+    using namespace custom_nms;
     void nms_with_sigmoid(float* boxes, int* boxes_shape, float* scores, int* scores_shape, float score_thr, float nms_thr, int* ret_indices, int* ret_indices_cls, int* ret_len) {
         /*
             For example,

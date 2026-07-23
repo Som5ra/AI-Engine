@@ -18,7 +18,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #endif
 
-#define GUSTO_RET int
+#define CUSTOM_RET int
 
 class HumanPoseExtractor2D {
 public:
@@ -30,12 +30,12 @@ public:
         int detect_interval = 3);
     ~HumanPoseExtractor2D() = default;
 
-    GUSTO_RET DetectPose(const cv::Mat& image);
-    GUSTO_RET Display(
+    CUSTOM_RET DetectPose(const cv::Mat& image);
+    CUSTOM_RET Display(
         cv::Mat& image,
         bool display_box = true,
         bool display_keypoints = true);
-    GUSTO_RET Debug() const;
+    CUSTOM_RET Debug() const;
 
 private:
     float LetterBoxImage(
@@ -47,10 +47,10 @@ private:
         bool fixed_shape = false,
         bool scale_up = true) const;
 
-    std::unique_ptr<gusto_detector2d::Detector> human_detector_;
-    std::unique_ptr<gusto_humanpose::RTMPose> pose_detector_;
-    std::unique_ptr<gusto_detector2d::DetectionResult> detection_result_;
-    std::vector<gusto_humanpose::KeyPoint2DResult> pose_results_;
+    std::unique_ptr<custom_detector2d::Detector> human_detector_;
+    std::unique_ptr<custom_humanpose::RTMPose> pose_detector_;
+    std::unique_ptr<custom_detector2d::DetectionResult> detection_result_;
+    std::vector<custom_humanpose::KeyPoint2DResult> pose_results_;
 
     int detect_interval_ = 1;
     int frame_index_ = 0;

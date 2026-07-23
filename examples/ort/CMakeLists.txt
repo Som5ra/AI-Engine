@@ -39,13 +39,13 @@ endif()
 
 if(BUILD_PLATFORM STREQUAL "Android")
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib/Android/${ANDROID_ABI}/)
-    add_custom_command(TARGET GustoEngine POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:GustoEngine> ${CMAKE_BINARY_DIR}/lib/Android/${ANDROID_ABI}/
+    add_custom_command(TARGET CustomEngine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:CustomEngine> ${CMAKE_BINARY_DIR}/lib/Android/${ANDROID_ABI}/
     )
 
     # ----------------------------------------------------------------------------
     #   Install target, for "make install"
     # ----------------------------------------------------------------------------
-    install(FILES $<TARGET_FILE:GustoEngine> DESTINATION ${PROJECT_SOURCE_DIR}/../gusto-engine-unity-wrapper/Assets/Plugins/Android/)
+    install(FILES $<TARGET_FILE:CustomEngine> DESTINATION ${PROJECT_SOURCE_DIR}/../custom-engine-unity-wrapper/Assets/Plugins/Android/)
 endif()
 

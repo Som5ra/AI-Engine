@@ -63,17 +63,17 @@ int main(int argc, char *argv[])
     std::string face_landmarker_path = "face_landmarks_detector.onnx";
     std::string face_landmarker_config_path = "landmarker_config.json";
     std::cout << "Loading Face Detector Model: " << face_detector_path << std::endl;
-    // gusto_mp_face::FaceDetector face_detector(face_detector_path, face_detector_config_path);
+    // custom_mp_face::FaceDetector face_detector(face_detector_path, face_detector_config_path);
     auto parsed_config = BaseONNX::ParseConfig(face_detector_path, face_detector_config_path);
-    gusto_mp_face::FaceDetector face_detector(std::move(parsed_config));
+    custom_mp_face::FaceDetector face_detector(std::move(parsed_config));
     std::cout << "Loading Face Landmarker Model: " << face_landmarker_path << std::endl;
-    gusto_mp_face::FaceLandmarker face_landmarker(face_landmarker_path, face_landmarker_config_path);
+    custom_mp_face::FaceLandmarker face_landmarker(face_landmarker_path, face_landmarker_config_path);
 
 
-    gusto_face_geometry::FaceMeshCalculator face_mesh_calculator;
+    custom_face_geometry::FaceMeshCalculator face_mesh_calculator;
     const std::string face_GeometryPipelineMetadata = "geometry_pipeline_metadata_including_iris_landmarks.json";
-    GUSTO_RET open_status = face_mesh_calculator.Open(face_GeometryPipelineMetadata);
-    if (open_status != GustoStatus::ERR_OK) {
+    CUSTOM_RET open_status = face_mesh_calculator.Open(face_GeometryPipelineMetadata);
+    if (open_status != CustomStatus::ERR_OK) {
         std::cerr << "Failed to open Geometry Pipeline Metadata!" << std::endl;
         return 1;
     }
@@ -121,8 +121,8 @@ int main(int argc, char *argv[])
         cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
         // auto [boxes, scores, indices, indices_cls] = face_detector.forward(frame);
         auto ret = face_detector.forward(frame);
-        auto* face_detector_result = dynamic_cast<gusto_mp_face::MediaPipeDetectorResult*>(ret.get());
-        std::vector<gusto_face_geometry::NormalizedLandmarkList> multi_face_landmarks;
+        auto* face_detector_result = dynamic_cast<custom_mp_face::MediaPipeDetectorResult*>(ret.get());
+        std::vector<custom_face_geometry::NormalizedLandmarkList> multi_face_landmarks;
         for (size_t i = 0; i < face_detector_result->boxes.size(); i++){
         // for(size_t idx = 0; idx < indices.size(); idx++) {
             // std::vector<int> box_to_crop = {
@@ -140,16 +140,16 @@ int main(int argc, char *argv[])
             // cv::Mat cropped_face = face_landmarker.crop_face(frame, box_to_crop);
             auto [cropped_face, box_to_crop_with_margin] = face_landmarker.crop_face(frame, box_to_crop);
             auto ret = face_landmarker.forward(cropped_face);
-            auto* face_landmarker_result = dynamic_cast<gusto_mp_face::MediapipeFaceLandmarkResult*>(ret.get());
+            auto* face_landmarker_result = dynamic_cast<custom_mp_face::MediapipeFaceLandmarkResult*>(ret.get());
             auto points = face_landmarker_result->points;
             auto score = face_landmarker_result->score;
 
             if (score < 0.49) {
                 continue;
             }
-            gusto_face_geometry::NormalizedLandmarkList thislandmark;
+            custom_face_geometry::NormalizedLandmarkList thislandmark;
             for (auto pt : points) {
-                gusto_face_geometry::NormalizedLandmark landmark;
+                custom_face_geometry::NormalizedLandmark landmark;
                 landmark.x = (pt.x + box_to_crop_with_margin[1]) / frame.size[1];
                 landmark.y = (pt.y + box_to_crop_with_margin[0])/ frame.size[0];
                 // landmark.x = (pt.x + box_to_crop_with_margin[0]) / frame.size[0];
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
         K.at<float>(1, 1) = 800; // Focal length in y direction
         K.at<float>(0, 2) = 320; // Principal point x-coordinate
         K.at<float>(1, 2) = 240; // Principal point y-coordinate
-        if (process_status == GustoStatus::ERR_OK) {
+        if (process_status == CustomStatus::ERR_OK) {
             // std::cout << "Face Geometry Processed!" << std::endl;
             // for (auto fg : multi_pose_mat){
             for (size_t idx = 0; idx < multi_pose_mat.size(); idx++){

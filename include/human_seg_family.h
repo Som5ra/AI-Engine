@@ -6,7 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-namespace gusto_humanseg{
+namespace custom_humanseg{
 
 enum class model_lib {
     selfie_multiclass_256x256,
@@ -62,5 +62,5 @@ class Segmenter : public BaseONNX {
 };
 
 
-} // //namespace gusto_humanseg
+} // //namespace custom_humanseg
 #endif // HUMAN_SEG_FAMILY_H

@@ -5,8 +5,8 @@ int main()
 {
     GenericDetector* detector = new GenericDetector();
 
-    const std::string modelpath = "/media/sombrali/HDD1/opencv-unity/gusto_dnn/weights/yolov7-tiny-20240821-3cls2.onnx";
-    const std::string cls_names_path = "/media/sombrali/HDD1/opencv-unity/gusto_dnn/weights/cls_names.names";
+    const std::string modelpath = "/media/sombrali/HDD1/opencv-unity/custom_dnn/weights/yolov7-tiny-20240821-3cls2.onnx";
+    const std::string cls_names_path = "/media/sombrali/HDD1/opencv-unity/custom_dnn/weights/cls_names.names";
     int _compile_error_code = detector->compile(640, 640, 0.5, 0.5, modelpath.c_str(), cls_names_path.c_str(), 1024);
     std::cout << "compile error code: " << _compile_error_code << std::endl;    
 

@@ -13,7 +13,7 @@ constexpr std::size_t kLandmarkCoordinateCount = 3;
 constexpr std::size_t kPoseMatrixElementCount = 16;
 
 template <typename Function>
-GUSTO_RET GuardGeometryApi(const char* operation, Function&& function) noexcept {
+CUSTOM_RET GuardGeometryApi(const char* operation, Function&& function) noexcept {
     try {
         return function();
     } catch (const std::exception& exception) {
@@ -21,24 +21,24 @@ GUSTO_RET GuardGeometryApi(const char* operation, Function&& function) noexcept 
     } catch (...) {
         std::cerr << operation << " failed with an unknown error" << std::endl;
     }
-    return GustoStatus::ERR_GENERAL_ERROR;
+    return CustomStatus::ERR_GENERAL_ERROR;
 }
 
 }  // namespace
 
-namespace gusto_face_geometry {
+namespace custom_face_geometry {
 
-GUSTO_RET FaceMeshCalculator::Open(
+CUSTOM_RET FaceMeshCalculator::Open(
     const std::string& face_geometry_pipeline_metadata) {
     metadata_ = GeometryPipelineMetadata{};
     const auto serialization_status =
         metadata_.serialize_json(face_geometry_pipeline_metadata);
-    if (serialization_status != GustoStatus::ERR_OK) {
-        return GustoStatus::ERR_GENERAL_SERIALIZATION;
+    if (serialization_status != CustomStatus::ERR_OK) {
+        return CustomStatus::ERR_GENERAL_SERIALIZATION;
     }
 
-    if (ValidateGeometryPipelineMetadata(metadata_) != GustoStatus::ERR_OK) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+    if (ValidateGeometryPipelineMetadata(metadata_) != CustomStatus::ERR_OK) {
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
     perspective_camera_.vertical_fov_degrees_ = 63.0F;
@@ -49,39 +49,39 @@ GUSTO_RET FaceMeshCalculator::Open(
         OriginPointLocation::TOP_LEFT_CORNER,
         perspective_camera_,
     };
-    if (ValidateEnvironment(environment) != GustoStatus::ERR_OK) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+    if (ValidateEnvironment(environment) != CustomStatus::ERR_OK) {
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
     auto [geometry_pipeline, create_status] =
         CreateGeometryPipeline(environment, metadata_);
-    if (create_status != GustoStatus::ERR_OK || !geometry_pipeline) {
-        return GustoStatus::ERR_GENERAL_ERROR;
+    if (create_status != CustomStatus::ERR_OK || !geometry_pipeline) {
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
 
     geometry_pipeline_ = std::move(geometry_pipeline);
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
 }
 
-std::tuple<std::vector<FaceGeometry>, GUSTO_RET>
+std::tuple<std::vector<FaceGeometry>, CUSTOM_RET>
 FaceMeshCalculator::Process(
     const std::pair<int, int>& image_size,
     const std::vector<NormalizedLandmarkList>& multi_face_landmarks) {
     if (!geometry_pipeline_) {
-        return {{}, GustoStatus::ERR_GENERAL_ERROR};
+        return {{}, CustomStatus::ERR_GENERAL_ERROR};
     }
     if (ValidateFrameDimensions(image_size.first, image_size.second) !=
-        GustoStatus::ERR_OK) {
-        return {{}, GustoStatus::ERR_GENERAL_INVALID_PARAMETER};
+        CustomStatus::ERR_OK) {
+        return {{}, CustomStatus::ERR_GENERAL_INVALID_PARAMETER};
     }
     if (multi_face_landmarks.empty()) {
-        return {{}, GustoStatus::ERR_OK};
+        return {{}, CustomStatus::ERR_OK};
     }
 
     return ProcessInternal(image_size, multi_face_landmarks);
 }
 
-std::tuple<std::vector<FaceGeometry>, GUSTO_RET>
+std::tuple<std::vector<FaceGeometry>, CUSTOM_RET>
 FaceMeshCalculator::ProcessInternal(
     const std::pair<int, int>& image_size,
     const std::vector<NormalizedLandmarkList>& multi_face_landmarks) {
@@ -91,45 +91,45 @@ FaceMeshCalculator::ProcessInternal(
             image_size.first,
             image_size.second);
 
-    if (estimate_status != GustoStatus::ERR_OK) {
+    if (estimate_status != CustomStatus::ERR_OK) {
         return {
             std::move(estimated_geometries),
-            GustoStatus::ERR_GENERAL_ERROR,
+            CustomStatus::ERR_GENERAL_ERROR,
         };
     }
 
-    return {std::move(estimated_geometries), GustoStatus::ERR_OK};
+    return {std::move(estimated_geometries), CustomStatus::ERR_OK};
 }
 
-}  // namespace gusto_face_geometry
+}  // namespace custom_face_geometry
 
 extern "C" {
 
-using gusto_face_geometry::FaceMeshCalculator;
-using gusto_face_geometry::NormalizedLandmark;
-using gusto_face_geometry::NormalizedLandmarkList;
+using custom_face_geometry::FaceMeshCalculator;
+using custom_face_geometry::NormalizedLandmark;
+using custom_face_geometry::NormalizedLandmarkList;
 
-GUSTO_API GUSTO_RET face_mesh_calculator_new(
+CUSTOM_API CUSTOM_RET face_mesh_calculator_new(
     FaceMeshCalculator** face_mesh_calculator) {
     if (face_mesh_calculator == nullptr) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
     *face_mesh_calculator = nullptr;
 
     return GuardGeometryApi("face_mesh_calculator_new", [&]() {
         *face_mesh_calculator = new FaceMeshCalculator();
-        return GustoStatus::ERR_OK;
+        return CustomStatus::ERR_OK;
     });
 }
 
-GUSTO_API GUSTO_RET face_mesh_calculator_open(
+CUSTOM_API CUSTOM_RET face_mesh_calculator_open(
     FaceMeshCalculator* face_mesh_calculator,
     const char* face_geometry_pipeline_metadata,
     int buffer_size) {
     if (face_mesh_calculator == nullptr ||
         face_geometry_pipeline_metadata == nullptr ||
         buffer_size <= 0) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
     return GuardGeometryApi("face_mesh_calculator_open", [&]() {
@@ -140,7 +140,7 @@ GUSTO_API GUSTO_RET face_mesh_calculator_open(
     });
 }
 
-GUSTO_API GUSTO_RET face_mesh_calculator_process(
+CUSTOM_API CUSTOM_RET face_mesh_calculator_process(
     FaceMeshCalculator* face_mesh_calculator,
     int image_width,
     int image_height,
@@ -151,14 +151,14 @@ GUSTO_API GUSTO_RET face_mesh_calculator_process(
         image_width <= 0 ||
         image_height <= 0 ||
         num_faces < 0) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
     if (num_faces == 0) {
-        return GustoStatus::ERR_OK;
+        return CustomStatus::ERR_OK;
     }
     if (multi_face_landmarks == nullptr ||
         face_geometry_pose_mat == nullptr) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
     return GuardGeometryApi("face_mesh_calculator_process", [&]() {
@@ -192,12 +192,12 @@ GUSTO_API GUSTO_RET face_mesh_calculator_process(
             face_mesh_calculator->Process(
                 std::make_pair(image_width, image_height),
                 landmark_batches);
-        if (process_status != GustoStatus::ERR_OK) {
+        if (process_status != CustomStatus::ERR_OK) {
             return process_status;
         }
         if (face_geometries.size() !=
             static_cast<std::size_t>(num_faces)) {
-            return GustoStatus::ERR_PARTIAL_FAIL;
+            return CustomStatus::ERR_PARTIAL_FAIL;
         }
 
         for (int face_index = 0; face_index < num_faces; ++face_index) {
@@ -215,14 +215,14 @@ GUSTO_API GUSTO_RET face_mesh_calculator_process(
             }
         }
 
-        return GustoStatus::ERR_OK;
+        return CustomStatus::ERR_OK;
     });
 }
 
-GUSTO_API GUSTO_RET face_mesh_calculator_destroy(
+CUSTOM_API CUSTOM_RET face_mesh_calculator_destroy(
     FaceMeshCalculator* face_mesh_calculator) {
     delete face_mesh_calculator;
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
 }
 
 }  // extern "C"

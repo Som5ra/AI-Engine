@@ -1,6 +1,6 @@
 #include "human_pose_family.h"
 
-namespace gusto_humanpose{
+namespace custom_humanpose{
 
 // std::map<std::string, model_lib> MODEL_NAME_LIB_MAPPER = {
 //     {"rtmo-s", model_lib::RTMO_S}
@@ -100,7 +100,7 @@ cv::Mat RTMPose::GetAffineTransform(float center_x, float center_y, float scale_
 	return affineTransform;
 }
 
-std::pair<cv::Mat, cv::Mat> RTMPose::CropImageByDetectBox(const cv::Mat& input_image, const GustoRect& box)
+std::pair<cv::Mat, cv::Mat> RTMPose::CropImageByDetectBox(const cv::Mat& input_image, const CustomRect& box)
 {
     float left = box.x1;
     float top = box.y1;
@@ -375,4 +375,4 @@ cv::Mat RTMPose::draw_single_person_keypoints(cv::Mat image, const std::vector<s
 
 
 
-} //namespace gusto_humanpose
+} //namespace custom_humanpose

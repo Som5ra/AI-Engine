@@ -66,7 +66,6 @@ Windows Host (with vs2022):
 ```
 
 ### NOTES
-Refer to Notion for [detail documentation](https://www.notion.so/gustolabs/AI-Engine-Build-Process-13b5f7c72a4a80b0b8c4e3a31933caa3)
-
+Historical external documentation has been retired in favor of repository-local guidance.
 ### Some model export guide:
 Refer to [docs](https://github.com/Som5ra/AI-Engine/blob/main/model_tools/export_onnx_mmdetection.md)

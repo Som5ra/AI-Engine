@@ -7,13 +7,13 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-namespace gusto_detector2d{
+namespace custom_detector2d{
 
 
 
 class DetectionResult : public PostProcessResult {
 public:
-    std::vector<GustoRect> boxes;
+    std::vector<CustomRect> boxes;
 };
 
 // std::unique_ptr<basic_model_config> fetch_model_config(const std::string _model_name, const std::string _model_path);
@@ -27,10 +27,10 @@ class Detector : public BaseONNX {
         // std::vector<float> preprocess_img(const cv::Mat& image, bool bgr2rgb = false);
         std::unique_ptr<PostProcessResult> forward(const cv::Mat& raw);
         // std::vector<Ort::Value> forward(const cv::Mat& raw);
-        std::vector<GustoRect> postprocess(const std::vector<Ort::Value>& net_out, float score_thr = 0.5, float nms_thr = 0.5) ;
+        std::vector<CustomRect> postprocess(const std::vector<Ort::Value>& net_out, float score_thr = 0.5, float nms_thr = 0.5) ;
 
 };
 
 
-} // //namespace gusto_humanseg
+} // //namespace custom_humanseg
 #endif // DETECTOR_2D_FAMILY_H

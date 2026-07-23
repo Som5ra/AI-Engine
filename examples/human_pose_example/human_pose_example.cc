@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
 
     // const std::string segmenter_name = "selfie_segmenter_landscape";
     // const std::string segmenter_name = "deeplab_v3";
-    std::unique_ptr<gusto_humanpose::humanpose_config> config = gusto_humanpose::fetch_model_config(pose_detector_name);
-    std::unique_ptr<gusto_humanpose::PoseDetector> human_pose_detector = std::make_unique<gusto_humanpose::PoseDetector>(config);
+    std::unique_ptr<custom_humanpose::humanpose_config> config = custom_humanpose::fetch_model_config(pose_detector_name);
+    std::unique_ptr<custom_humanpose::PoseDetector> human_pose_detector = std::make_unique<custom_humanpose::PoseDetector>(config);
 
     float min_time = 1000000;
     float max_time = 0;

@@ -10,7 +10,7 @@
 namespace {
 
 template <typename Function>
-GUSTO_RET GuardWasmApi(const char* operation, Function&& function) noexcept {
+CUSTOM_RET GuardWasmApi(const char* operation, Function&& function) noexcept {
     try {
         return function();
     } catch (const cv::Exception& exception) {
@@ -20,7 +20,7 @@ GUSTO_RET GuardWasmApi(const char* operation, Function&& function) noexcept {
     } catch (...) {
         std::cerr << operation << " failed with an unknown error" << std::endl;
     }
-    return GustoStatus::ERR_GENERAL_ERROR;
+    return CustomStatus::ERR_GENERAL_ERROR;
 }
 
 template <typename Model, typename Function>
@@ -41,14 +41,14 @@ bool IsValidBitmap(std::intptr_t bitmap, int height, int width) {
 
 }  // namespace
 
-HumanPoseExtractor2D* Gusto_Human_Pose_Pipeline_Compile(
+HumanPoseExtractor2D* Custom_Human_Pose_Pipeline_Compile(
     const std::string& detector_path,
     const std::string& detector_config_path,
     const std::string& pose_model_path,
     const std::string& pose_model_config_path,
     int detect_interval) noexcept {
     return GuardWasmFactory<HumanPoseExtractor2D>(
-        "Gusto_Human_Pose_Pipeline_Compile", [&]() {
+        "Custom_Human_Pose_Pipeline_Compile", [&]() {
             auto model = std::make_unique<HumanPoseExtractor2D>(
                 detector_path,
                 detector_config_path,
@@ -59,7 +59,7 @@ HumanPoseExtractor2D* Gusto_Human_Pose_Pipeline_Compile(
         });
 }
 
-GUSTO_RET Gusto_Human_Pose_Pipeline_Inference(
+CUSTOM_RET Custom_Human_Pose_Pipeline_Inference(
     HumanPoseExtractor2D* model_ptr,
     std::intptr_t bitmap,
     int height,
@@ -67,10 +67,10 @@ GUSTO_RET Gusto_Human_Pose_Pipeline_Inference(
     bool display_box,
     bool display_keypoints) noexcept {
     if (model_ptr == nullptr || !IsValidBitmap(bitmap, height, width)) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
-    return GuardWasmApi("Gusto_Human_Pose_Pipeline_Inference", [&]() {
+    return GuardWasmApi("Custom_Human_Pose_Pipeline_Inference", [&]() {
         cv::Mat frame(
             height,
             width,
@@ -79,16 +79,16 @@ GUSTO_RET Gusto_Human_Pose_Pipeline_Inference(
         cv::cvtColor(frame, frame, cv::COLOR_RGBA2RGB);
 
         const auto start_time = std::chrono::steady_clock::now();
-        const GUSTO_RET inference_status = model_ptr->DetectPose(frame);
-        if (inference_status != GustoStatus::ERR_OK) {
+        const CUSTOM_RET inference_status = model_ptr->DetectPose(frame);
+        if (inference_status != CustomStatus::ERR_OK) {
             return inference_status;
         }
 
         if (display_box || display_keypoints) {
-            const GUSTO_RET display_status =
+            const CUSTOM_RET display_status =
                 model_ptr->Display(
                     frame, display_box, display_keypoints);
-            if (display_status != GustoStatus::ERR_OK) {
+            if (display_status != CustomStatus::ERR_OK) {
                 return display_status;
             }
 
@@ -110,17 +110,17 @@ GUSTO_RET Gusto_Human_Pose_Pipeline_Inference(
             reinterpret_cast<void*>(bitmap),
             frame.data,
             frame.total() * frame.elemSize());
-        return GustoStatus::ERR_OK;
+        return CustomStatus::ERR_OK;
     });
 }
 
-GUSTO_RET Gusto_Human_Pose_Pipeline_Destroy(
+CUSTOM_RET Custom_Human_Pose_Pipeline_Destroy(
     HumanPoseExtractor2D* model_ptr) noexcept {
     delete model_ptr;
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
 }
 
-FaceGeometryTracker3D* Gusto_Face_Geometry_Pipeline_Compile(
+FaceGeometryTracker3D* Custom_Face_Geometry_Pipeline_Compile(
     const std::string& face_detector_path,
     const std::string& face_detector_config_path,
     const std::string& face_landmarker_path,
@@ -128,7 +128,7 @@ FaceGeometryTracker3D* Gusto_Face_Geometry_Pipeline_Compile(
     const std::string& face_geometry_pipeline_metadata,
     int detect_interval) noexcept {
     return GuardWasmFactory<FaceGeometryTracker3D>(
-        "Gusto_Face_Geometry_Pipeline_Compile", [&]() {
+        "Custom_Face_Geometry_Pipeline_Compile", [&]() {
             auto model = std::make_unique<FaceGeometryTracker3D>(
                 face_detector_path,
                 face_detector_config_path,
@@ -140,7 +140,7 @@ FaceGeometryTracker3D* Gusto_Face_Geometry_Pipeline_Compile(
         });
 }
 
-GUSTO_RET Gusto_Face_Geometry_Pipeline_Inference(
+CUSTOM_RET Custom_Face_Geometry_Pipeline_Inference(
     FaceGeometryTracker3D* model_ptr,
     std::intptr_t bitmap,
     int height,
@@ -148,10 +148,10 @@ GUSTO_RET Gusto_Face_Geometry_Pipeline_Inference(
     bool display_keypoints,
     bool display_coordinates) noexcept {
     if (model_ptr == nullptr || !IsValidBitmap(bitmap, height, width)) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
-    return GuardWasmApi("Gusto_Face_Geometry_Pipeline_Inference", [&]() {
+    return GuardWasmApi("Custom_Face_Geometry_Pipeline_Inference", [&]() {
         cv::Mat frame(
             height,
             width,
@@ -159,15 +159,15 @@ GUSTO_RET Gusto_Face_Geometry_Pipeline_Inference(
             reinterpret_cast<void*>(bitmap));
         cv::cvtColor(frame, frame, cv::COLOR_RGBA2RGB);
 
-        const GUSTO_RET inference_status = model_ptr->Detect(
+        const CUSTOM_RET inference_status = model_ptr->Detect(
             frame, display_keypoints, display_coordinates);
-        if (inference_status != GustoStatus::ERR_OK) {
+        if (inference_status != CustomStatus::ERR_OK) {
             return inference_status;
         }
 
         cv::Mat rendered_frame = model_ptr->GetRenderedFrame();
         if (rendered_frame.empty()) {
-            return GustoStatus::ERR_GENERAL_ERROR;
+            return CustomStatus::ERR_GENERAL_ERROR;
         }
 
         cv::cvtColor(
@@ -176,17 +176,17 @@ GUSTO_RET Gusto_Face_Geometry_Pipeline_Inference(
             reinterpret_cast<void*>(bitmap),
             rendered_frame.data,
             rendered_frame.total() * rendered_frame.elemSize());
-        return GustoStatus::ERR_OK;
+        return CustomStatus::ERR_OK;
     });
 }
 
-GUSTO_RET Gusto_Face_Geometry_Pipeline_Destroy(
+CUSTOM_RET Custom_Face_Geometry_Pipeline_Destroy(
     FaceGeometryTracker3D* model_ptr) noexcept {
     delete model_ptr;
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
 }
 
-EMSCRIPTEN_BINDINGS(gusto_engine_module) {
+EMSCRIPTEN_BINDINGS(custom_engine_module) {
     emscripten::class_<HumanPoseExtractor2D>("HumanPoseExtractor2D")
         .constructor<
             const std::string&,
@@ -195,16 +195,16 @@ EMSCRIPTEN_BINDINGS(gusto_engine_module) {
             const std::string&,
             int>();
     emscripten::function(
-        "Gusto_Human_Pose_Pipeline_Compile",
-        &Gusto_Human_Pose_Pipeline_Compile,
+        "Custom_Human_Pose_Pipeline_Compile",
+        &Custom_Human_Pose_Pipeline_Compile,
         emscripten::allow_raw_pointers());
     emscripten::function(
-        "Gusto_Human_Pose_Pipeline_Inference",
-        &Gusto_Human_Pose_Pipeline_Inference,
+        "Custom_Human_Pose_Pipeline_Inference",
+        &Custom_Human_Pose_Pipeline_Inference,
         emscripten::allow_raw_pointers());
     emscripten::function(
-        "Gusto_Human_Pose_Pipeline_Destroy",
-        &Gusto_Human_Pose_Pipeline_Destroy,
+        "Custom_Human_Pose_Pipeline_Destroy",
+        &Custom_Human_Pose_Pipeline_Destroy,
         emscripten::allow_raw_pointers());
 
     emscripten::class_<FaceGeometryTracker3D>("FaceGeometryTracker3D")
@@ -216,15 +216,15 @@ EMSCRIPTEN_BINDINGS(gusto_engine_module) {
             const std::string&,
             int>();
     emscripten::function(
-        "Gusto_Face_Geometry_Pipeline_Compile",
-        &Gusto_Face_Geometry_Pipeline_Compile,
+        "Custom_Face_Geometry_Pipeline_Compile",
+        &Custom_Face_Geometry_Pipeline_Compile,
         emscripten::allow_raw_pointers());
     emscripten::function(
-        "Gusto_Face_Geometry_Pipeline_Inference",
-        &Gusto_Face_Geometry_Pipeline_Inference,
+        "Custom_Face_Geometry_Pipeline_Inference",
+        &Custom_Face_Geometry_Pipeline_Inference,
         emscripten::allow_raw_pointers());
     emscripten::function(
-        "Gusto_Face_Geometry_Pipeline_Destroy",
-        &Gusto_Face_Geometry_Pipeline_Destroy,
+        "Custom_Face_Geometry_Pipeline_Destroy",
+        &Custom_Face_Geometry_Pipeline_Destroy,
         emscripten::allow_raw_pointers());
 }

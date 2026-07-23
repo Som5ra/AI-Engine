@@ -168,9 +168,9 @@ int main()
 {
     GenericDetector* detector = new GenericDetector();
 
-    // const std::string modelpath = "/media/sombrali/HDD1/opencv-unity/gusto_dnn/weights/end2end_nonms_fp16.onnx";
+    // const std::string modelpath = "/media/sombrali/HDD1/opencv-unity/custom_dnn/weights/end2end_nonms_fp16.onnx";
     const std::string modelpath = "/media/sombrali/HDD1/mmlib/mmyolo/work_dirs/retinanet_mbnv2-1x_coco/epoch_12/end2end_nonms.onnx";
-    const std::string cls_names_path = "/media/sombrali/HDD1/opencv-unity/gusto_dnn/weights/rtm_test_cat.names";
+    const std::string cls_names_path = "/media/sombrali/HDD1/opencv-unity/custom_dnn/weights/rtm_test_cat.names";
     std::cout << "modelpath: " << modelpath << std::endl;
     int _compile_error_code = detector->compile(640, 640, 0.5, 0.5, modelpath.c_str(), cls_names_path.c_str(), 1024);
     std::cout << "compile error code: " << _compile_error_code << std::endl;    

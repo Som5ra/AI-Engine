@@ -2,19 +2,19 @@ if(NOT EMSCRIPTEN)
     message(FATAL_ERROR "BUILD_PLATFORM=wasm requires the Emscripten CMake toolchain")
 endif()
 
-add_executable(GustoEngineWASM
+add_executable(CustomEngineWASM
     wasm_api.cc
     ${AI_ENGINE_MODULES}
 )
 
-target_include_directories(GustoEngineWASM PRIVATE
+target_include_directories(CustomEngineWASM PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_SOURCE_DIR}/include"
 )
 
-target_link_libraries(GustoEngineWASM PRIVATE ${AI_ENGINE_LINK_LIBRARIES})
+target_link_libraries(CustomEngineWASM PRIVATE ${AI_ENGINE_LINK_LIBRARIES})
 
-target_link_options(GustoEngineWASM PRIVATE
+target_link_options(CustomEngineWASM PRIVATE
     "--bind"
     "-Os"
     "-sFORCE_FILESYSTEM=1"
@@ -25,4 +25,4 @@ target_link_options(GustoEngineWASM PRIVATE
     "SHELL:-sEXPORTED_FUNCTIONS=['_malloc','_free']"
 )
 
-set_target_properties(GustoEngineWASM PROPERTIES SUFFIX ".js")
+set_target_properties(CustomEngineWASM PROPERTIES SUFFIX ".js")

@@ -31,7 +31,7 @@ extern "C"{
     
     FaceDetector* face_detector;
     FaceLandmarker* face_landmarker;
-    gusto_face_geometry::FaceMeshCalculator face_mesh_calculator;
+    custom_face_geometry::FaceMeshCalculator face_mesh_calculator;
 
 
     cv::Mat frame;
@@ -56,8 +56,8 @@ extern "C"{
         std::cout << "Loading Face Landmarker Model: " << face_landmarker_path << std::endl;
         face_landmarker = new FaceLandmarker(face_landmarker_path);    
     
-        GUSTO_RET open_status = face_mesh_calculator.Open(face_GeometryPipelineMetadata);
-        if (open_status != GustoStatus::ERR_OK) {
+        CUSTOM_RET open_status = face_mesh_calculator.Open(face_GeometryPipelineMetadata);
+        if (open_status != CustomStatus::ERR_OK) {
             std::cerr << "Failed to open Geometry Pipeline Metadata!" << std::endl;
             return ;
         }
@@ -71,7 +71,7 @@ extern "C"{
         frame = cv::imread(frame_path);
         auto start = std::chrono::high_resolution_clock::now();
         auto [boxes, scores, indices, indices_cls] = face_detector->forward(frame);
-        std::vector<gusto_face_geometry::NormalizedLandmarkList> multi_face_landmarks;
+        std::vector<custom_face_geometry::NormalizedLandmarkList> multi_face_landmarks;
         for(size_t idx = 0; idx < indices.size(); idx++) {
             std::vector<int> box_to_crop = {
                 static_cast<int>(boxes[indices[idx]].y1 * frame.size[0]),
@@ -85,9 +85,9 @@ extern "C"{
             if (score < 0.49) {
                 continue;
             }
-            gusto_face_geometry::NormalizedLandmarkList thislandmark;
+            custom_face_geometry::NormalizedLandmarkList thislandmark;
             for (auto pt : points) {
-                gusto_face_geometry::NormalizedLandmark landmark;
+                custom_face_geometry::NormalizedLandmark landmark;
                 landmark.x = (pt.x + box_to_crop_with_margin[1]) / frame.size[1];
                 landmark.y = (pt.y + box_to_crop_with_margin[0])/ frame.size[0];
                 // landmark.x = (pt.x + box_to_crop_with_margin[0]) / frame.size[0];
@@ -106,7 +106,7 @@ extern "C"{
         K.at<float>(1, 1) = 800; // Focal length in y direction
         K.at<float>(0, 2) = 320; // Principal point x-coordinate
         K.at<float>(1, 2) = 240; // Principal point y-coordinate
-        if (process_status == GustoStatus::ERR_OK) {
+        if (process_status == CustomStatus::ERR_OK) {
             // std::cout << "Face Geometry Processed!" << std::endl;
             // for (auto fg : multi_pose_mat){
             for (size_t idx = 0; idx < multi_pose_mat.size(); idx++){

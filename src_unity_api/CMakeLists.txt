@@ -4,12 +4,12 @@ else()
     set(AI_ENGINE_UNITY_LIBRARY_TYPE SHARED)
 endif()
 
-add_library(GustoEngineUnity ${AI_ENGINE_UNITY_LIBRARY_TYPE}
+add_library(CustomEngineUnity ${AI_ENGINE_UNITY_LIBRARY_TYPE}
     unity_api.cc
     ${AI_ENGINE_MODULES}
 )
 
-target_include_directories(GustoEngineUnity
+target_include_directories(CustomEngineUnity
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
@@ -17,9 +17,9 @@ target_include_directories(GustoEngineUnity
         "${CMAKE_SOURCE_DIR}/include"
 )
 
-target_link_libraries(GustoEngineUnity PRIVATE ${AI_ENGINE_LINK_LIBRARIES})
+target_link_libraries(CustomEngineUnity PRIVATE ${AI_ENGINE_LINK_LIBRARIES})
 
-install(TARGETS GustoEngineUnity
+install(TARGETS CustomEngineUnity
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"

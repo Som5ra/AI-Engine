@@ -18,18 +18,18 @@ FaceGeometryTracker3D::FaceGeometryTracker3D(
     const std::string& face_landmarker_config_path,
     const std::string& face_geometry_pipeline_metadata,
     int detect_interval)
-    : face_detector_(std::make_unique<gusto_mp_face::FaceDetector>(
+    : face_detector_(std::make_unique<custom_mp_face::FaceDetector>(
           face_detector_path, face_detector_config_path)),
-      face_landmarker_(std::make_unique<gusto_mp_face::FaceLandmarker>(
+      face_landmarker_(std::make_unique<custom_mp_face::FaceLandmarker>(
           face_landmarker_path, face_landmarker_config_path)),
       face_mesh_calculator_(
-          std::make_unique<gusto_face_geometry::FaceMeshCalculator>()),
+          std::make_unique<custom_face_geometry::FaceMeshCalculator>()),
       detect_interval_(detect_interval) {
     initialization_status_ =
         face_mesh_calculator_->Open(face_geometry_pipeline_metadata);
 }
 
-GUSTO_RET FaceGeometryTracker3D::Detect(
+CUSTOM_RET FaceGeometryTracker3D::Detect(
     const cv::Mat& frame,
     bool display_keypoints,
     bool display_coord) {
@@ -39,29 +39,29 @@ GUSTO_RET FaceGeometryTracker3D::Detect(
     rendered_frame_.release();
 
     if (frame.empty()) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
     rendered_frame_ = frame.clone();
 
-    if (initialization_status_ != GustoStatus::ERR_OK) {
+    if (initialization_status_ != CustomStatus::ERR_OK) {
         return initialization_status_;
     }
 
     if (!face_detector_ || !face_landmarker_ || !face_mesh_calculator_) {
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
 
     try {
         auto detector_output = face_detector_->forward(frame);
         auto* detector_result =
-            dynamic_cast<gusto_mp_face::MediaPipeDetectorResult*>(
+            dynamic_cast<custom_mp_face::MediaPipeDetectorResult*>(
                 detector_output.get());
         if (detector_result == nullptr) {
-            return GustoStatus::ERR_GENERAL_ERROR;
+            return CustomStatus::ERR_GENERAL_ERROR;
         }
 
-        std::vector<gusto_face_geometry::NormalizedLandmarkList>
+        std::vector<custom_face_geometry::NormalizedLandmarkList>
             multi_face_landmarks;
         multi_face_landmarks.reserve(detector_result->boxes.size());
 
@@ -99,10 +99,10 @@ GUSTO_RET FaceGeometryTracker3D::Detect(
 
             auto landmarker_output = face_landmarker_->forward(cropped_face);
             auto* landmarker_result =
-                dynamic_cast<gusto_mp_face::MediapipeFaceLandmarkResult*>(
+                dynamic_cast<custom_mp_face::MediapipeFaceLandmarkResult*>(
                     landmarker_output.get());
             if (landmarker_result == nullptr) {
-                return GustoStatus::ERR_GENERAL_ERROR;
+                return CustomStatus::ERR_GENERAL_ERROR;
             }
 
             if (landmarker_result->score < kMinimumLandmarkScore ||
@@ -110,11 +110,11 @@ GUSTO_RET FaceGeometryTracker3D::Detect(
                 continue;
             }
 
-            gusto_face_geometry::NormalizedLandmarkList face_landmarks;
+            custom_face_geometry::NormalizedLandmarkList face_landmarks;
             face_landmarks.landmark.reserve(landmarker_result->points.size());
 
             for (const auto& point : landmarker_result->points) {
-                gusto_face_geometry::NormalizedLandmark landmark{};
+                custom_face_geometry::NormalizedLandmark landmark{};
                 landmark.x =
                     (point.x + crop_box_with_margin[1]) / frame.cols;
                 landmark.y =
@@ -139,19 +139,19 @@ GUSTO_RET FaceGeometryTracker3D::Detect(
 
         // No face is a valid inference result, not a pipeline failure.
         if (multi_face_landmarks.empty()) {
-            return GustoStatus::ERR_OK;
+            return CustomStatus::ERR_OK;
         }
 
         auto [face_geometries, process_status] =
             face_mesh_calculator_->Process(
                 std::make_pair(frame.cols, frame.rows),
                 multi_face_landmarks);
-        if (process_status != GustoStatus::ERR_OK) {
+        if (process_status != CustomStatus::ERR_OK) {
             return process_status;
         }
 
         face_geometries_ = std::move(face_geometries);
-        return GustoStatus::ERR_OK;
+        return CustomStatus::ERR_OK;
     } catch (const cv::Exception& exception) {
         std::cerr << "Face geometry OpenCV error: " << exception.what()
                   << std::endl;
@@ -162,14 +162,14 @@ GUSTO_RET FaceGeometryTracker3D::Detect(
 
     face_geometries_.clear();
     rendered_frame_ = frame.clone();
-    return GustoStatus::ERR_GENERAL_ERROR;
+    return CustomStatus::ERR_GENERAL_ERROR;
 }
 
 cv::Mat FaceGeometryTracker3D::GetRenderedFrame() const {
     return rendered_frame_;
 }
 
-const std::vector<gusto_face_geometry::FaceGeometry>&
+const std::vector<custom_face_geometry::FaceGeometry>&
 FaceGeometryTracker3D::GetFaceGeometries() const noexcept {
     return face_geometries_;
 }

@@ -1,5 +1,5 @@
-#ifndef GUSTO_UTILS_H
-#define GUSTO_UTILS_H
+#ifndef CUSTOM_UTILS_H
+#define CUSTOM_UTILS_H
 
 #include <chrono>
 #include <fstream>
@@ -16,14 +16,14 @@
 #endif
 
 #if defined(_WIN32)
-#define GUSTO_API __declspec(dllexport)
+#define CUSTOM_API __declspec(dllexport)
 #elif defined(__GNUC__) || defined(__clang__)
-#define GUSTO_API __attribute__((visibility("default")))
+#define CUSTOM_API __attribute__((visibility("default")))
 #else
-#define GUSTO_API
+#define CUSTOM_API
 #endif
 
-namespace GustoStatus {
+namespace CustomStatus {
 
 constexpr int ERR_OK = 0x00000000;
 constexpr int ERR_GENERAL_ERROR = 0x76000000;
@@ -36,9 +36,9 @@ constexpr int ERR_GENERAL_NOT_SUPPORT =
     -(ERR_GENERAL_ERROR | 0x00000005);
 constexpr int ERR_PARTIAL_FAIL = 0x76000001;
 
-}  // namespace GustoStatus
+}  // namespace CustomStatus
 
-struct GustoRect {
+struct CustomRect {
     float x1;
     float y1;
     float x2;
@@ -46,10 +46,10 @@ struct GustoRect {
     float conf = 0.0F;
     int label = -1;
 
-    GustoRect(float x1, float y1, float x2, float y2)
+    CustomRect(float x1, float y1, float x2, float y2)
         : x1(x1), y1(y1), x2(x2), y2(y2) {}
 
-    GustoRect(
+    CustomRect(
         float x1,
         float y1,
         float x2,
@@ -91,4 +91,4 @@ public:
     int num_class;
 };
 
-#endif  // GUSTO_UTILS_H
+#endif  // CUSTOM_UTILS_H

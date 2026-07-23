@@ -1,6 +1,6 @@
 #include "human_seg_family.h"
 
-namespace gusto_humanseg{
+namespace custom_humanseg{
 
 std::map<std::string, model_lib> MODEL_NAME_LIB_MAPPER = {
     {"selfie_multiclass_256x256", model_lib::selfie_multiclass_256x256},
@@ -187,4 +187,4 @@ cv::Mat Segmenter::postprocess(const std::vector<Ort::Value>& mask_out, std::pai
     return colorized_output;
 }
 
-} //namespace gusto_humanseg
+} //namespace custom_humanseg

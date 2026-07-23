@@ -59,18 +59,18 @@ HumanPoseExtractor2D::HumanPoseExtractor2D(
     const std::string& pose_detector_model_path,
     const std::string& pose_detector_config_path,
     int detect_interval)
-    : human_detector_(std::make_unique<gusto_detector2d::Detector>(
+    : human_detector_(std::make_unique<custom_detector2d::Detector>(
           human_detector_model_path, human_detector_config_path)),
-      pose_detector_(std::make_unique<gusto_humanpose::RTMPose>(
+      pose_detector_(std::make_unique<custom_humanpose::RTMPose>(
           pose_detector_model_path, pose_detector_config_path)),
       detection_result_(
-          std::make_unique<gusto_detector2d::DetectionResult>()),
+          std::make_unique<custom_detector2d::DetectionResult>()),
       detect_interval_(std::max(1, detect_interval)) {}
 
-GUSTO_RET HumanPoseExtractor2D::DetectPose(const cv::Mat& image) {
+CUSTOM_RET HumanPoseExtractor2D::DetectPose(const cv::Mat& image) {
     if (image.empty() || !human_detector_ || !pose_detector_ ||
         !detection_result_) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
     try {
@@ -89,10 +89,10 @@ GUSTO_RET HumanPoseExtractor2D::DetectPose(const cv::Mat& image) {
         if (refresh_detection) {
             auto detector_output = human_detector_->forward(detector_frame);
             auto* detector_result =
-                dynamic_cast<gusto_detector2d::DetectionResult*>(
+                dynamic_cast<custom_detector2d::DetectionResult*>(
                     detector_output.get());
             if (detector_result == nullptr) {
-                return GustoStatus::ERR_GENERAL_ERROR;
+                return CustomStatus::ERR_GENERAL_ERROR;
             }
             detection_result_->boxes = detector_result->boxes;
         }
@@ -114,16 +114,16 @@ GUSTO_RET HumanPoseExtractor2D::DetectPose(const cv::Mat& image) {
 
             auto pose_output = pose_detector_->forward(pose_input);
             auto* pose_result =
-                dynamic_cast<gusto_humanpose::KeyPoint2DResult*>(
+                dynamic_cast<custom_humanpose::KeyPoint2DResult*>(
                     pose_output.get());
             if (pose_result == nullptr) {
-                return GustoStatus::ERR_GENERAL_ERROR;
+                return CustomStatus::ERR_GENERAL_ERROR;
             }
 
             pose_results_[index].keypoints = pose_result->keypoints;
         }
 
-        return GustoStatus::ERR_OK;
+        return CustomStatus::ERR_OK;
     } catch (const cv::Exception& exception) {
         std::cerr << "Human pose OpenCV error: " << exception.what()
                   << std::endl;
@@ -133,15 +133,15 @@ GUSTO_RET HumanPoseExtractor2D::DetectPose(const cv::Mat& image) {
     }
 
     pose_results_.clear();
-    return GustoStatus::ERR_GENERAL_ERROR;
+    return CustomStatus::ERR_GENERAL_ERROR;
 }
 
-GUSTO_RET HumanPoseExtractor2D::Display(
+CUSTOM_RET HumanPoseExtractor2D::Display(
     cv::Mat& image,
     bool display_box,
     bool display_keypoints) {
     if (image.empty() || !detection_result_ || !pose_detector_) {
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
     const auto& boxes = detection_result_->boxes;
@@ -169,14 +169,14 @@ GUSTO_RET HumanPoseExtractor2D::Display(
         }
     }
 
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
 }
 
-GUSTO_RET HumanPoseExtractor2D::Debug() const {
+CUSTOM_RET HumanPoseExtractor2D::Debug() const {
     if (!human_detector_ || !human_detector_->_config) {
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
 
     std::cout << human_detector_->_config->model_path << std::endl;
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
 }

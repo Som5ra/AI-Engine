@@ -17,7 +17,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #endif
 
-#define GUSTO_RET int
+#define CUSTOM_RET int
 
 class FaceGeometryTracker3D {
 public:
@@ -30,23 +30,23 @@ public:
         int detect_interval = 0);
     ~FaceGeometryTracker3D() = default;
 
-    GUSTO_RET Detect(
+    CUSTOM_RET Detect(
         const cv::Mat& frame,
         bool display_keypoints = true,
         bool display_coord = true);
 
     cv::Mat GetRenderedFrame() const;
-    const std::vector<gusto_face_geometry::FaceGeometry>& GetFaceGeometries() const noexcept;
+    const std::vector<custom_face_geometry::FaceGeometry>& GetFaceGeometries() const noexcept;
 
 private:
-    std::unique_ptr<gusto_mp_face::FaceDetector> face_detector_;
-    std::unique_ptr<gusto_mp_face::FaceLandmarker> face_landmarker_;
-    std::unique_ptr<gusto_face_geometry::FaceMeshCalculator> face_mesh_calculator_;
+    std::unique_ptr<custom_mp_face::FaceDetector> face_detector_;
+    std::unique_ptr<custom_mp_face::FaceLandmarker> face_landmarker_;
+    std::unique_ptr<custom_face_geometry::FaceMeshCalculator> face_mesh_calculator_;
 
-    std::vector<gusto_face_geometry::FaceGeometry> face_geometries_;
+    std::vector<custom_face_geometry::FaceGeometry> face_geometries_;
     cv::Mat rendered_frame_;
 
-    int initialization_status_ = GustoStatus::ERR_GENERAL_ERROR;
+    int initialization_status_ = CustomStatus::ERR_GENERAL_ERROR;
     int detect_interval_ = 0;
     int num_frames_ = 0;
 };

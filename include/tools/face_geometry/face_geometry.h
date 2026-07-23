@@ -1,10 +1,10 @@
-#ifndef GUSTO_FACE_GEOMETRY_H
-#define GUSTO_FACE_GEOMETRY_H
+#ifndef CUSTOM_FACE_GEOMETRY_H
+#define CUSTOM_FACE_GEOMETRY_H
 #include "utils.h"
 
-namespace gusto_face_geometry {
+namespace custom_face_geometry {
 
-    #define GUSTO_RET int
+    #define CUSTOM_RET int
     using json = nlohmann::json;
 
 
@@ -48,8 +48,8 @@ namespace gusto_face_geometry {
             InputSource input_source;
             std::vector<WeightedLandmarkRef> procrustes_landmark_basis;
             Mesh3d canonical_mesh;
-            GUSTO_RET serialize_json(const std::string& filename);
-            GUSTO_RET GUSTO_CHECK_CANONICAL_MESH();
+            CUSTOM_RET serialize_json(const std::string& filename);
+            CUSTOM_RET CUSTOM_CHECK_CANONICAL_MESH();
             int procrustes_landmark_basis_size() const { return procrustes_landmark_basis.size(); }
     };
 
@@ -210,25 +210,25 @@ namespace gusto_face_geometry {
     // Far Z must be greater than Near Z with a margin of `1e-9`.
     // Vertical FOV must be in range (0, 180) with a margin of `1e-9` on the range
     // edges.
-    GUSTO_RET ValidatePerspectiveCamera(const PerspectiveCamera& perspective_camera);
+    CUSTOM_RET ValidatePerspectiveCamera(const PerspectiveCamera& perspective_camera);
 
     // Validates `environment`.
     //
     // Environment's perspective camera must be valid.
-    GUSTO_RET ValidateEnvironment(const Environment& environment);
+    CUSTOM_RET ValidateEnvironment(const Environment& environment);
 
     // Validates `mesh_3d`.
     //
     // Mesh vertex buffer size must a multiple of the vertex size.
     // Mesh index buffer size must a multiple of the primitive size.
     // All mesh indices must reference an existing mesh vertex.
-    GUSTO_RET ValidateMesh3d(const Mesh3d& mesh_3d);
+    CUSTOM_RET ValidateMesh3d(const Mesh3d& mesh_3d);
 
     // Validates `face_geometry`.
     //
     // Face mesh must be valid.
     // Face pose transformation matrix must be a 4x4 matrix.
-    GUSTO_RET ValidateFaceGeometry(const FaceGeometry& face_geometry);
+    CUSTOM_RET ValidateFaceGeometry(const FaceGeometry& face_geometry);
 
     // Validates `metadata`.
     //
@@ -237,15 +237,15 @@ namespace gusto_face_geometry {
     // All Procrustes basis indices must reference an existing canonical mesh
     // vertex.
     // All Procrustes basis landmarks must have a non-negative weight.
-    GUSTO_RET ValidateGeometryPipelineMetadata(
+    CUSTOM_RET ValidateGeometryPipelineMetadata(
         const GeometryPipelineMetadata& metadata);
 
     // Validates frame dimensions.
     //
     // Both frame width and frame height must be positive.
-    GUSTO_RET ValidateFrameDimensions(int frame_width, int frame_height);
+    CUSTOM_RET ValidateFrameDimensions(int frame_width, int frame_height);
 
 
 }
 
-#endif // GUSTO_FACE_GEOMETRY_H
+#endif // CUSTOM_FACE_GEOMETRY_H

@@ -17,7 +17,7 @@ extern "C"{
     float total_time = 0;
     int num_frames = 0;
 
-    std::unique_ptr<gusto_detector2d::Detector> human_detector;
+    std::unique_ptr<custom_detector2d::Detector> human_detector;
     cv::Mat frame;
 
     void Open_Session(
@@ -28,20 +28,20 @@ extern "C"{
         try{
             std::string model_path;
             model_path.assign(_model_path);
-            std::unique_ptr<basic_model_config> config = gusto_detector2d::fetch_model_config("Generic Detector", model_path, std::make_pair(input_w, input_h));
+            std::unique_ptr<basic_model_config> config = custom_detector2d::fetch_model_config("Generic Detector", model_path, std::make_pair(input_w, input_h));
 
             #if defined(BUILD_PLATFORM_ANDROID)
-            LOGI("GUSTO_DETECTION", "debugf1");
+            LOGI("CUSTOM_DETECTION", "debugf1");
             #endif
-            human_detector = std::move(std::make_unique<gusto_detector2d::Detector>(config));
+            human_detector = std::move(std::make_unique<custom_detector2d::Detector>(config));
             std::cout << "Successfully loaded model" << std::endl;
             #if defined(BUILD_PLATFORM_ANDROID)
-            LOGI("GUSTO_DETECTION", "Successfully loaded model");
+            LOGI("CUSTOM_DETECTION", "Successfully loaded model");
             #endif
         }catch(const std::exception& e){
             #if defined(BUILD_PLATFORM_ANDROID)
-            LOGE("GUSTO_DETECTION", "Failed to load model!");
-            LOGE("GUSTO_DETECTION", "%s", e.what());
+            LOGE("CUSTOM_DETECTION", "Failed to load model!");
+            LOGE("CUSTOM_DETECTION", "%s", e.what());
             #endif
             std::cerr << "Failed to load model!" << std::endl;
             std::cerr << e.what() << '\n';
@@ -53,7 +53,7 @@ extern "C"{
         std::string frame_path;
         frame_path.assign(_frame_path);
         #if defined(BUILD_PLATFORM_ANDROID)
-        LOGI("GUSTO_DETECTION", "Processing Frame: %s", frame_path.c_str());
+        LOGI("CUSTOM_DETECTION", "Processing Frame: %s", frame_path.c_str());
         #endif
         std::cout << "Processing Frame: " << frame_path << std::endl;
         frame = cv::imread(frame_path);
@@ -68,7 +68,7 @@ extern "C"{
         total_time += duration;
         num_frames++;
         #if defined(BUILD_PLATFORM_ANDROID)
-        LOGI("GUSTO_DETECTION", "Frame Processed in: %f ms, avg: %f ms", duration, std::ceil(total_time / num_frames * 100) / 100);
+        LOGI("CUSTOM_DETECTION", "Frame Processed in: %f ms, avg: %f ms", duration, std::ceil(total_time / num_frames * 100) / 100);
         #endif
         std::cout << "\rmin_time: " << min_time << "ms  |  max_time: " << max_time << "ms  |  avg_time: " << std::ceil(total_time / num_frames * 100) / 100 << "ms " << std::flush;    
         return ;

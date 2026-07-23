@@ -1,11 +1,11 @@
-#ifndef GUSTO_FACE_GEOMETRY_PROCRUSTES_SOLVER_H
-#define GUSTO_FACE_GEOMETRY_PROCRUSTES_SOLVER_H
+#ifndef CUSTOM_FACE_GEOMETRY_PROCRUSTES_SOLVER_H
+#define CUSTOM_FACE_GEOMETRY_PROCRUSTES_SOLVER_H
 
 #include <memory>
 #include "Eigen/Dense"
 
-namespace gusto_face_geometry {
-#define GUSTO_RET int
+namespace custom_face_geometry {
+#define CUSTOM_RET int
 // Encapsulates a stateless solver for the Weighted Extended Orthogonal
 // Procrustes (WEOP) Problem, as defined in Section 2.4 of
 // https://doi.org/10.3929/ethz-a-004656648.
@@ -49,8 +49,8 @@ class ProcrustesSolver {
 
 std::unique_ptr<ProcrustesSolver> CreateFloatPrecisionProcrustesSolver();
 
-}  // namespace gusto_face_geometry
+}  // namespace custom_face_geometry
 
 
 
-#endif // GUSTO_FACE_GEOMETRY_PROCRUSTES_SOLVER_H
+#endif // CUSTOM_FACE_GEOMETRY_PROCRUSTES_SOLVER_H

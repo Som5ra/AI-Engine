@@ -4,17 +4,17 @@ else()
     set(AI_ENGINE_LIBRARY_TYPE SHARED)
 endif()
 
-add_library(GustoEngine ${AI_ENGINE_LIBRARY_TYPE} ${AI_ENGINE_MODULES})
+add_library(CustomEngine ${AI_ENGINE_LIBRARY_TYPE} ${AI_ENGINE_MODULES})
 
-target_include_directories(GustoEngine
+target_include_directories(CustomEngine
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_link_libraries(GustoEngine PRIVATE ${AI_ENGINE_LINK_LIBRARIES})
+target_link_libraries(CustomEngine PRIVATE ${AI_ENGINE_LINK_LIBRARIES})
 
-install(TARGETS GustoEngine
+install(TARGETS CustomEngine
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"

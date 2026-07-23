@@ -3,7 +3,7 @@
 #include "tools/face_geometry/face_geometry.h"
 #include "tools/face_geometry/procrustes_solver.h"
 
-namespace gusto_face_geometry {
+namespace custom_face_geometry {
 
 class ScreenToMetricSpaceConverter {
  public:
@@ -56,13 +56,13 @@ class ScreenToMetricSpaceConverter {
   //
   //       To keep the logic correct, the landmark set handedness is changed any
   //       time the screen-to-metric semantic barrier is passed.
-  GUSTO_RET Convert(const NormalizedLandmarkList& screen_landmark_list,  //
+  CUSTOM_RET Convert(const NormalizedLandmarkList& screen_landmark_list,  //
                        const PerspectiveCameraFrustum& pcf,                 //
                        LandmarkList& metric_landmark_list,                  //
                        Eigen::Matrix4f& pose_transform_mat) const {
     if (screen_landmark_list.landmark_size() != canonical_metric_landmarks_.cols()) {
         std::cerr << "The number of landmarks doesn't match the number passed upon initialization!" << std::endl;
-        return GustoStatus::ERR_GENERAL_INVALID_PARAMETER;
+        return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
     Eigen::Matrix3Xf screen_landmarks;
@@ -80,9 +80,9 @@ class ScreenToMetricSpaceConverter {
 
 
     float first_iteration_scale;
-    if (EstimateScale(intermediate_landmarks, &first_iteration_scale) != GustoStatus::ERR_OK) {
+    if (EstimateScale(intermediate_landmarks, &first_iteration_scale) != CustomStatus::ERR_OK) {
         std::cerr << "Failed to estimate first iteration scale!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
     // 2nd iteration: unproject XY using the scale from the 1st iteration.
     intermediate_landmarks = screen_landmarks;
@@ -95,9 +95,9 @@ class ScreenToMetricSpaceConverter {
     // landmarks.
     if (input_source_ == InputSource::FACE_DETECTION_PIPELINE) {
       Eigen::Matrix4f intermediate_pose_transform_mat;
-      if (procrustes_solver_->SolveWeightedOrthogonalProblem(canonical_metric_landmarks_, intermediate_landmarks, landmark_weights_, intermediate_pose_transform_mat) != GustoStatus::ERR_OK) {
+      if (procrustes_solver_->SolveWeightedOrthogonalProblem(canonical_metric_landmarks_, intermediate_landmarks, landmark_weights_, intermediate_pose_transform_mat) != CustomStatus::ERR_OK) {
         std::cerr << "Failed to estimate pose transform matrix!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
       }
       
       intermediate_landmarks.row(2) =
@@ -106,9 +106,9 @@ class ScreenToMetricSpaceConverter {
               .row(2);
     }
     float second_iteration_scale;
-    if (EstimateScale(intermediate_landmarks, &second_iteration_scale) != GustoStatus::ERR_OK) {
+    if (EstimateScale(intermediate_landmarks, &second_iteration_scale) != CustomStatus::ERR_OK) {
         std::cerr << "Failed to estimate first iteration scale!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
 
     // Use the total scale to unproject the screen landmarks.
@@ -120,9 +120,9 @@ class ScreenToMetricSpaceConverter {
     // At this point, screen landmarks are converted into metric landmarks.
     Eigen::Matrix3Xf& metric_landmarks = screen_landmarks;
 
-    if (procrustes_solver_->SolveWeightedOrthogonalProblem(canonical_metric_landmarks_, metric_landmarks, landmark_weights_, pose_transform_mat) != GustoStatus::ERR_OK) {
+    if (procrustes_solver_->SolveWeightedOrthogonalProblem(canonical_metric_landmarks_, metric_landmarks, landmark_weights_, pose_transform_mat) != CustomStatus::ERR_OK) {
         std::cerr << "Failed to estimate pose transform matrix!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
     // std::cout << "\nDebug pose_transform_mat after SolveWeightedOrthogonalProblem: \n" << pose_transform_mat << std::endl;
 
@@ -135,7 +135,7 @@ class ScreenToMetricSpaceConverter {
 
     ConvertEigenMatrixToLandmarkList(metric_landmarks, metric_landmark_list);
 
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
   }
 
  private:
@@ -155,16 +155,16 @@ class ScreenToMetricSpaceConverter {
     landmarks.colwise() += Eigen::Vector3f(x_translation, y_translation, 0.f);
   }
 
-  GUSTO_RET EstimateScale(Eigen::Matrix3Xf& landmarks, float* ret) const {
+  CUSTOM_RET EstimateScale(Eigen::Matrix3Xf& landmarks, float* ret) const {
     Eigen::Matrix4f transform_mat;
     if (procrustes_solver_->SolveWeightedOrthogonalProblem(
             canonical_metric_landmarks_, landmarks, landmark_weights_,
-            transform_mat) != GustoStatus::ERR_OK) {
+            transform_mat) != CustomStatus::ERR_OK) {
         std::cerr << "Failed to estimate canonical-to-runtime landmark set transform!" << std::endl;
-        return GustoStatus::ERR_GENERAL_ERROR;
+        return CustomStatus::ERR_GENERAL_ERROR;
     }
     *ret = transform_mat.col(0).norm();
-    return GustoStatus::ERR_OK;
+    return CustomStatus::ERR_OK;
     // return transform_mat.col(0).norm();
   }
 
@@ -242,15 +242,15 @@ class GeometryPipelineImpl : public GeometryPipeline {
         canonical_mesh_vertex_position_offset_(canonical_mesh_vertex_position_offset),
         space_converter_(std::move(space_converter)) {}
 
-  std::pair<std::vector<FaceGeometry>, GUSTO_RET> EstimateFaceGeometry(
+  std::pair<std::vector<FaceGeometry>, CUSTOM_RET> EstimateFaceGeometry(
   // std::optional<std::vector<FaceGeometry>> EstimateFaceGeometry(
       const std::vector<NormalizedLandmarkList>& multi_face_landmarks,
       int frame_width, 
       int frame_height) const override {
     
-    if (ValidateFrameDimensions(frame_width, frame_height) != GustoStatus::ERR_OK) {
+    if (ValidateFrameDimensions(frame_width, frame_height) != CustomStatus::ERR_OK) {
         std::cerr << "Invalid frame dimensions!" << std::endl;
-        return std::make_pair(std::vector<FaceGeometry>(), GustoStatus::ERR_GENERAL_INVALID_PARAMETER);
+        return std::make_pair(std::vector<FaceGeometry>(), CustomStatus::ERR_GENERAL_INVALID_PARAMETER);
         // return std::nullptr;
     }
     // Create a perspective camera frustum to be shared for geometry estimation
@@ -262,7 +262,7 @@ class GeometryPipelineImpl : public GeometryPipeline {
     // From this point, the meaning of "face landmarks" is clarified further as
     // "screen face landmarks". This is done do distinguish from "metric face
     // landmarks" that are derived during the face geometry estimation process.
-    GUSTO_RET ret_signal = GustoStatus::ERR_OK;
+    CUSTOM_RET ret_signal = CustomStatus::ERR_OK;
     for (const NormalizedLandmarkList& screen_face_landmarks : multi_face_landmarks) {
         MatrixData MatrixData{4, 4, Layout::COLUMN_MAJOR};
         FaceGeometry _face_geometry{canonical_mesh_, MatrixData};
@@ -275,23 +275,23 @@ class GeometryPipelineImpl : public GeometryPipeline {
                   _face_geometry.pose_transform_matrix.at(i, j) = -9999;
                 }
             }
-            ret_signal = GustoStatus::ERR_PARTIAL_FAIL;
+            ret_signal = CustomStatus::ERR_PARTIAL_FAIL;
             continue;
         }
         // Convert the screen landmarks into the metric landmarks and get the pose
         // transformation matrix.
         LandmarkList metric_face_landmarks;
         Eigen::Matrix4f pose_transform_mat;
-        if (space_converter_->Convert(screen_face_landmarks, pcf, metric_face_landmarks, pose_transform_mat) != GustoStatus::ERR_OK) {
+        if (space_converter_->Convert(screen_face_landmarks, pcf, metric_face_landmarks, pose_transform_mat) != CustomStatus::ERR_OK) {
             std::cerr << "Failed to convert landmarks from the screen to the metric space!" << std::endl;
             for (int i = 0; i < 4; ++i) {
               for (int j = 0; j < 4; ++j) {
                   _face_geometry.pose_transform_matrix.at(i, j) = -9999;
                 }
             }
-            ret_signal = GustoStatus::ERR_PARTIAL_FAIL;
+            ret_signal = CustomStatus::ERR_PARTIAL_FAIL;
             continue;
-            // return std::make_pair(multi_face_geometry, GustoStatus::ERR_GENERAL_INVALID_PARAMETER);
+            // return std::make_pair(multi_face_geometry, CustomStatus::ERR_GENERAL_INVALID_PARAMETER);
             // return std::nullptr;
         }
         // [Sombra] -> I think it's for protobuf to send the pose matrix back
@@ -321,7 +321,7 @@ class GeometryPipelineImpl : public GeometryPipeline {
         multi_face_geometry.push_back(_face_geometry);
     }
 
-    return std::make_pair(multi_face_geometry, GustoStatus::ERR_OK); 
+    return std::make_pair(multi_face_geometry, CustomStatus::ERR_OK); 
   }
 
  private:
@@ -356,21 +356,21 @@ class GeometryPipelineImpl : public GeometryPipeline {
 };
 
 // std::optional<std::unique_ptr<GeometryPipeline>> CreateGeometryPipeline(
-std::pair<std::unique_ptr<GeometryPipeline>, GUSTO_RET> CreateGeometryPipeline(const Environment& environment, const GeometryPipelineMetadata& metadata) {
-    if (ValidateEnvironment(environment) != GustoStatus::ERR_OK) {
+std::pair<std::unique_ptr<GeometryPipeline>, CUSTOM_RET> CreateGeometryPipeline(const Environment& environment, const GeometryPipelineMetadata& metadata) {
+    if (ValidateEnvironment(environment) != CustomStatus::ERR_OK) {
         // return std::nullptr;
-        return std::make_pair(nullptr, GustoStatus::ERR_GENERAL_INVALID_PARAMETER);
+        return std::make_pair(nullptr, CustomStatus::ERR_GENERAL_INVALID_PARAMETER);
     }
-    if (ValidateGeometryPipelineMetadata(metadata) != GustoStatus::ERR_OK) {
+    if (ValidateGeometryPipelineMetadata(metadata) != CustomStatus::ERR_OK) {
         // return std::nullptr;
-        return std::make_pair(nullptr, GustoStatus::ERR_GENERAL_INVALID_PARAMETER);
+        return std::make_pair(nullptr, CustomStatus::ERR_GENERAL_INVALID_PARAMETER);
     }
     const auto& canonical_mesh = metadata.canonical_mesh;
 
     // [Sombra] -> Don't need check canonical mesh here, it's hardcoded for us
-    // if (ValidateCanonicalMesh(canonical_mesh) != GustoStatus::ERR_OK) {
+    // if (ValidateCanonicalMesh(canonical_mesh) != CustomStatus::ERR_OK) {
     //     // return std::nullptr;
-    //     return std::make_pair(nullptr, GustoStatus::ERR_GENERAL_INVALID_PARAMETER);
+    //     return std::make_pair(nullptr, CustomStatus::ERR_GENERAL_INVALID_PARAMETER);
     // }
     // RET_CHECK(HasVertexComponent(canonical_mesh.vertex_type(),
     //                            VertexComponent::POSITION))
@@ -417,7 +417,7 @@ std::pair<std::unique_ptr<GeometryPipeline>, GUSTO_RET> CreateGeometryPipeline(c
                 std::move(landmark_weights),
                 CreateFloatPrecisionProcrustesSolver()));
 
-  return std::make_pair(std::move(result), GustoStatus::ERR_OK);
+  return std::make_pair(std::move(result), CustomStatus::ERR_OK);
 }
 
 }
