@@ -7,7 +7,12 @@
 #include <string>
 #include <utility>
 
+#if __has_include(<opencv2/imgcodecs.hpp>)
 #include <opencv2/imgcodecs.hpp>
+#define AI_ENGINE_HAS_OPENCV_IMGCODECS 1
+#else
+#define AI_ENGINE_HAS_OPENCV_IMGCODECS 0
+#endif
 
 namespace {
 
@@ -129,6 +134,7 @@ CUSTOM_API CUSTOM_RET Custom_Model_Inference_Image(
         return CustomStatus::ERR_GENERAL_INVALID_PARAMETER;
     }
 
+#if AI_ENGINE_HAS_OPENCV_IMGCODECS
     return GuardUnityApi("Custom_Model_Inference_Image", [&]() {
         if (!model_ptr->_config) {
             return CustomStatus::ERR_GENERAL_ERROR;
@@ -144,6 +150,9 @@ CUSTOM_API CUSTOM_RET Custom_Model_Inference_Image(
         return ValidatePostProcessResult(
             output, model_ptr->_config->result_type);
     });
+#else
+    return CustomStatus::ERR_GENERAL_NOT_SUPPORT;
+#endif
 }
 
 CUSTOM_API CUSTOM_RET Custom_Model_Inference(
