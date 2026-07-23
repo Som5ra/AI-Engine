@@ -276,6 +276,7 @@ class GeometryPipelineImpl : public GeometryPipeline {
                 }
             }
             ret_signal = CustomStatus::ERR_PARTIAL_FAIL;
+            multi_face_geometry.push_back(std::move(_face_geometry));
             continue;
         }
         // Convert the screen landmarks into the metric landmarks and get the pose
@@ -290,6 +291,7 @@ class GeometryPipelineImpl : public GeometryPipeline {
                 }
             }
             ret_signal = CustomStatus::ERR_PARTIAL_FAIL;
+            multi_face_geometry.push_back(std::move(_face_geometry));
             continue;
             // return std::make_pair(multi_face_geometry, CustomStatus::ERR_GENERAL_INVALID_PARAMETER);
             // return std::nullptr;
@@ -321,7 +323,7 @@ class GeometryPipelineImpl : public GeometryPipeline {
         multi_face_geometry.push_back(_face_geometry);
     }
 
-    return std::make_pair(multi_face_geometry, CustomStatus::ERR_OK); 
+    return std::make_pair(std::move(multi_face_geometry), ret_signal);
   }
 
  private:
