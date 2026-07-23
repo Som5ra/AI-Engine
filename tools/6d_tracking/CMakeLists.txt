@@ -1,172 +1,82 @@
-cmake_minimum_required(VERSION 3.10)
-add_definitions("-DBUILD_PLATFORM_${def}")
-# CXX Standard
-# =============================================================================
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE "Release")
-# set(CMAKE_BUILD_TYPE "Release")
+if(NOT BUILD_PLATFORM MATCHES "^(linux|android|macos|windows)$")
+    message(FATAL_ERROR
+        "Experimental 6D tracking is not supported on ${BUILD_PLATFORM}")
+endif()
 
-
-# Libraries
-# =============================================================================
-if(BUILD_PLATFORM STREQUAL "android" )
-    add_compile_definitions(__DISABLE_OPENGL__)
-    message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
-    set(FILES_CPP ${CMAKE_CURRENT_SOURCE_DIR}/src/body.cpp 
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp 
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/common.cpp 
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/model.cpp 
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/region_modality.cpp 
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/tracker.cpp
+if(BUILD_PLATFORM STREQUAL "android")
+    set(AI_ENGINE_6D_SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/body.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/common.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/model.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/region_modality.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/tracker.cpp"
     )
+    set(AI_ENGINE_6D_GRAPHICS_LIBRARIES "")
 else()
-
     find_package(OpenGL REQUIRED)
     find_package(GLEW REQUIRED)
     find_package(glfw3 3 REQUIRED)
-
-    add_compile_definitions(__OPENCV_DEBUG__)
-
-    FILE(GLOB_RECURSE FILES_CPP "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-    set(Custom_Linker OpenGL::GL GLEW::GLEW glfw)
-
-endif()
-find_package(Eigen3 REQUIRED)
-find_package(OpenCV 4 REQUIRED)
-find_package(OpenMP REQUIRED)
-# if(OpenMP_FOUND)
-#     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-#     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-# endif()
-
-
-# Compiler Settings
-# =============================================================================
-# Default settings
-# set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag(-march HAS_MARCH)
-check_cxx_compiler_flag(-mtune HAS_MTUNE)
-if(HAS_MARCH)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-endif()
-if(HAS_MTUNE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mtune=native")
-endif()
-
-
-# Compiling
-
-
-# CPP Source Compiling
-# =============================================================================
-add_library(csrt3d_module SHARED
-    ${FILES_CPP}
-    "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/csrt3d.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/unity_api.cc"
-)
-
-
-## include
-target_include_directories(csrt3d_module
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/csrt3d
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-)
-
-## linking
-target_link_libraries(csrt3d_module
-    PUBLIC
-        Eigen3::Eigen
-    PRIVATE
-        ${OpenCV_LIBS}
-        # OpenGL::GL
-        # GLEW::GLEW
-        # glfw
-        ${Custom_Linker}
-        OpenMP::OpenMP_CXX
-
+    file(GLOB_RECURSE AI_ENGINE_6D_SOURCES CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
     )
+    set(AI_ENGINE_6D_GRAPHICS_LIBRARIES
+        OpenGL::GL
+        GLEW::GLEW
+        glfw
+    )
+endif()
 
-# example
-# =============================================================================
+add_library(ai_engine_6d_objects OBJECT
+    ${AI_ENGINE_6D_SOURCES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/csrt3d.cc"
+)
+set_target_properties(ai_engine_6d_objects PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+)
+target_include_directories(ai_engine_6d_objects PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d"
+    "${CMAKE_CURRENT_SOURCE_DIR}/third_party"
+)
+target_link_libraries(ai_engine_6d_objects PUBLIC
+    Eigen3::Eigen
+    ${OpenCV_LIBS}
+    ${AI_ENGINE_OPENMP_TARGET}
+    ${AI_ENGINE_6D_GRAPHICS_LIBRARIES}
+)
 
-if(NOT BUILD_PLATFORM STREQUAL "android" )
+if(BUILD_PLATFORM STREQUAL "android")
+    target_compile_definitions(ai_engine_6d_objects PRIVATE __DISABLE_OPENGL__)
+else()
+    target_compile_definitions(ai_engine_6d_objects PRIVATE __OPENCV_DEBUG__)
+endif()
 
+foreach(target_name IN ITEMS csrt3d_module model_target)
+    add_library(${target_name} SHARED
+        $<TARGET_OBJECTS:ai_engine_6d_objects>
+        "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/unity_api.cc"
+    )
+    target_link_libraries(${target_name} PRIVATE
+        Eigen3::Eigen
+        ${OpenCV_LIBS}
+        ${AI_ENGINE_OPENMP_TARGET}
+        ${AI_ENGINE_6D_GRAPHICS_LIBRARIES}
+    )
+endforeach()
 
+if(NOT BUILD_PLATFORM STREQUAL "android")
     add_executable(run_on_webcam
-        ${FILES_CPP}
-        "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/csrt3d.cc"
+        $<TARGET_OBJECTS:ai_engine_6d_objects>
         "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/example/run_on_webcam.cc"
     )
-
-    ## include
-    target_include_directories(run_on_webcam
-        PUBLIC
-            ${CMAKE_CURRENT_SOURCE_DIR}/include
-            ${CMAKE_CURRENT_SOURCE_DIR}/csrt3d
-            ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    )
-
-
-
-    ## linking
-    target_link_libraries(run_on_webcam
-        PUBLIC
-            # csrt3d_module
-            Eigen3::Eigen
-        PRIVATE
-            ${OpenCV_LIBS}
-            # OpenGL::GL
-            # GLEW::GLEW
-            # glfw
-            ${Custom_Linker}
-            OpenMP::OpenMP_CXX
-    )
-
-endif()
-
-# Unity Plugin Compiling
-# =============================================================================
-
-
-# set(FILES_CPP_WO_OPENGL src/body.cpp src/camera.cpp src/common.cpp src/model.cpp src/region_modality.cpp src/tracker.cpp)
-
-
-add_library(model_target SHARED
-    # ${FILES_CPP_WO_OPENGL}
-    ${FILES_CPP}
-    "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/csrt3d.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/csrt3d/unity_api.cc"
-)
-
-# target_compile_definitions(model_target PRIVATE __DISABLE_OPENGL__)
-
-
-## include
-target_include_directories(model_target
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/csrt3d
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-)
-
-## linking
-target_link_libraries(model_target
-    PUBLIC
+    target_link_libraries(run_on_webcam PRIVATE
         Eigen3::Eigen
-    PRIVATE
         ${OpenCV_LIBS}
-        # OpenGL::GL
-        # GLEW::GLEW
-        # glfw
-        ${Custom_Linker}
-        OpenMP::OpenMP_CXX
-)
-
+        ${AI_ENGINE_OPENMP_TARGET}
+        ${AI_ENGINE_6D_GRAPHICS_LIBRARIES}
+    )
+endif()
 
 install(TARGETS csrt3d_module model_target
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
