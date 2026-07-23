@@ -264,8 +264,8 @@ class GeometryPipelineImpl : public GeometryPipeline {
     // landmarks" that are derived during the face geometry estimation process.
     CUSTOM_RET ret_signal = CustomStatus::ERR_OK;
     for (const NormalizedLandmarkList& screen_face_landmarks : multi_face_landmarks) {
-        MatrixData MatrixData{4, 4, Layout::COLUMN_MAJOR};
-        FaceGeometry _face_geometry{canonical_mesh_, MatrixData};
+        MatrixData matrix_data{4, 4, Layout::ROW_MAJOR};
+        FaceGeometry _face_geometry{canonical_mesh_, std::move(matrix_data)};
         // Having a too compact screen landmark list will result in numerical
         // instabilities, therefore such faces are filtered.
         if (IsScreenLandmarkListTooCompact(screen_face_landmarks)) {
