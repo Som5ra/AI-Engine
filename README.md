@@ -1,71 +1,102 @@
-## Intro 👇👇
-👏👋This is a lite library with pure C++ for AI model inference, aiming to deploy on mobile devices easily. This can be built to be migrated into **Unity** and used by C#.🎉🎉
+# AI-Engine 📦
 
-## NN Inference (Developing) 👇👇
+AI-Engine is a C++17 inference library for ONNX models on Linux, Android,
+macOS, iOS, Windows, and WebAssembly. It includes native and Unity-facing
+bindings for:
 
-Strongly depending on module: onnxruntime.
+- 2D object detection
+- face detection, landmarks, and 3D face geometry
+- human segmentation
+- multi-person 2D pose estimation
 
-**Click to Check Demo**
+This repository is being prepared as a stable archive. See
+[ARCHIVE.md](ARCHIVE.md) for the handoff status, known limitations, and final
+archive checklist.
 
-1. **2D detection Model**
-    1. RTMDet-series
-    2. YOLO-series
-2. [Face Landmark Model](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/face_geometry_demo.gif)
-    1. Face Detector
-    2. Face Landmarker
-3. [Human Segmentation Model](https://github.com/Som5ra/AI-Engine/blob/main/media/demo/human_segmentation_demo.gif)
-    1. Selfie (Close to camera)
-4. **Human Pose Model**
-    <!-- 1. RTMO `Far Scenario`   `Single Stage` -->
-    <!-- 2. VIT Pose `Pending` -->
-    1. RTMPOSE
-### Supported ONNXRuntime Execution Providers:
-|         | Linux | Android (exclude x86) | MacOS     | IOS       | Windows | WebAssembly |
-|---------|-------|-----------------------|-----------|-----------|---------|---------|
-| CPU     | ✅     | ✅                     | ✅         | ✅         | ✅       | ✅       |
-| GPU     | -     | -                     | ✅(CoreML) | ✅(CoreML) | -       | -       |
-| XNNPACK | ✅     | ✅                     | -         | -         | ✅       | -       |
-| NNAPI   | -     | ✅                     | -         | -         | -       | -       |
+## Public API names
 
-## Other Supported Modules:
+The maintained public surface uses neutral `Custom` naming:
 
-### Post-processing
+- native library: `CustomEngine`
+- Unity library: `CustomEngineUnity`
+- WebAssembly target: `CustomEngineWASM`
+- C exports: `Custom_*`
+- status and geometry types: `CustomStatus` and `CustomRect`
+- internal namespaces: `custom_*`
 
-1. [Non-maximum Suppression](https://www.notion.so/Post-Processing-NMS-13b5f7c72a4a804b8751ea6bf1272c3c?pvs=21)
-2. [Face-Geometry](https://www.notion.so/Post-Processing-Face-Geometry-13b5f7c72a4a809bbd5cdc7ccfea48ca?pvs=21)
+This is an intentional breaking rename. Consumers must update their native
+library names and exported-function declarations together.
 
-|                         | Linux | Android | MacOS | IOS | Windows |
-|-------------------------|-------|---------|-------|-----|---------|
-| Non-maximum Suppression | ✅     | ✅       | ✅     | ✅   | ✅       |
-| Face-Geometry           | ✅     | ✅       | ✅     | ✅   | ✅       |
+## Dependencies
 
+The default build requires:
 
-### Supported 3rd parties:
-|                             | Linux |     Android    | MacOS | IOS | Windows | WebAssembly |
-|:---------------------------:|:-----:|:--------------:|:-----:|:---:|:-------:|:-------:|
-|       OpenCV - Mobile       | ✅     | ✅              | ✅     | ✅   | ✅       | ✅       |
-|         ONNXRuntime         | ✅     | ✅ excluding x86 | ✅     | ✅   | ✅       | ✅       |
-| nlohmann json (header only) | ✅     | ✅              | ✅     | ✅   | ✅       | ✅       |
-|     Eigen (header only)     | ✅     | ✅              | ✅     | ✅   | ✅       | ✅       |
-|            OpenMP           | ✅     | ✅              | ✅     | ✅   | ✅       | ✅       |
+- CMake 3.20 or newer
+- a C++17 compiler
+- OpenCV Mobile 4.10.0
+- ONNX Runtime prebuilt archives referenced by the platform bootstrap scripts
+- vendored Eigen 3.4 and nlohmann/json 3.11
+- OpenMP where the target toolchain provides it
 
-### Build
+The default configuration builds only the native engine and Unity bindings.
+Examples, standalone tools, and experimental 6D tracking are opt-in.
 
-```
-Linux Host:
+## Build
+
+Linux dependencies can be bootstrapped and compiled with:
+
+```bash
+./build_linux.sh
 ./build_linux.sh install
-# python3 build.py --android --linux
-
-MACOS Host:
-./build_osx.sh
-./build_ios.sh
-# python3 build.py --macos --ios (--noinstall)
-
-Windows Host (with vs2022):
-# python3 build.py --windows (--noinstall)
 ```
 
-### NOTES
-Historical external documentation has been retired in favor of repository-local guidance.
-### Some model export guide:
-Refer to [docs](https://github.com/Som5ra/AI-Engine/blob/main/model_tools/export_onnx_mmdetection.md)
+The cross-platform Python driver assumes the platform dependencies are already
+present:
+
+```bash
+python3 build.py linux --install
+python3 build.py macos --toolchain osx.toolchain.cmake
+python3 build.py ios --toolchain ios.toolchain.cmake --generator Xcode
+python3 build.py windows --toolchain win.toolchain.cmake
+python3 build.py android \
+  --toolchain /path/to/android-ndk/build/cmake/android.toolchain.cmake \
+  --android-abi arm64-v8a
+```
+
+Linux and macOS also have CMake presets:
+
+```bash
+cmake --preset linux-release
+cmake --build --preset linux-release
+```
+
+Optional components are enabled explicitly:
+
+```bash
+python3 build.py linux \
+  --cmake-arg=-DAI_ENGINE_BUILD_EXAMPLES=ON \
+  --cmake-arg=-DAI_ENGINE_BUILD_STANDALONE_TOOLS=ON
+```
+
+Experimental 6D tracking additionally requires OpenGL, GLEW, and GLFW:
+
+```bash
+python3 build.py linux --cmake-arg=-DAI_ENGINE_BUILD_6D_TRACKING=ON
+```
+
+## Archive readiness check
+
+Run the dependency-free structural regression check before merging or
+archiving:
+
+```bash
+python3 scripts/check_archive_readiness.py
+```
+
+The check covers the P0 logic fixes, ownership APIs, portable build defaults,
+identifier cleanup, and removal of generated/deprecated artifacts.
+
+## Model export notes
+
+The historical MMDetection/MMYOLO export notes are retained in
+[model_tools/export_onnx_mmdetection.md](model_tools/export_onnx_mmdetection.md).
