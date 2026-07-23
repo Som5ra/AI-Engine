@@ -5,9 +5,9 @@ if(BUILD_PLATFORM STREQUAL "linux")
     set(_opencv_default
         "${AI_ENGINE_3RDPARTY_DIR}/opencv/opencv-mobile-4.10.0-ubuntu-2204/lib/cmake/opencv4")
     set(_ort_include_default
-        "${AI_ENGINE_3RDPARTY_DIR}/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/static_lib/include")
+        "${AI_ENGINE_3RDPARTY_DIR}/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/include")
     set(_ort_library_default
-        "${AI_ENGINE_3RDPARTY_DIR}/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/static_lib/lib/libonnxruntime.a")
+        "${AI_ENGINE_3RDPARTY_DIR}/onnxruntime/onnxruntime-linux-x64-static_lib-1.19.2/lib/libonnxruntime.a")
 elseif(BUILD_PLATFORM STREQUAL "android")
     if(NOT ANDROID_ABI)
         message(FATAL_ERROR "ANDROID_ABI is required for an Android build")
