@@ -115,6 +115,61 @@ def main() -> int:
         "CMakeLists.txt",
         '"${CMAKE_SOURCE_DIR}/src/multi_stage_face_geometry_3d.cc"',
     )
+    require_text(
+        "tools/face_geometry/geometry_pipeline.cc",
+        "std::make_pair(std::move(multi_face_geometry), ret_signal)",
+    )
+    require_text(
+        "tools/face_geometry/geometry_pipeline.cc",
+        "Layout::ROW_MAJOR",
+    )
+    require_text(
+        "tools/face_geometry/face_geometry.cc",
+        "canonical_mesh.canonical_mesh_num_vertices != 478",
+    )
+    require_text(
+        "tools/face_geometry/face_geometry.cc",
+        'data.at("input_source").template get<InputSource>()',
+    )
+    require_text(
+        "build.py",
+        'ANDROID_ABIS = ("armeabi-v7a", "arm64-v8a", "x86_64")',
+    )
+    require_text(
+        "cmake/Dependencies.cmake",
+        "set(AI_ENGINE_ANDROID_ABIS armeabi-v7a arm64-v8a x86_64)",
+    )
+    require_text(
+        "src/multi_stage_face_geometry_3d.cc",
+        "detect_interval_(std::max(1, detect_interval))",
+    )
+    require_text(
+        "src/multi_stage_face_geometry_3d.cc",
+        "DrawCoordinateAxes(",
+    )
+    require_text(
+        "src/BaseONNX.cc",
+        "Model preprocessing configuration does not match the input tensor",
+    )
+    require_text(
+        "src/detector2d_family.cc",
+        "index * detection_stride",
+    )
+    require_text(
+        "src/human_pose_family.cc",
+        "RTMPose output shapes must be [1, joints, bins]",
+    )
+
+    for example_cmake in (
+        "examples/face_geometry_example/CMakeLists.txt",
+        "examples/detection_2d_example/CMakeLists.txt",
+        "examples/ort/CMakeLists.txt",
+        "examples/json_test/CMakeLists.txt",
+    ):
+        if "OpenMP::OpenMP_CXX" in read_text(example_cmake):
+            raise AssertionError(
+                f"{example_cmake} bypasses the optional OpenMP target"
+            )
 
     removed_paths = [
         "tools/6d_tracking/build",
@@ -129,8 +184,8 @@ def main() -> int:
         )
 
     print(
-        f"Archive readiness checks passed: {len(files)} maintained files, "
-        "14 structural invariants."
+        f"Archive readiness checks passed: {len(files)} maintained files; "
+        "all reviewed structural invariants hold."
     )
     return 0
 
