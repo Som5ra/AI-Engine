@@ -1,5 +1,7 @@
 #include "detector2d_family.h"
 
+#include <stdexcept>
+
 namespace custom_detector2d{
 
 
@@ -36,22 +38,50 @@ std::unique_ptr<PostProcessResult> Detector::forward(const cv::Mat& raw) {
 
 
 // model with nms
-std::vector<CustomRect> Detector::postprocess(const std::vector<Ort::Value>& net_out, float score_thr, float nms_thr) {
-    const float* _dets = net_out[0].GetTensorData<float>();
-    const float* _labels = net_out[1].GetTensorData<float>();
+std::vector<CustomRect> Detector::postprocess(
+    const std::vector<Ort::Value>& net_out,
+    float score_thr,
+    float nms_thr) {
+    (void)nms_thr;
+    if (net_out.size() < 2) {
+        throw std::runtime_error(
+            "Detector output must contain detections and labels");
+    }
 
-    // std::cout << "net_out[0].GetTensorTypeAndShapeInfo().GetElementCount(): " << net_out[0].GetTensorTypeAndShapeInfo().GetElementCount() << std::endl;
-    // std::cout << "net_out[1].GetTensorTypeAndShapeInfo().GetElementCount(): " << net_out[1].GetTensorTypeAndShapeInfo().GetElementCount() << std::endl;
-    std::vector<int64_t> det_result_dims = net_out[0].GetTensorTypeAndShapeInfo().GetShape();
-    assert(net_out[0].GetTensorTypeAndShapeInfo().GetElementCount() % 5 == 0);
-    assert(net_out[1].GetTensorTypeAndShapeInfo().GetElementCount() * 5 == net_out[0].GetTensorTypeAndShapeInfo().GetElementCount());
+    const auto detection_info = net_out[0].GetTensorTypeAndShapeInfo();
+    const auto label_info = net_out[1].GetTensorTypeAndShapeInfo();
+    const std::vector<int64_t> detection_shape = detection_info.GetShape();
+    const std::size_t detection_count = detection_info.GetElementCount();
+    const std::size_t label_count = label_info.GetElementCount();
 
+    if (detection_shape.size() < 3 || detection_shape.back() < 5) {
+        throw std::runtime_error(
+            "Detector output must have shape [batch, boxes, values>=5]");
+    }
+    const std::size_t detection_stride =
+        static_cast<std::size_t>(detection_shape.back());
+    if (label_count == 0 ||
+        label_count * detection_stride != detection_count) {
+        throw std::runtime_error(
+            "Detector detection and label output sizes do not match");
+    }
+
+    const float* detections = net_out[0].GetTensorData<float>();
+    const float* labels = net_out[1].GetTensorData<float>();
     std::vector<CustomRect> filtered_boxes;
+    filtered_boxes.reserve(label_count);
 
-    for(size_t i = 0; i < net_out[1].GetTensorTypeAndShapeInfo().GetElementCount(); i++){
-        CustomRect rect(_dets[i * det_result_dims[2]], _dets[i * det_result_dims[2] + 1], _dets[i * det_result_dims[2] + 2], _dets[i * det_result_dims[2] + 3], _dets[i * 4 + 4], _labels[i]);
-        if (_dets[i * det_result_dims[2] + 4] > score_thr){
-            filtered_boxes.push_back(rect);
+    for (std::size_t index = 0; index < label_count; ++index) {
+        const std::size_t offset = index * detection_stride;
+        const float score = detections[offset + 4];
+        if (score > score_thr) {
+            filtered_boxes.emplace_back(
+                detections[offset],
+                detections[offset + 1],
+                detections[offset + 2],
+                detections[offset + 3],
+                score,
+                static_cast<int>(labels[index]));
         }
     }
 
