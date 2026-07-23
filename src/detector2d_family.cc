@@ -60,8 +60,7 @@ std::vector<CustomRect> Detector::postprocess(
     }
     const std::size_t detection_stride =
         static_cast<std::size_t>(detection_shape.back());
-    if (label_count == 0 ||
-        label_count * detection_stride != detection_count) {
+    if (label_count * detection_stride != detection_count) {
         throw std::runtime_error(
             "Detector detection and label output sizes do not match");
     }
