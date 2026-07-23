@@ -36,12 +36,27 @@ Demo assets are retained for
 | Execution provider | Linux | Android | macOS | iOS | Windows | WebAssembly |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | CPU | Yes | Yes | Yes | Yes | Yes | Yes |
-| CoreML | — | — | Yes | Yes | — | — |
+| CoreML | — | — | — | Yes | — | — |
 | XNNPACK | Yes | Yes | — | — | Yes | — |
 | NNAPI | — | Yes | — | — | — | — |
 
 Android support excludes the legacy x86 ONNX Runtime target; `armeabi-v7a`,
 `arm64-v8a`, and `x86_64` remain available in the build driver.
+
+### Retained target architectures
+
+| Target | Retained architecture / variant |
+|---|---|
+| Linux | x86_64 |
+| Android | armeabi-v7a, arm64-v8a, x86_64 |
+| macOS | arm64 |
+| iOS | arm64 device |
+| Windows | x86_64 |
+| WebAssembly | SIMD-enabled wasm32 |
+
+These are the architectures represented by the pinned prebuilt dependency
+packages. Other architectures require consumers to supply compatible OpenCV and
+ONNX Runtime builds explicitly.
 
 ### Post-processing modules
 
