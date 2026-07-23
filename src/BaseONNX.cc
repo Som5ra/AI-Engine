@@ -1,5 +1,8 @@
 
-#include "BaseONNX.h"\n\n#include <stdexcept>
+#include "BaseONNX.h"
+
+#include <cmath>
+#include <stdexcept>
 
 std::unique_ptr<basic_model_config> BaseONNX::ParseConfig(const std::string& model_path, const std::string& config_path){
     std::unique_ptr<basic_model_config> _config = std::make_unique<basic_model_config>();
