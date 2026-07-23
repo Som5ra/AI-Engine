@@ -182,6 +182,9 @@ BaseONNX::BaseONNX(std::unique_ptr<basic_model_config> _config)
     : ort_env(ORT_LOGGING_LEVEL_WARNING, "ONNXRuntime"),
         ort_session(nullptr) {
     this->_config = std::move(_config);
+    if (!this->_config) {
+        throw std::invalid_argument("Model configuration cannot be null");
+    }
     this->Compile();
 }
 
