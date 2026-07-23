@@ -27,7 +27,7 @@ public:
         const std::string& face_landmarker_path,
         const std::string& face_landmarker_config_path,
         const std::string& face_geometry_pipeline_metadata,
-        int detect_interval = 0);
+        int detect_interval = 1);
     ~FaceGeometryTracker3D() = default;
 
     CUSTOM_RET Detect(
@@ -47,8 +47,9 @@ private:
     cv::Mat rendered_frame_;
 
     int initialization_status_ = CustomStatus::ERR_GENERAL_ERROR;
-    int detect_interval_ = 0;
-    int num_frames_ = 0;
+    int detect_interval_ = 1;
+    int frame_index_ = 0;
+    std::vector<CustomRect> cached_face_boxes_;
 };
 
 #endif  // MULTI_STAGE_FACE_GEOMETRY_3D_H
