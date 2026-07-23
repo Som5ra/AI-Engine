@@ -161,7 +161,8 @@ CUSTOM_RET Custom_Face_Geometry_Pipeline_Inference(
 
         const CUSTOM_RET inference_status = model_ptr->Detect(
             frame, display_keypoints, display_coordinates);
-        if (inference_status != CustomStatus::ERR_OK) {
+        if (inference_status != CustomStatus::ERR_OK &&
+            inference_status != CustomStatus::ERR_PARTIAL_FAIL) {
             return inference_status;
         }
 
@@ -176,7 +177,7 @@ CUSTOM_RET Custom_Face_Geometry_Pipeline_Inference(
             reinterpret_cast<void*>(bitmap),
             rendered_frame.data,
             rendered_frame.total() * rendered_frame.elemSize());
-        return CustomStatus::ERR_OK;
+        return inference_status;
     });
 }
 
@@ -187,17 +188,11 @@ CUSTOM_RET Custom_Face_Geometry_Pipeline_Destroy(
 }
 
 EMSCRIPTEN_BINDINGS(custom_engine_module) {
-    emscripten::class_<HumanPoseExtractor2D>("HumanPoseExtractor2D")
-        .constructor<
-            const std::string&,
-            const std::string&,
-            const std::string&,
-            const std::string&,
-            int>();
+    emscripten::class_<HumanPoseExtractor2D>("HumanPoseExtractor2D");
     emscripten::function(
         "Custom_Human_Pose_Pipeline_Compile",
         &Custom_Human_Pose_Pipeline_Compile,
-        emscripten::allow_raw_pointers());
+        emscripten::return_value_policy::reference());
     emscripten::function(
         "Custom_Human_Pose_Pipeline_Inference",
         &Custom_Human_Pose_Pipeline_Inference,
@@ -207,18 +202,11 @@ EMSCRIPTEN_BINDINGS(custom_engine_module) {
         &Custom_Human_Pose_Pipeline_Destroy,
         emscripten::allow_raw_pointers());
 
-    emscripten::class_<FaceGeometryTracker3D>("FaceGeometryTracker3D")
-        .constructor<
-            const std::string&,
-            const std::string&,
-            const std::string&,
-            const std::string&,
-            const std::string&,
-            int>();
+    emscripten::class_<FaceGeometryTracker3D>("FaceGeometryTracker3D");
     emscripten::function(
         "Custom_Face_Geometry_Pipeline_Compile",
         &Custom_Face_Geometry_Pipeline_Compile,
-        emscripten::allow_raw_pointers());
+        emscripten::return_value_policy::reference());
     emscripten::function(
         "Custom_Face_Geometry_Pipeline_Inference",
         &Custom_Face_Geometry_Pipeline_Inference,
