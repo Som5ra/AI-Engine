@@ -35,10 +35,10 @@ Demo assets are retained for
 
 | Execution provider | Linux | Android | macOS | iOS | Windows | WebAssembly |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| CPU | ✅ | Yes | ✅ | Yes | ✅ | Yes |
-| CoreML | ❌ | — | ❌ | ✅ | ❌ | — |
-| XNNPACK | ✅ | Yes | ❌ | — | ✅ | ❌ |
-| NNAPI | ❌ | ✅ | ❌ | — | ❌ | — |
+| CPU | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| CoreML | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| XNNPACK | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| NNAPI | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
 
 Android support excludes the legacy x86 ONNX Runtime target; `armeabi-v7a`,
 `arm64-v8a`, and `x86_64` remain available in the build driver.
@@ -62,18 +62,18 @@ ONNX Runtime builds explicitly.
 
 | Module | Linux | Android | macOS | iOS | Windows | WebAssembly |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Non-maximum suppression | ✅ | Yes | ✅ | Yes | ✅ | Yes |
-| Multi-face geometry | ✅ | Yes | ✅ | Yes | ✅ | Yes |
+| Non-maximum suppression | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Multi-face geometry | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### Third-party architecture matrix
 
 | Dependency | Linux | Android | macOS | iOS | Windows | WebAssembly |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| OpenCV Mobile 4.10.0 | ✅ | Yes | ✅ | Yes | ✅ | Yes |
-| ONNX Runtime | ✅ | ✅, except x86 | ✅ | Yes | ✅ | Yes |
-| nlohmann/json 3.11 | ✅ | Yes | ✅ | Yes | ✅ | Yes |
-| Eigen 3.4 | ✅ | Yes | ✅ | Yes | ✅ | Yes |
-| OpenMP acceleration | ✅ | ⚠️ Toolchain-dependent | ✅ | ❌ | — | ❌ |
+| OpenCV Mobile 4.10.0 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| ONNX Runtime | ✅ | ✅, except x86 | ✅ | ✅ | ✅ | ✅ |
+| nlohmann/json 3.11 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Eigen 3.4 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| OpenMP acceleration | ✅ | ⚠️ Toolchain-dependent | ✅ | ❌ | ❌ | ❌ |
 
 These tables describe the retained target configuration. The archive checklist
 still requires native smoke builds for every platform that must remain
