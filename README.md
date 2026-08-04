@@ -1,6 +1,6 @@
-# AI-Engine 📦
+# NN-Engine 📦
 
-AI-Engine is a C++17 inference library for ONNX models on Linux, Android,
+NN-Engine is a C++17 inference library for ONNX models on Linux, Android,
 macOS, iOS, Windows, and WebAssembly. It includes native and Unity-facing
 bindings for:
 
