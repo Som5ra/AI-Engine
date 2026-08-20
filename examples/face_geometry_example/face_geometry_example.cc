@@ -8,6 +8,7 @@
 
 #include <onnxruntime_cxx_api.h>
 
+#include <array>
 #include <tuple>
 #include <map>
 #include <cmath>
@@ -124,45 +125,35 @@ int main(int argc, char *argv[])
         auto* face_detector_result = dynamic_cast<custom_mp_face::MediaPipeDetectorResult*>(ret.get());
         std::vector<custom_face_geometry::NormalizedLandmarkList> multi_face_landmarks;
         for (size_t i = 0; i < face_detector_result->boxes.size(); i++){
-        // for(size_t idx = 0; idx < indices.size(); idx++) {
-            // std::vector<int> box_to_crop = {
-            //     static_cast<int>(boxes[indices[idx]].y1 * frame.size[0]),
-            //     static_cast<int>(boxes[indices[idx]].x1 * frame.size[1]),
-            //     static_cast<int>(boxes[indices[idx]].y2 * frame.size[0]),
-            //     static_cast<int>(boxes[indices[idx]].x2 * frame.size[1]), 
-            // }; 
-            std::vector<int> box_to_crop = {
-                static_cast<int>(face_detector_result->boxes[i].y1 * frame.size[0]),
-                static_cast<int>(face_detector_result->boxes[i].x1 * frame.size[1]),
-                static_cast<int>(face_detector_result->boxes[i].y2 * frame.size[0]),
-                static_cast<int>(face_detector_result->boxes[i].x2 * frame.size[1]), 
-            };
-            // cv::Mat cropped_face = face_landmarker.crop_face(frame, box_to_crop);
-            auto [cropped_face, box_to_crop_with_margin] = face_landmarker.crop_face(frame, box_to_crop);
-            auto ret = face_landmarker.forward(cropped_face);
+            const std::array<cv::Point2f, 6>* kps =
+                (i < face_detector_result->keypoints.size())
+                    ? &face_detector_result->keypoints[i]
+                    : nullptr;
+            const auto crop = face_landmarker.crop_face_roi(
+                frame, face_detector_result->boxes[i], kps);
+            if (crop.image.empty() || crop.dst_to_src.empty()) {
+                continue;
+            }
+            auto ret = face_landmarker.forward(crop.image);
             auto* face_landmarker_result = dynamic_cast<custom_mp_face::MediapipeFaceLandmarkResult*>(ret.get());
-            auto points = face_landmarker_result->points;
             auto score = face_landmarker_result->score;
 
             if (score < 0.49) {
                 continue;
             }
+            auto points = custom_mp_face::FaceLandmarker::MapLandmarksToImage(
+                face_landmarker_result->points, crop.dst_to_src);
             custom_face_geometry::NormalizedLandmarkList thislandmark;
             for (auto pt : points) {
                 custom_face_geometry::NormalizedLandmark landmark;
-                landmark.x = (pt.x + box_to_crop_with_margin[1]) / frame.size[1];
-                landmark.y = (pt.y + box_to_crop_with_margin[0])/ frame.size[0];
-                // landmark.x = (pt.x + box_to_crop_with_margin[0]) / frame.size[0];
-                // landmark.y = (pt.y + box_to_crop_with_margin[1])/ frame.size[1];
-                // landmark.z = pt.z / 500;
+                landmark.x = pt.x / frame.size[1];
+                landmark.y = pt.y / frame.size[0];
                 landmark.z = pt.z / frame.size[1];
                 thislandmark.landmark.push_back(landmark);
             }
             multi_face_landmarks.push_back(thislandmark);
             if (DISPLAY){
-                // cropped_face = face_landmarker.draw_points(cropped_face, points);
-                face_landmarker.draw_points(frame, points, cv::Point(box_to_crop_with_margin[1], box_to_crop_with_margin[0]));
-                // cv::imshow("cropped_face", cropped_face);
+                face_landmarker.draw_points(frame, points, cv::Point(0, 0));
             }
         }
         auto [multi_pose_mat, process_status] = face_mesh_calculator.Process(std::make_pair(frame.cols, frame.rows), multi_face_landmarks);
