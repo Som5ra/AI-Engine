@@ -25,9 +25,13 @@ archive checklist.
 | Human pose | RTMPose with multi-person detection | ✅ Maintained |
 | 6D object tracking | Region-based CAD model tracker | ⚠️ Experimental; opt-in |
 
-Demo assets are retained for
-[face geometry](media/demo/face_geometry_demo.gif) and
-[human segmentation](media/demo/human_segmentation_demo.gif).
+<p align="center">
+  <img src="media/demo/face_geometry_demo.gif" alt="Multi-face 3D geometry and pose" width="640">
+  <br>
+  <sub>Multi-face 3D geometry and pose</sub>
+</p>
+
+Additional demo: [human segmentation](media/demo/human_segmentation_demo.gif).
 
 ## Platform and architecture support
 
